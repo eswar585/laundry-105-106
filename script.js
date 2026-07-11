@@ -1,9 +1,7 @@
-// ===============================================
+// =========================================
 // FAMILY LAUNDRY MANAGEMENT SYSTEM
-// SCRIPT.JS - PART 1
-// ===============================================
-
-// Firebase Imports
+// script.js - Part 1
+// =========================================
 
 import { db } from "./firebase.js";
 
@@ -14,80 +12,50 @@ import {
     query,
     where,
     orderBy,
-    serverTimestamp
+    serverTimestamp,
+    doc,
+    updateDoc,
+    deleteDoc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-// ===============================================
-// CURRENT USER
-// ===============================================
+// ----------------------------
+// Current User
+// ----------------------------
 
 const currentUser = localStorage.getItem("loggedInUser");
 
-// Redirect if not logged in
-
-if (
-    window.location.pathname.includes("dashboard.html") &&
-    !currentUser
-) {
+if (!currentUser) {
     window.location.href = "index.html";
 }
 
-// ===============================================
-// USER NAME
-// ===============================================
+// ----------------------------
+// Welcome
+// ----------------------------
 
-let displayName = "";
+const welcomeText = document.getElementById("welcomeText");
 
-switch (currentUser) {
-
-    case "person1":
-        displayName = "ESWAR";
-        break;
-
-    case "person2":
-        displayName = "SNEHITH";
-        break;
-
-    case "person3":
-        displayName = "SANTHOSH";
-        break;
-
-    case "person4":
-        displayName = "DON";
-        break;
-
-    case "admin":
-        displayName = "ADMIN";
-        break;
-
-    default:
-        displayName = "Guest";
-
+if (welcomeText) {
+    welcomeText.textContent = `Welcome, ${currentUser}`;
 }
 
-const welcome = document.getElementById("welcomeText");
+// ----------------------------
+// Logout
+// ----------------------------
 
-if (welcome) {
-
-    welcome.innerHTML = "Welcome, " + displayName;
-
-}
-
-// ===============================================
-// LOGOUT
-// ===============================================
-
-window.logout = function () {
+document
+.getElementById("logoutBtn")
+?.addEventListener("click", () => {
 
     localStorage.removeItem("loggedInUser");
 
     window.location.href = "index.html";
 
-};
+});
 
-// ===============================================
-// FORM ELEMENTS
-// ===============================================
+// ----------------------------
+// Form Elements
+// ----------------------------
 
 const form = document.getElementById("laundryForm");
 
@@ -105,9 +73,11 @@ const towels = document.getElementById("towels");
 
 const bedsheets = document.getElementById("bedsheets");
 
-// ===============================================
-// TODAY'S DATE
-// ===============================================
+const liveTotal = document.getElementById("liveTotal");
+
+// ----------------------------
+// Today's Date
+// ----------------------------
 
 if (date) {
 
@@ -115,113 +85,90 @@ if (date) {
 
 }
 
-// ===============================================
-// TOTAL CALCULATION
-// ===============================================
+// ----------------------------
+// Edit Mode
+// ----------------------------
 
-function totalClothes() {
+let editingId = null;
+
+// ----------------------------
+// Calculate Total
+// ----------------------------
+
+function calculateTotal() {
 
     return (
 
-        Number(shirts?.value || 0) +
+        Number(shirts.value || 0) +
 
-        Number(pants?.value || 0) +
+        Number(pants.value || 0) +
 
-        Number(inners?.value || 0) +
+        Number(inners.value || 0) +
 
-        Number(boxers?.value || 0) +
+        Number(boxers.value || 0) +
 
-        Number(towels?.value || 0) +
+        Number(towels.value || 0) +
 
-        Number(bedsheets?.value || 0)
+        Number(bedsheets.value || 0)
 
     );
 
 }
 
-// ===============================================
-// UPDATE DASHBOARD CARD
-// ===============================================
-
 function updateLiveTotal() {
 
-    const totalBox = document.getElementById("totalClothes");
-
-    if (totalBox) {
-
-        totalBox.innerHTML = totalClothes();
-
-    }
+    liveTotal.textContent = calculateTotal();
 
 }
-
-// ===============================================
-// LIVE INPUT EVENTS
-// ===============================================
 
 [
-    shirts,
-    pants,
-    inners,
-    boxers,
-    towels,
-    bedsheets
+shirts,
+pants,
+inners,
+boxers,
+towels,
+bedsheets
 
-].forEach(input => {
+].forEach(input=>{
 
-    if (input) {
-
-        input.addEventListener("input", updateLiveTotal);
-
-    }
+input.addEventListener("input",updateLiveTotal);
 
 });
+// =========================================
+// SAVE / UPDATE LAUNDRY ENTRY
+// =========================================
 
-// ===============================================
-// FUNCTIONS CONTINUE IN PART 2
-// ===============================================
-// ===============================================
-// SCRIPT.JS - PART 2A
-// SAVE DATA
-// ===============================================
-
-if (form) {
-
-    form.addEventListener("submit", saveLaundry);
-
-}
-
-async function saveLaundry(e) {
+form.addEventListener("submit", async function (e) {
 
     e.preventDefault();
 
-    const laundry = {
+    const laundryData = {
 
         user: currentUser,
 
         date: date.value,
 
-        shirts: Number(shirts.value) || 0,
+        shirts: Number(shirts.value),
 
-        pants: Number(pants.value) || 0,
+        pants: Number(pants.value),
 
-        inners: Number(inners.value) || 0,
+        inners: Number(inners.value),
 
-        boxers: Number(boxers.value) || 0,
+        boxers: Number(boxers.value),
 
-        towels: Number(towels.value) || 0,
+        towels: Number(towels.value),
 
-        bedsheets: Number(bedsheets.value) || 0,
+        bedsheets: Number(bedsheets.value),
 
-        total: totalClothes(),
+        total: calculateTotal(),
 
         createdAt: serverTimestamp()
 
     };
 
-    if (laundry.total <= 0) {
+    if (laundryData.total === 0) {
 
-        alert("Enter at least one cloth.");
+        alert("Please enter at least one clothing item.");
 
         return;
 
@@ -229,15 +176,59 @@ async function saveLaundry(e) {
 
     try {
 
-        await addDoc(
+        if (editingId === null) {
 
-            collection(db, "laundry"),
+            await addDoc(
 
-            laundry
+                collection(db, "laundry"),
 
-        );
+                laundryData
 
-        alert("Laundry Saved Successfully");
+            );
+
+            alert("Laundry Entry Saved Successfully.");
+
+        }
+
+        else {
+
+            await updateDoc(
+
+                doc(db, "laundry", editingId),
+
+                {
+
+                    user: laundryData.user,
+
+                    date: laundryData.date,
+
+                    shirts: laundryData.shirts,
+
+                    pants: laundryData.pants,
+
+                    inners: laundryData.inners,
+
+                    boxers: laundryData.boxers,
+
+                    towels: laundryData.towels,
+
+                    bedsheets: laundryData.bedsheets,
+
+                    total: laundryData.total
+
+                }
+
+            );
+
+            alert("Laundry Entry Updated Successfully.");
+
+            editingId = null;
+
+            document.getElementById("saveBtn").innerHTML =
+
+            '<i class="fa-solid fa-floppy-disk"></i> Save Entry';
+
+        }
 
         form.reset();
 
@@ -245,7 +236,7 @@ async function saveLaundry(e) {
 
         updateLiveTotal();
 
-        loadLaundryHistory();
+        loadHistory();
 
     }
 
@@ -253,71 +244,96 @@ async function saveLaundry(e) {
 
         console.error(error);
 
-        alert("Unable to Save Data");
+        alert("Unable to save data.");
 
     }
 
+});
+
+
+
+// =========================================
+// RESET FORM
+// =========================================
+
+function clearForm() {
+
+    form.reset();
+
+    date.value = new Date().toISOString().split("T")[0];
+
+    editingId = null;
+
+    updateLiveTotal();
+
+    document.getElementById("saveBtn").innerHTML =
+
+    '<i class="fa-solid fa-floppy-disk"></i> Save Entry';
+
 }
+// =========================================
+// LOAD LAUNDRY HISTORY
+// =========================================
 
+async function loadHistory() {
 
+    const historyTable = document.getElementById("historyTable");
 
-// ===============================================
-// LOAD HISTORY
-// ===============================================
+    const totalEntries = document.getElementById("totalEntries");
 
-async function loadLaundryHistory() {
+    const totalClothes = document.getElementById("totalClothes");
 
-    const tbody = document.getElementById("historyTable");
+    const lastEntry = document.getElementById("lastEntry");
 
-    if (!tbody) return;
+    if (!historyTable) return;
 
-    tbody.innerHTML = "";
+    historyTable.innerHTML = "";
 
     let q;
 
-    if (currentUser === "admin") {
+    if (currentUser === "ADMIN") {
 
         q = query(
-
             collection(db, "laundry"),
-
-            orderBy("createdAt", "desc")
-
+            orderBy("date", "desc")
         );
 
-    }
-
-    else {
+    } else {
 
         q = query(
-
             collection(db, "laundry"),
-
             where("user", "==", currentUser),
-
-            orderBy("createdAt", "desc")
-
+            orderBy("date", "desc")
         );
 
     }
 
     const snapshot = await getDocs(q);
 
-    let totalEntries = 0;
+    let entryCount = 0;
 
-    let totalItems = 0;
+    let clothCount = 0;
+
+    let latestDate = "--";
 
     snapshot.forEach((document) => {
 
         const data = document.data();
 
-        const docId = document.id;
+        const id = document.id;
 
-        totalEntries++;
+        entryCount++;
 
-        totalItems += data.total;
+        clothCount += Number(data.total);
 
-        tbody.innerHTML += `
+        if (latestDate === "--") {
+
+            latestDate = data.date;
+
+        }
+
+        historyTable.innerHTML += `
+
 <tr>
 
 <td>${data.date}</td>
@@ -340,7 +356,7 @@ async function loadLaundryHistory() {
 
 <button
 class="action-btn edit-btn"
-data-id="${docId}">
+onclick="editEntry('${id}')">
 
 <i class="fa-solid fa-pen"></i>
 
@@ -348,7 +364,7 @@ data-id="${docId}">
 
 <button
 class="action-btn delete-btn"
-data-id="${docId}">
+onclick="deleteEntry('${id}')">
 
 <i class="fa-solid fa-trash"></i>
 
@@ -361,99 +377,218 @@ data-id="${docId}">
 `;
 
     });
-          // Update Dashboard Cards
 
-        const totalEntriesBox = document.getElementById("totalEntries");
+    totalEntries.textContent = entryCount;
 
-        if (totalEntriesBox) {
+    totalClothes.textContent = clothCount;
 
-            totalEntriesBox.textContent = totalEntries;
+    lastEntry.textContent = latestDate;
+
+}
+
+
+
+// =========================================
+// LOAD WHEN PAGE OPENS
+// =========================================
+
+loadHistory();
+// =========================================
+// EDIT ENTRY
+// =========================================
+
+window.editEntry = async function (id) {
+
+    try {
+
+        const documentRef = doc(db, "laundry", id);
+
+        const snapshot = await getDoc(documentRef);
+
+        if (!snapshot.exists()) {
+
+            alert("Laundry entry not found.");
+
+            return;
 
         }
 
-        const totalClothesBox = document.getElementById("totalClothes");
+        const data = snapshot.data();
 
-        if (totalClothesBox) {
+        editingId = id;
 
-            totalClothesBox.textContent = totalItems;
+        date.value = data.date;
 
-        }
+        shirts.value = data.shirts;
+
+        pants.value = data.pants;
+
+        inners.value = data.inners;
+
+        boxers.value = data.boxers;
+
+        towels.value = data.towels;
+
+        bedsheets.value = data.bedsheets;
+
+        updateLiveTotal();
+
+        document.getElementById("saveBtn").innerHTML =
+            '<i class="fa-solid fa-pen"></i> Update Entry';
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
 
     }
 
     catch (error) {
 
-        console.error("Error loading history:", error);
+        console.error(error);
+
+        alert("Unable to load laundry entry.");
 
     }
+
+};
+
+
+
+// =========================================
+// DELETE ENTRY
+// =========================================
+
+window.deleteEntry = async function (id) {
+
+    const confirmDelete = confirm(
+        "Are you sure you want to delete this laundry entry?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+        await deleteDoc(
+            doc(db, "laundry", id)
+        );
+
+        alert("Laundry entry deleted successfully.");
+
+        loadHistory();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Unable to delete laundry entry.");
+
+    }
+
+};
+
+
+
+// =========================================
+// PDF BUTTON
+// =========================================
+
+const pdfButton = document.getElementById("downloadPdf");
+
+if (pdfButton) {
+
+    pdfButton.addEventListener("click", () => {
+
+        if (typeof downloadLaundryPDF === "function") {
+
+            downloadLaundryPDF();
+
+        } else {
+
+            alert("PDF module not loaded.");
+
+        }
+
+    });
+
+}
+// =========================================
+// SCRIPT.JS - PART 5
+// FINAL UTILITIES
+// =========================================
+
+// Auto Update Live Total on Page Load
+updateLiveTotal();
+
+
+// Highlight Current User
+console.log("Logged in as:", currentUser);
+
+
+// Sidebar PDF Button
+const pdfMenu = document.getElementById("pdfMenu");
+
+if (pdfMenu) {
+
+    pdfMenu.addEventListener("click", () => {
+
+        document.getElementById("downloadPdf").click();
+
+    });
 
 }
 
 
+// Enter Key Support
+document.addEventListener("keydown", function (e) {
 
-// ===============================================
-// INITIAL LOAD
-// ===============================================
+    if (e.key === "Escape" && editingId !== null) {
 
-if (window.location.pathname.includes("dashboard.html")) {
-
-    loadLaundryHistory();
-
-}
-
-
-
-// ===============================================
-// EDIT & DELETE BUTTONS
-// (Actual functionality in Part 3)
-// ===============================================
-
-document.addEventListener("click", function (e) {
-
-    const editBtn = e.target.closest(".edit-btn");
-
-    const deleteBtn = e.target.closest(".delete-btn");
-
-    if (editBtn) {
-
-        const id = editBtn.dataset.id;
-
-        editLaundry(id);
-
-    }
-
-    if (deleteBtn) {
-
-        const id = deleteBtn.dataset.id;
-
-        deleteLaundry(id);
+        clearForm();
 
     }
 
 });
 
 
+// Empty Table Message
+async function checkEmptyTable() {
 
-// ===============================================
-// PLACEHOLDER FUNCTIONS
-// (Will be completed in Part 3)
-// ===============================================
+    const table = document.getElementById("historyTable");
 
-function editLaundry(id) {
+    if (!table) return;
 
-    console.log("Edit:", id);
+    if (table.children.length === 0) {
+
+        table.innerHTML = `
+
+<tr class="empty-row">
+
+<td colspan="9">
+
+No Laundry Records Found
+
+</td>
+
+</tr>
+
+`;
+
+    }
 
 }
 
-function deleteLaundry(id) {
 
-    console.log("Delete:", id);
+// Check for empty table after initial load
+loadHistory().then(() => {
+    checkEmptyTable();
+});
 
-}
 
+// =========================================
+// END OF SCRIPT.JS
+// =========================================
 
-
-// ===============================================
-// END OF PART 2B
-// ===============================================
-
+console.log("Laundry Management System Loaded Successfully");
