@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Laundry Management System</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-shirt"></i>
+                <h1>Family Laundry Management System</h1>
+            </div>
+
+            <p class="subtitle">
+                Select your account to access your personal laundry records.
+            </p>
+        </header>
+
+        <!-- Login Cards -->
+        <section class="login-section">
+
+            <div class="user-card" data-user="person1">
+                <i class="fa-solid fa-user"></i>
+                <h2>Person 1</h2>
+                <p>View and manage your laundry records.</p>
+                <button class="login-btn" onclick="login('person1')">
+                    Login
+                </button>
+            </div>
+
+            <div class="user-card" data-user="person2">
+                <i class="fa-solid fa-user"></i>
+                <h2>Person 2</h2>
+                <p>View and manage your laundry records.</p>
+                <button class="login-btn" onclick="login('person2')">
+                    Login
+                </button>
+            </div>
+
+            <div class="user-card" data-user="person3">
+                <i class="fa-solid fa-user"></i>
+                <h2>Person 3</h2>
+                <p>View and manage your laundry records.</p>
+                <button class="login-btn" onclick="login('person3')">
+                    Login
+                </button>
+            </div>
+
+            <div class="user-card" data-user="person4">
+                <i class="fa-solid fa-user"></i>
+                <h2>Person 4</h2>
+                <p>View and manage your laundry records.</p>
+                <button class="login-btn" onclick="login('person4')">
+                    Login
+                </button>
+            </div>
+
+            <!-- Admin -->
+            <div class="user-card admin-card" data-user="admin">
+                <i class="fa-solid fa-user-shield"></i>
+                <h2>Administrator</h2>
+                <p>Manage all family laundry records.</p>
+                <button class="login-btn admin-btn" onclick="login('admin')">
+                    Login
+                </button>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        function login(user) {
+            localStorage.setItem("loggedInUser", user);
+            window.location.href = "dashboard.html";
+        }
+    </script>
+
+</body>
+</html>
