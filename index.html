@@ -1,148 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Laundry Management System</title>
+    <title>Family Laundry Management</title>
 
     <link rel="stylesheet" href="style.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 
 <body>
 
-<div class="container">
+<div class="login-container">
 
-    <!-- Header -->
-
-    <header>
+    <div class="login-box">
 
         <div class="logo">
 
             <i class="fa-solid fa-shirt"></i>
 
-            <h1>Laundry Management System</h1>
+            <h1>Family Laundry Management</h1>
+
+            <p>
+                Store and manage laundry records for all family members.
+            </p>
 
         </div>
 
-        <p class="subtitle">
+        <form id="loginForm">
 
-            Select your account to access your personal laundry records.
+            <label>Login ID</label>
 
-        </p>
+            <input
+                type="text"
+                id="loginId"
+                placeholder="Enter Login ID"
+                autocomplete="off"
+                required
+            >
 
-    </header>
+            <button type="submit">
 
-    <!-- Login Cards -->
-
-    <section class="login-section">
-
-        <div class="user-card">
-
-            <i class="fa-solid fa-user"></i>
-
-            <h2>ESWAR</h2>
-
-            <p>View and manage your laundry records.</p>
-
-            <button class="login-btn" onclick="login('person1')">
+                <i class="fa-solid fa-right-to-bracket"></i>
 
                 Login
 
             </button>
 
-        </div>
+        </form>
 
-        <div class="user-card">
+        <div class="login-help">
 
-            <i class="fa-solid fa-user"></i>
+            <h3>Available Login IDs</h3>
 
-            <h2>SNEHITH</h2>
+            <ul>
 
-            <p>View and manage your laundry records.</p>
+                <li>ESWAR</li>
 
-            <button class="login-btn" onclick="login('person2')">
+                <li>SNEHITH</li>
 
-                Login
+                <li>SANTHOSH</li>
 
-            </button>
+                <li>DON</li>
 
-        </div>
+                <li>ADMIN</li>
 
-        <div class="user-card">
-
-            <i class="fa-solid fa-user"></i>
-
-            <h2>SANTHOSH</h2>
-
-            <p>View and manage your laundry records.</p>
-
-            <button class="login-btn" onclick="login('person3')">
-
-                Login
-
-            </button>
+            </ul>
 
         </div>
 
-        <div class="user-card">
-
-            <i class="fa-solid fa-user"></i>
-
-            <h2>DON</h2>
-
-            <p>View and manage your laundry records.</p>
-
-            <button class="login-btn" onclick="login('person4')">
-
-                Login
-
-            </button>
-
-        </div>
-
-        <div class="user-card admin-card">
-
-            <i class="fa-solid fa-user-shield"></i>
-
-            <h2>Administrator</h2>
-
-            <p>Manage all family laundry records.</p>
-
-            <button class="login-btn admin-btn" onclick="login('admin')">
-
-                Login
-
-            </button>
-
-        </div>
-
-    </section>
+    </div>
 
 </div>
 
 <script>
 
-function login(user){
+document
+.getElementById("loginForm")
+.addEventListener("submit",function(e){
 
-    localStorage.setItem("loggedInUser",user);
+e.preventDefault();
 
-    window.location.href="dashboard.html";
+const id=document
+.getElementById("loginId")
+.value
+.trim()
+.toUpperCase();
+
+const users=[
+
+"ESWAR",
+
+"SNEHITH",
+
+"SANTHOSH",
+
+"DON",
+
+"ADMIN"
+
+];
+
+if(!users.includes(id)){
+
+alert("Invalid Login ID");
+
+return;
 
 }
 
+localStorage.setItem("loggedInUser",id);
+
+window.location.href="dashboard.html";
+
+});
+
 </script>
-
-<!-- Main Script -->
-
-<script type="module" src="script.js"></script>
 
 </body>
 
