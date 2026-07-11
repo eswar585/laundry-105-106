@@ -1,7 +1,9 @@
-/* ==========================================
+/* ===========================================================
    FAMILY LAUNDRY MANAGEMENT SYSTEM
-   Modern Glassmorphism UI
-========================================== */
+   Modern Dashboard UI
+=========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 *{
     margin:0;
@@ -10,44 +12,53 @@
     font-family:'Poppins',sans-serif;
 }
 
+html{
+    scroll-behavior:smooth;
+}
+
 body{
+
+    background:#eef3fb;
+
+    color:#222;
 
     min-height:100vh;
 
-    background:linear-gradient(135deg,#2563eb,#4f46e5,#7c3aed);
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    padding:40px;
-
 }
+
+/* ===========================
+        LOGIN PAGE
+=========================== */
 
 .container{
 
-    width:100%;
+    width:95%;
+
     max-width:1400px;
+
+    margin:auto;
+
+    padding:40px 20px;
 
 }
 
 header{
 
     text-align:center;
-    margin-bottom:50px;
 
-    color:white;
+    margin-bottom:50px;
 
 }
 
 .logo{
 
     display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:15px;
 
-    margin-bottom:15px;
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
 
 }
 
@@ -55,56 +66,57 @@ header{
 
     font-size:45px;
 
+    color:#2563eb;
+
 }
 
 .logo h1{
 
     font-size:38px;
+
     font-weight:700;
+
+    color:#1e293b;
 
 }
 
 .subtitle{
 
-    font-size:17px;
+    margin-top:15px;
 
-    opacity:.9;
+    font-size:16px;
+
+    color:#64748b;
 
 }
 
-/* ========================= */
+/* ===========================
+        USER CARDS
+=========================== */
 
 .login-section{
 
     display:grid;
 
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
 
     gap:30px;
 
 }
 
-/* ========================= */
-
 .user-card{
 
-    background:rgba(255,255,255,.15);
+    background:#fff;
 
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.25);
-
-    border-radius:22px;
+    border-radius:20px;
 
     padding:35px;
 
     text-align:center;
 
-    color:white;
-
     transition:.35s;
 
-    box-shadow:0 15px 35px rgba(0,0,0,.15);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
 
 }
 
@@ -112,22 +124,23 @@ header{
 
     transform:translateY(-10px);
 
-    background:rgba(255,255,255,.22);
+    box-shadow:0 18px 40px rgba(37,99,235,.15);
 
 }
 
 .user-card i{
 
     width:90px;
+
     height:90px;
 
     line-height:90px;
 
     border-radius:50%;
 
-    background:white;
+    background:#2563eb;
 
-    color:#2563eb;
+    color:#fff;
 
     font-size:35px;
 
@@ -139,21 +152,19 @@ header{
 
     margin-bottom:10px;
 
-    font-size:24px;
+    color:#1e293b;
 
 }
 
 .user-card p{
 
-    opacity:.9;
-
-    line-height:1.6;
+    color:#64748b;
 
     margin-bottom:25px;
 
-}
+    line-height:1.7;
 
-/* ========================= */
+}
 
 .login-btn{
 
@@ -161,21 +172,19 @@ header{
 
     border:none;
 
-    outline:none;
-
-    cursor:pointer;
+    padding:14px;
 
     border-radius:12px;
 
-    padding:14px;
+    background:#2563eb;
+
+    color:#fff;
+
+    cursor:pointer;
 
     font-size:16px;
 
     font-weight:600;
-
-    background:white;
-
-    color:#2563eb;
 
     transition:.3s;
 
@@ -183,23 +192,19 @@ header{
 
 .login-btn:hover{
 
-    background:#2563eb;
-
-    color:white;
+    background:#1d4ed8;
 
 }
 
-/* ========================= */
-
 .admin-card{
 
-    border:2px solid gold;
+    border:2px solid #f59e0b;
 
 }
 
 .admin-card i{
 
-    color:#f59e0b;
+    background:#f59e0b;
 
 }
 
@@ -207,44 +212,847 @@ header{
 
     background:#f59e0b;
 
-    color:white;
-
 }
 
 .admin-btn:hover{
 
-    background:white;
-
-    color:#f59e0b;
+    background:#d97706;
 
 }
 
-/* ========================= */
+/* ===========================
+        DASHBOARD
+=========================== */
 
-@media(max-width:768px){
+.dashboard{
 
-.logo{
+    display:flex;
 
-    flex-direction:column;
-
-}
-
-.logo h1{
-
-    font-size:28px;
+    min-height:100vh;
 
 }
 
-.subtitle{
+/* ===========================
+        SIDEBAR
+=========================== */
 
+.sidebar{
+
+    width:260px;
+
+    background:#1e293b;
+
+    color:white;
+
+    padding:30px 20px;
+
+    position:fixed;
+
+    top:0;
+
+    left:0;
+
+    bottom:0;
+
+}
+
+.sidebar h2{
+
+    text-align:center;
+
+    margin-bottom:40px;
+
+    font-size:24px;
+
+}
+
+.sidebar h2 i{
+
+    margin-right:10px;
+
+}
+
+.sidebar ul{
+
+    list-style:none;
+
+}
+
+.sidebar ul li{
+
+    padding:16px 18px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    margin-bottom:12px;
+
+    transition:.3s;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.sidebar ul li:hover{
+
+    background:#2563eb;
+
+}
+
+.sidebar ul li.active{
+
+    background:#2563eb;
+
+}
+
+/* ===========================
+        CONTENT
+=========================== */
+
+.content{
+
+    flex:1;
+
+    margin-left:260px;
+
+    padding:35px;
+
+}
+
+.topbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:35px;
+
+}
+
+.topbar h1{
+
+    color:#1e293b;
+
+    font-size:34px;
+
+}
+
+.topbar p{
+
+    color:#64748b;
+
+    margin-top:8px;
+
+}
+/* ===========================================================
+   DASHBOARD CARDS
+=========================================================== */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    margin-bottom:35px;
+}
+
+.card{
+    background:#ffffff;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    transition:.3s;
+    position:relative;
+    overflow:hidden;
+}
+
+.card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:6px;
+    height:100%;
+    background:#2563eb;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 15px 35px rgba(37,99,235,.15);
+}
+
+.card i{
+    font-size:34px;
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+.card h3{
+    color:#64748b;
     font-size:15px;
+    margin-bottom:8px;
+    font-weight:500;
+}
+
+.card h2{
+    font-size:34px;
+    color:#1e293b;
+    font-weight:700;
+}
+
+/* ===========================================================
+   ENTRY FORM
+=========================================================== */
+
+.entry-form{
+    background:#ffffff;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    margin-bottom:35px;
+}
+
+.entry-form h2{
+    color:#1e293b;
+    margin-bottom:25px;
+    font-size:24px;
+}
+
+.entry-form form{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.entry-form input{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid #dbe4f0;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    transition:.3s;
+    background:#f8fafc;
+}
+
+.entry-form input:focus{
+    border-color:#2563eb;
+    background:#ffffff;
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;
+}
+
+.entry-form button{
+    width:220px;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.entry-form button:hover{
+    background:#1d4ed8;
+}
+
+.entry-form button i{
+    margin-right:8px;
+}
+
+/* ===========================================================
+   HISTORY SECTION
+=========================================================== */
+
+.history{
+    background:#ffffff;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.history-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.history-header h2{
+    color:#1e293b;
+    font-size:24px;
+}
+
+#downloadPdf{
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    transition:.3s;
+}
+
+#downloadPdf:hover{
+    background:#b91c1c;
+}
+
+#downloadPdf i{
+    margin-right:8px;
+}
+
+/* ===========================================================
+   TABLE
+=========================================================== */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+
+thead{
+    background:#2563eb;
+    color:white;
+}
+
+thead th{
+    padding:16px;
+    text-align:center;
+    font-size:15px;
+    font-weight:600;
+}
+
+tbody tr{
+    transition:.3s;
+}
+
+tbody tr:nth-child(even){
+    background:#f8fafc;
+}
+
+tbody tr:hover{
+    background:#e8f1ff;
+}
+
+tbody td{
+    padding:15px;
+    text-align:center;
+    border-bottom:1px solid #edf2f7;
+    color:#334155;
+}
+
+/* ===========================================================
+   ACTION BUTTONS
+=========================================================== */
+
+.action-btn{
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    color:white;
+    margin:2px;
+    transition:.3s;
+}
+
+.edit-btn{
+    background:#2563eb;
+}
+
+.edit-btn:hover{
+    background:#1d4ed8;
+}
+
+.delete-btn{
+    background:#ef4444;
+}
+
+.delete-btn:hover{
+    background:#dc2626;
+}
+
+/* ===========================================================
+   CUSTOM SCROLLBAR
+=========================================================== */
+
+::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#e5e7eb;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#2563eb;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#1d4ed8;
+}
+/* ===========================================================
+   RESPONSIVE DESIGN
+=========================================================== */
+
+@media screen and (max-width:1200px){
+
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media screen and (max-width:992px){
+
+    .sidebar{
+        width:220px;
+    }
+
+    .content{
+        margin-left:220px;
+        padding:25px;
+    }
+
+    .logo h1{
+        font-size:30px;
+    }
+
+}
+
+@media screen and (max-width:768px){
+
+    body{
+        overflow-x:hidden;
+    }
+
+    .dashboard{
+        flex-direction:column;
+    }
+
+    .sidebar{
+
+        position:relative;
+
+        width:100%;
+
+        height:auto;
+
+        padding:20px;
+
+    }
+
+    .sidebar h2{
+
+        margin-bottom:20px;
+
+    }
+
+    .sidebar ul{
+
+        display:flex;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+        gap:10px;
+
+    }
+
+    .sidebar ul li{
+
+        margin:0;
+
+        padding:12px 18px;
+
+    }
+
+    .content{
+
+        margin-left:0;
+
+        padding:20px;
+
+    }
+
+    .topbar{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+    .cards{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .history{
+
+        overflow-x:auto;
+
+    }
+
+    table{
+
+        min-width:900px;
+
+    }
+
+    .entry-form button{
+
+        width:100%;
+
+    }
+
+    .history-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:15px;
+
+    }
+
+}
+
+@media screen and (max-width:480px){
+
+    .container{
+
+        padding:20px 10px;
+
+    }
+
+    .logo{
+
+        flex-direction:column;
+
+        gap:10px;
+
+    }
+
+    .logo h1{
+
+        font-size:24px;
+
+        text-align:center;
+
+    }
+
+    .subtitle{
+
+        font-size:14px;
+
+    }
+
+    .user-card{
+
+        padding:25px;
+
+    }
+
+    .user-card i{
+
+        width:75px;
+
+        height:75px;
+
+        line-height:75px;
+
+        font-size:28px;
+
+    }
+
+    .topbar h1{
+
+        font-size:24px;
+
+    }
+
+    .card h2{
+
+        font-size:28px;
+
+    }
+
+}
+
+/* ===========================================================
+   ANIMATIONS
+=========================================================== */
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
 
 }
 
 .user-card{
 
-    padding:28px;
+    animation:fadeIn .6s ease;
 
 }
 
+.card{
+
+    animation:fadeIn .5s ease;
+
 }
+
+.entry-form{
+
+    animation:fadeIn .7s ease;
+
+}
+
+.history{
+
+    animation:fadeIn .8s ease;
+
+}
+
+/* ===========================================================
+   INPUT PLACEHOLDER
+=========================================================== */
+
+input::placeholder{
+
+    color:#94a3b8;
+
+}
+
+/* ===========================================================
+   BUTTON EFFECT
+=========================================================== */
+
+button{
+
+    transition:all .3s ease;
+
+}
+
+button:active{
+
+    transform:scale(.98);
+
+}
+
+/* ===========================================================
+   FOCUS EFFECTS
+=========================================================== */
+
+button:focus,
+input:focus{
+
+    outline:none;
+
+}
+
+/* ===========================================================
+   SELECTION
+=========================================================== */
+
+::selection{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+/* ===========================================================
+   SHADOW UTILITIES
+=========================================================== */
+
+.shadow-sm{
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+}
+
+.shadow-md{
+
+    box-shadow:0 10px 25px rgba(0,0,0,.10);
+
+}
+
+.shadow-lg{
+
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+
+}
+
+/* ===========================================================
+   BORDER RADIUS UTILITIES
+=========================================================== */
+
+.rounded{
+
+    border-radius:12px;
+
+}
+
+.rounded-lg{
+
+    border-radius:18px;
+
+}
+
+.rounded-xl{
+
+    border-radius:25px;
+
+}
+
+/* ===========================================================
+   TEXT UTILITIES
+=========================================================== */
+
+.text-center{
+
+    text-align:center;
+
+}
+
+.text-right{
+
+    text-align:right;
+
+}
+
+.text-left{
+
+    text-align:left;
+
+}
+
+/* ===========================================================
+   COLOR UTILITIES
+=========================================================== */
+
+.text-primary{
+
+    color:#2563eb;
+
+}
+
+.text-success{
+
+    color:#16a34a;
+
+}
+
+.text-danger{
+
+    color:#dc2626;
+
+}
+
+.text-warning{
+
+    color:#d97706;
+
+}
+
+/* ===========================================================
+   BACKGROUND UTILITIES
+=========================================================== */
+
+.bg-white{
+
+    background:#ffffff;
+
+}
+
+.bg-primary{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+.bg-success{
+
+    background:#16a34a;
+
+    color:#ffffff;
+
+}
+
+.bg-danger{
+
+    background:#dc2626;
+
+    color:#ffffff;
+
+}
+
+/* ===========================================================
+   SPACING
+=========================================================== */
+
+.mt-10{margin-top:10px;}
+.mt-20{margin-top:20px;}
+.mt-30{margin-top:30px;}
+
+.mb-10{margin-bottom:10px;}
+.mb-20{margin-bottom:20px;}
+.mb-30{margin-bottom:30px;}
+
+.p-10{padding:10px;}
+.p-20{padding:20px;}
+.p-30{padding:30px;}
+
+/* ===========================================================
+   END OF STYLE.CSS
+=========================================================== */
