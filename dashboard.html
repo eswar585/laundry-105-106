@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard | Family Laundry Management</title>
+<title>Dashboard | Family Laundry</title>
 
 <link rel="stylesheet" href="style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
@@ -19,201 +24,302 @@
 
 <div class="dashboard">
 
-    <!-- Sidebar -->
+<!-- Sidebar -->
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <h2><i class="fa-solid fa-shirt"></i> Laundry</h2>
+<h2>
 
-        <ul>
+<i class="fa-solid fa-shirt"></i>
 
-            <li class="active">
-                <i class="fa-solid fa-house"></i>
-                Dashboard
-            </li>
+Laundry
 
-            <li>
-                <i class="fa-solid fa-plus"></i>
-                Add Entry
-            </li>
+</h2>
 
-            <li>
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                History
-            </li>
+<ul>
 
-            <li>
-                <i class="fa-solid fa-file-pdf"></i>
-                Download PDF
-            </li>
+<li class="active">
 
-            <li onclick="logout()">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Logout
-            </li>
+<i class="fa-solid fa-house"></i>
 
-        </ul>
+Dashboard
 
-    </aside>
+</li>
 
-    <!-- Main Content -->
+<li>
 
-    <main class="content">
+<i class="fa-solid fa-plus"></i>
 
-        <header class="topbar">
+New Entry
 
-            <div>
+</li>
 
-                <h1 id="welcomeText">Welcome</h1>
+<li>
 
-                <p>Your Personal Laundry Dashboard</p>
+<i class="fa-solid fa-clock-rotate-left"></i>
 
-            </div>
+History
 
-        </header>
+</li>
 
-        <!-- Summary Cards -->
+<li id="pdfMenu">
 
-        <section class="cards">
+<i class="fa-solid fa-file-pdf"></i>
 
-            <div class="card">
+Download PDF
 
-                <i class="fa-solid fa-shirt"></i>
+</li>
 
-                <h3>Total Clothes</h3>
+<li id="logoutBtn">
 
-                <h2 id="totalClothes">0</h2>
+<i class="fa-solid fa-right-from-bracket"></i>
 
-            </div>
+Logout
 
-            <div class="card">
+</li>
 
-                <i class="fa-solid fa-list"></i>
+</ul>
 
-                <h3>Total Entries</h3>
+</aside>
 
-                <h2 id="totalEntries">0</h2>
+<!-- Main Content -->
 
-            </div>
+<div class="content">
 
-            <div class="card">
+<header class="topbar">
 
-                <i class="fa-solid fa-calendar"></i>
+<div>
 
-                <h3>Last Entry</h3>
+<h1 id="welcomeText">
 
-                <h2 id="lastEntry">--</h2>
+Welcome
 
-            </div>
+</h1>
 
-        </section>
+<p>
 
-        <!-- Add Laundry Entry -->
+Laundry Management Dashboard
 
-        <section class="entry-form">
-
-            <h2>Add Laundry Entry</h2>
-
-            <form id="laundryForm">
-
-                <input type="date" id="date">
-
-                <div class="grid">
-
-                    <input type="number" id="shirts" placeholder="Shirts" min="0">
-
-                    <input type="number" id="pants" placeholder="Pants" min="0">
-
-                    <input type="number" id="inners" placeholder="Inners" min="0">
-
-                    <input type="number" id="boxers" placeholder="Boxers" min="0">
-
-                    <input type="number" id="towels" placeholder="Towels" min="0">
-
-                    <input type="number" id="bedsheets" placeholder="Bed Sheets" min="0">
-
-                </div>
-
-                <button type="submit">
-
-                    <i class="fa-solid fa-plus"></i>
-
-                    Save Entry
-
-                </button>
-
-            </form>
-
-        </section>
-
-        <!-- History -->
-
-        <section class="history">
-
-            <div class="history-header">
-
-                <h2>Laundry History</h2>
-
-                <button id="downloadPdf">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-
-                    Download PDF
-
-                </button>
-
-            </div>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>Date</th>
-                        <th>Shirts</th>
-                        <th>Pants</th>
-                        <th>Inners</th>
-                        <th>Boxers</th>
-                        <th>Towels</th>
-                        <th>Bed Sheets</th>
-                        <th>Total</th>
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="historyTable">
-
-                </tbody>
-
-            </table>
-
-        </section>
-
-    </main>
+</p>
 
 </div>
 
-<script>
+</header>
 
-const user = localStorage.getItem("loggedInUser");
+<!-- Cards -->
 
-document.getElementById("welcomeText").innerHTML =
-"Welcome, " + user;
+<section class="cards">
 
-function logout(){
+<div class="card">
 
-localStorage.removeItem("loggedInUser");
+<i class="fa-solid fa-shirt"></i>
 
-window.location.href="index.html";
+<h3>Total Clothes</h3>
 
-}
+<h2 id="totalClothes">
 
-</script>
+0
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-list"></i>
+
+<h3>Total Entries</h3>
+
+<h2 id="totalEntries">
+
+0
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<i class="fa-solid fa-calendar-days"></i>
+
+<h3>Last Laundry</h3>
+
+<h2 id="lastEntry">
+
+--
+
+</h2>
+
+</div>
+
+</section>
+
+<!-- Entry Form -->
+
+<section class="entry-section">
+
+<h2>
+
+Add Laundry Entry
+
+</h2>
+
+<form id="laundryForm">
+
+<input
+type="date"
+id="date"
+required>
+
+<div class="grid">
+
+<input
+type="number"
+id="shirts"
+placeholder="Shirts"
+min="0"
+value="0">
+
+<input
+type="number"
+id="pants"
+placeholder="Pants"
+min="0"
+value="0">
+
+<input
+type="number"
+id="inners"
+placeholder="Inners"
+min="0"
+value="0">
+
+<input
+type="number"
+id="boxers"
+placeholder="Boxers"
+min="0"
+value="0">
+
+<input
+type="number"
+id="towels"
+placeholder="Towels"
+min="0"
+value="0">
+
+<input
+type="number"
+id="bedsheets"
+placeholder="Bed Sheets"
+min="0"
+value="0">
+
+</div>
+
+<div class="total-box">
+
+Total Clothes :
+
+<span id="liveTotal">
+
+0
+
+</span>
+
+</div>
+
+<button
+type="submit"
+id="saveBtn">
+
+<i class="fa-solid fa-floppy-disk"></i>
+
+Save Entry
+
+</button>
+
+</form>
+
+</section>
+
+<!-- History -->
+
+<section class="history">
+
+<div class="history-header">
+
+<h2>
+
+Laundry History
+
+</h2>
+
+<button id="downloadPdf">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+Download PDF
+
+</button>
+
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Shirts</th>
+
+<th>Pants</th>
+
+<th>Inners</th>
+
+<th>Boxers</th>
+
+<th>Towels</th>
+
+<th>Bed Sheets</th>
+
+<th>Total</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="historyTable">
+    </tbody>
+
+</table>
+
+</div>
+
+</section>
+
+</div>
+
+</div>
+
+<!-- Firebase -->
+
+<script type="module" src="firebase.js"></script>
+
+<!-- Main Script -->
 
 <script type="module" src="script.js"></script>
 
+<!-- PDF Script -->
+
+<script type="module" src="pdf.js"></script>
+
 </body>
+
 </html>
