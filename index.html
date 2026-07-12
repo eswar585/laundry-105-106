@@ -15,20 +15,20 @@
     <div id="login-screen" class="flex items-center justify-center min-h-screen px-4">
         <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-100">
             <h1 class="text-2xl font-bold text-center text-blue-600 mb-2">Laundry Tracker</h1>
-            <p class="text-gray-500 text-center text-sm mb-6">Select your ID to log in</p>
+            <p class="text-gray-500 text-center text-sm mb-6">Select your name to log in</p>
             
             <div class="space-y-3">
-                <button onclick="window.login('Person 1')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
-                    <span>Person 1</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 001</span>
+                <button onclick="window.promptPassword('ESWAR')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center cursor-pointer">
+                    <span>ESWAR</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">ID: 001</span>
                 </button>
-                <button onclick="window.login('Person 2')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
-                    <span>Person 2</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 002</span>
+                <button onclick="window.promptPassword('SNEHITH')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center cursor-pointer">
+                    <span>SNEHITH</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">ID: 002</span>
                 </button>
-                <button onclick="window.login('Person 3')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
-                    <span>Person 3</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 003</span>
+                <button onclick="window.promptPassword('SANTHOSH')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center cursor-pointer">
+                    <span>SANTHOSH</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">ID: 003</span>
                 </button>
-                <button onclick="window.login('Person 4')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
-                    <span>Person 4</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 004</span>
+                <button onclick="window.promptPassword('CHANDRA')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center cursor-pointer">
+                    <span>CHANDRA</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">ID: 004</span>
                 </button>
             </div>
         </div>
@@ -43,10 +43,10 @@
                 <p class="text-sm text-gray-500">Cloud database active. Live syncing across all devices.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="window.downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                <button onclick="window.downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm flex items-center gap-2 cursor-pointer">
                     📥 Download PDF Report
                 </button>
-                <button onclick="window.logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition text-sm">
+                <button onclick="window.logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition text-sm cursor-pointer">
                     Logout
                 </button>
             </div>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm shadow-sm mt-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm shadow-sm mt-2 cursor-pointer">
                         Save Entry
                     </button>
                 </form>
@@ -169,20 +169,40 @@
         let currentUser = "";
         let globalLogs = []; 
 
+        // Password dictionary setup
+        const userPasswords = {
+            "ESWAR": "2000",
+            "SNEHITH": "2001",
+            "SANTHOSH": "2002",
+            "CHANDRA": "2003"
+        };
+
         // Safely set the date selector when the document loads
         document.addEventListener("DOMContentLoaded", () => {
             const dateInput = document.getElementById('log-date');
             if(dateInput) dateInput.valueAsDate = new Date();
         });
 
-        // Expose functions explicitly to the window scope for click events
-        window.login = function(personName) {
+        // Prompt user for password before giving access
+        window.promptPassword = function(personName) {
+            const enteredPassword = prompt(`Enter login password for ${personName}:`);
+            
+            if (enteredPassword === null) return; // User canceled the prompt
+
+            if (enteredPassword === userPasswords[personName]) {
+                login(personName);
+            } else {
+                alert("❌ Incorrect password! Please try again.");
+            }
+        };
+
+        function login(personName) {
             currentUser = personName;
             document.getElementById('current-user').innerText = personName;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             listenToDatabase();
-        };
+        }
 
         window.logout = function() {
             currentUser = "";
@@ -257,7 +277,7 @@
                     <td class="py-3 text-center text-gray-600">${log.towel}</td>
                     <td class="py-3 text-center text-gray-600">${log.bedsheet}</td>
                     <td class="py-3 text-right">
-                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-medium text-xs">Delete</button>
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-medium text-xs cursor-pointer">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
