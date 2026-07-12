@@ -18,16 +18,16 @@
             <p class="text-gray-500 text-center text-sm mb-6">Select your ID to log in</p>
             
             <div class="space-y-3">
-                <button onclick="login('Person 1')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                <button onclick="window.login('Person 1')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
                     <span>Person 1</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 001</span>
                 </button>
-                <button onclick="login('Person 2')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                <button onclick="window.login('Person 2')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
                     <span>Person 2</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 002</span>
                 </button>
-                <button onclick="login('Person 3')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                <button onclick="window.login('Person 3')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
                     <span>Person 3</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 003</span>
                 </button>
-                <button onclick="login('Person 4')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                <button onclick="window.login('Person 4')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
                     <span>Person 4</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 004</span>
                 </button>
             </div>
@@ -43,10 +43,10 @@
                 <p class="text-sm text-gray-500">Cloud database active. Live syncing across all devices.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                <button onclick="window.downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm flex items-center gap-2">
                     📥 Download PDF Report
                 </button>
-                <button onclick="logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition text-sm">
+                <button onclick="window.logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition text-sm">
                     Logout
                 </button>
             </div>
@@ -56,7 +56,7 @@
             <!-- Left Side: Form -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
                 <h3 class="text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
-                <form id="laundry-form" onsubmit="saveLog(event)" class="space-y-4">
+                <form id="laundry-form" onsubmit="window.saveLog(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Date Sent</label>
                         <input type="date" id="log-date" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -148,27 +148,18 @@
 
     <!-- FIREBASE AND SYSTEM LOGIC -->
     <script type="module">
-        // Import the components you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-
-    apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
-
-    authDomain: "laundry-management-32c18.firebaseapp.com",
-
-    projectId: "laundry-management-32c18",
-
-    storageBucket: "laundry-management-32c18.firebasestorage.app",
-
-    messagingSenderId: "195267320338",
-
-    appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
-
-    measurementId: "G-XZYPE7WQBN"
-
-};
+            apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
+            authDomain: "laundry-management-32c18.firebaseapp.com",
+            projectId: "laundry-management-32c18",
+            storageBucket: "laundry-management-32c18.firebasestorage.app",
+            messagingSenderId: "195267320338",
+            appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
+            measurementId: "G-XZYPE7WQBN"
+        };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -176,26 +167,29 @@
         const laundryRef = ref(db, 'laundry_records');
 
         let currentUser = "";
-        let globalLogs = []; // Stores latest synced version from cloud
+        let globalLogs = []; 
 
-        // Make functions globally accessible outside of module scope
+        // Safely set the date selector when the document loads
+        document.addEventListener("DOMContentLoaded", () => {
+            const dateInput = document.getElementById('log-date');
+            if(dateInput) dateInput.valueAsDate = new Date();
+        });
+
+        // Expose functions explicitly to the window scope for click events
         window.login = function(personName) {
             currentUser = personName;
             document.getElementById('current-user').innerText = personName;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             listenToDatabase();
-        }
+        };
 
         window.logout = function() {
             currentUser = "";
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
-        }
+        };
 
-        document.getElementById('log-date').valueAsDate = new Date();
-
-        // Save entry straight to cloud database
         window.saveLog = function(e) {
             e.preventDefault();
             
@@ -211,35 +205,30 @@
                 bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
             });
 
-            // Reset inputs
             ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
                 document.getElementById(id).value = 0;
             });
-        }
+        };
 
-        // Delete from cloud
         window.deleteLog = function(key) {
             if(confirm("Are you sure you want to delete this log entry?")) {
                 const itemRef = ref(db, 'laundry_records/' + key);
                 remove(itemRef);
             }
-        }
+        };
 
-        // Live Listener: Fires automatically whenever data changes in Firebase
         function listenToDatabase() {
             onValue(laundryRef, (snapshot) => {
                 const data = snapshot.val();
                 globalLogs = [];
                 
                 if (data) {
-                    // Convert Firebase object system to array format
                     Object.keys(data).forEach(key => {
                         globalLogs.push({
                             key: key,
                             ...data[key]
                         });
                     });
-                    // Keep list ordered chronologically by date descending
                     globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
                 }
                 renderTable(globalLogs);
@@ -268,14 +257,13 @@
                     <td class="py-3 text-center text-gray-600">${log.towel}</td>
                     <td class="py-3 text-center text-gray-600">${log.bedsheet}</td>
                     <td class="py-3 text-right">
-                        <button onclick="deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-medium text-xs">Delete</button>
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-medium text-xs">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Download Master PDF using runtime memory logs
         window.downloadPDF = function() {
             if(globalLogs.length === 0) {
                 alert("There is no data to print yet!");
@@ -314,7 +302,7 @@
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.add('hidden');
             });
-        }
+        };
     </script>
 </body>
 </html>
