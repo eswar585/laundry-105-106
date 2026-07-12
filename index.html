@@ -3,124 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Laundry Management</title>
-
-    <link rel="stylesheet" href="style.css">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <title>Live Laundry Tracker</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+<body class="bg-gray-50 min-h-screen font-sans">
 
-<body>
-
-<div class="login-container">
-
-    <div class="login-box">
-
-        <div class="logo">
-
-            <i class="fa-solid fa-shirt"></i>
-
-            <h1>Family Laundry Management</h1>
-
-            <p>
-                Store and manage laundry records for all family members.
-            </p>
-
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-100">
+            <h1 class="text-2xl font-bold text-center text-blue-600 mb-2">Laundry Tracker</h1>
+            <p class="text-gray-500 text-center text-sm mb-6">Select your ID to log in</p>
+            
+            <div class="space-y-3">
+                <button onclick="login('Person 1')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                    <span>Person 1</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 001</span>
+                </button>
+                <button onclick="login('Person 2')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                    <span>Person 2</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 002</span>
+                </button>
+                <button onclick="login('Person 3')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                    <span>Person 3</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 003</span>
+                </button>
+                <button onclick="login('Person 4')" class="w-full bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-medium py-3 px-4 rounded-lg transition text-left flex justify-between items-center">
+                    <span>Person 4</span> <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-500">User ID: 004</span>
+                </button>
+            </div>
         </div>
-
-        <form id="loginForm">
-
-            <label>Login ID</label>
-
-            <input
-                type="text"
-                id="loginId"
-                placeholder="Enter Login ID"
-                autocomplete="off"
-                required
-            >
-
-            <button type="submit">
-
-                <i class="fa-solid fa-right-to-bracket"></i>
-
-                Login
-
-            </button>
-
-        </form>
-
-        <div class="login-help">
-
-            <h3>Available Login IDs</h3>
-
-            <ul>
-
-                <li>ESWAR</li>
-
-                <li>SNEHITH</li>
-
-                <li>SANTHOSH</li>
-
-                <li>DON</li>
-
-                <li>ADMIN</li>
-
-            </ul>
-
-        </div>
-
     </div>
 
-</div>
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboard" class="hidden max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Hello, <span id="current-user" class="text-blue-600">User</span>!</h2>
+                <p class="text-sm text-gray-500">Cloud database active. Live syncing across all devices.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm flex items-center gap-2">
+                    📥 Download PDF Report
+                </button>
+                <button onclick="logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition text-sm">
+                    Logout
+                </button>
+            </div>
+        </div>
 
-<script>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Side: Form -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
+                <form id="laundry-form" onsubmit="saveLog(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date Sent</label>
+                        <input type="date" id="log-date" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="border-t border-gray-150 my-2 pt-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Item Counts</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-gray-600">Pants</label>
+                                <input type="number" id="count-pant" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600">Shirts</label>
+                                <input type="number" id="count-shirt" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600">Inners</label>
+                                <input type="number" id="count-inners" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600">Boxers</label>
+                                <input type="number" id="count-boxers" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600">Towels</label>
+                                <input type="number" id="count-towels" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600">Bed Sheets</label>
+                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                            </div>
+                        </div>
+                    </div>
 
-document
-.getElementById("loginForm")
-.addEventListener("submit",function(e){
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm shadow-sm mt-2">
+                        Save Entry
+                    </button>
+                </form>
+            </div>
 
-e.preventDefault();
+            <!-- Right Side: History -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">All History Logs</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm" id="history-table">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-gray-500 font-medium">
+                                <th class="pb-3 font-semibold">Date</th>
+                                <th class="pb-3 font-semibold">Who</th>
+                                <th class="pb-3 font-semibold text-center">Pant</th>
+                                <th class="pb-3 font-semibold text-center">Shirt</th>
+                                <th class="pb-3 font-semibold text-center">Inners</th>
+                                <th class="pb-3 font-semibold text-center">Boxers</th>
+                                <th class="pb-3 font-semibold text-center">Towel</th>
+                                <th class="pb-3 font-semibold text-center">Bed Sheet</th>
+                                <th class="pb-3 font-semibold text-right text-red-500">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-gray-100 text-gray-700">
+                            <tr><td colspan="9" class="text-center text-gray-400 py-8">Connecting to Firebase...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-const id=document
-.getElementById("loginId")
-.value
-.trim()
-.toUpperCase();
+    <!-- HIDDEN PDF TEMPLATE -->
+    <div id="pdf-template" class="hidden p-8 text-black bg-white">
+        <h1 class="text-2xl font-bold mb-1">Master Laundry Report</h1>
+        <p class="text-sm text-gray-600 mb-6">Generated on: <span id="pdf-gen-date"></span></p>
+        <table class="w-full text-left text-xs border-collapse">
+            <thead>
+                <tr class="border-b-2 border-gray-800 font-bold">
+                    <th class="py-2">Date</th>
+                    <th class="py-2">Person</th>
+                    <th class="py-2 text-center">Pant</th>
+                    <th class="py-2 text-center">Shirt</th>
+                    <th class="py-2 text-center">Inners</th>
+                    <th class="py-2 text-center">Boxers</th>
+                    <th class="py-2 text-center">Towel</th>
+                    <th class="py-2 text-center">Bed Sheet</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-table-body" class="divide-y divide-gray-300"></tbody>
+        </table>
+    </div>
 
-const users=[
+    <!-- FIREBASE AND SYSTEM LOGIC -->
+    <script type="module">
+        // Import the components you need from the Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-"ESWAR",
+        // ⚠️ REPLACE THIS CONFIGURATION OBJECT WITH YOURS FROM STEP 2 ⚠️
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-"SNEHITH",
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const laundryRef = ref(db, 'laundry_records');
 
-"SANTHOSH",
+        let currentUser = "";
+        let globalLogs = []; // Stores latest synced version from cloud
 
-"DON",
+        // Make functions globally accessible outside of module scope
+        window.login = function(personName) {
+            currentUser = personName;
+            document.getElementById('current-user').innerText = personName;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            listenToDatabase();
+        }
 
-"ADMIN"
+        window.logout = function() {
+            currentUser = "";
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
 
-];
+        document.getElementById('log-date').valueAsDate = new Date();
 
-if(!users.includes(id)){
+        // Save entry straight to cloud database
+        window.saveLog = function(e) {
+            e.preventDefault();
+            
+            const newRecordRef = push(laundryRef);
+            set(newRecordRef, {
+                user: currentUser,
+                date: document.getElementById('log-date').value,
+                pant: parseInt(document.getElementById('count-pant').value) || 0,
+                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
+                inners: parseInt(document.getElementById('count-inners').value) || 0,
+                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
+                towel: parseInt(document.getElementById('count-towels').value) || 0,
+                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
+            });
 
-alert("Invalid Login ID");
+            // Reset inputs
+            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
+                document.getElementById(id).value = 0;
+            });
+        }
 
-return;
+        // Delete from cloud
+        window.deleteLog = function(key) {
+            if(confirm("Are you sure you want to delete this log entry?")) {
+                const itemRef = ref(db, 'laundry_records/' + key);
+                remove(itemRef);
+            }
+        }
 
-}
+        // Live Listener: Fires automatically whenever data changes in Firebase
+        function listenToDatabase() {
+            onValue(laundryRef, (snapshot) => {
+                const data = snapshot.val();
+                globalLogs = [];
+                
+                if (data) {
+                    // Convert Firebase object system to array format
+                    Object.keys(data).forEach(key => {
+                        globalLogs.push({
+                            key: key,
+                            ...data[key]
+                        });
+                    });
+                    // Keep list ordered chronologically by date descending
+                    globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                }
+                renderTable(globalLogs);
+            });
+        }
 
-localStorage.setItem("loggedInUser",id);
+        function renderTable(logs) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
 
-window.location.href="dashboard.html";
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-gray-400 py-8">No records found. Start by entering one on the left!</td></tr>`;
+                return;
+            }
 
-});
+            logs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+                tr.innerHTML = `
+                    <td class="py-3 font-medium text-gray-900">${log.date}</td>
+                    <td class="py-3"><span class="px-2 py-1 rounded text-xs font-medium ${log.user === currentUser ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">${log.user}</span></td>
+                    <td class="py-3 text-center text-gray-600">${log.pant}</td>
+                    <td class="py-3 text-center text-gray-600">${log.shirt}</td>
+                    <td class="py-3 text-center text-gray-600">${log.inners}</td>
+                    <td class="py-3 text-center text-gray-600">${log.boxers}</td>
+                    <td class="py-3 text-center text-gray-600">${log.towel}</td>
+                    <td class="py-3 text-center text-gray-600">${log.bedsheet}</td>
+                    <td class="py-3 text-right">
+                        <button onclick="deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-medium text-xs">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-</script>
+        // Download Master PDF using runtime memory logs
+        window.downloadPDF = function() {
+            if(globalLogs.length === 0) {
+                alert("There is no data to print yet!");
+                return;
+            }
 
+            document.getElementById('pdf-gen-date').innerText = new Date().toLocaleDateString();
+            const pdfTbody = document.getElementById('pdf-table-body');
+            pdfTbody.innerHTML = "";
+
+            globalLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2">${log.date}</td>
+                    <td class="py-2 font-medium">${log.user}</td>
+                    <td class="py-2 text-center">${log.pant}</td>
+                    <td class="py-2 text-center">${log.shirt}</td>
+                    <td class="py-2 text-center">${log.inners}</td>
+                    <td class="py-2 text-center">${log.boxers}</td>
+                    <td class="py-2 text-center">${log.towel}</td>
+                    <td class="py-2 text-center">${log.bedsheet}</td>
+                `;
+                pdfTbody.appendChild(tr);
+            });
+
+            const element = document.getElementById('pdf-template');
+            const opt = {
+                margin:       0.5,
+                filename:     `laundry-master-report-${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            element.classList.remove('hidden');
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden');
+            });
+        }
+    </script>
 </body>
-
 </html>
