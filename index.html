@@ -13,24 +13,58 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm w-full max-w-md border border-gray-100">
-            <h1 class="text-2xl font-black text-center text-blue-600 mb-1 tracking-tight">Laundry Tracker</h1>
-            <p class="text-gray-400 text-center text-xs sm:text-sm mb-6 font-medium">Select your name to log in</p>
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-md border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mb-3">
+                    🧺
+                </div>
+                <h1 class="text-2xl font-black text-gray-900 tracking-tight">Laundry Tracker</h1>
+                <p class="text-gray-400 text-xs sm:text-sm font-medium mt-1">Select your account to sign in</p>
+            </div>
             
             <div class="space-y-3">
-                <button onclick="window.promptPassword('ESWAR')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-bold py-3.5 px-4 rounded-xl transition text-center cursor-pointer focus:outline-none border border-transparent hover:border-blue-200 active:scale-[0.99]">
-                    ESWAR
+                <button onclick="window.openPasswordModal('ESWAR')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>ESWAR</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
                 </button>
-                <button onclick="window.promptPassword('SNEHITH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-bold py-3.5 px-4 rounded-xl transition text-center cursor-pointer focus:outline-none border border-transparent hover:border-blue-200 active:scale-[0.99]">
-                    SNEHITH
+                <button onclick="window.openPasswordModal('SNEHITH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>SNEHITH</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
                 </button>
-                <button onclick="window.promptPassword('SANTHOSH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-bold py-3.5 px-4 rounded-xl transition text-center cursor-pointer focus:outline-none border border-transparent hover:border-blue-200 active:scale-[0.99]">
-                    SANTHOSH
+                <button onclick="window.openPasswordModal('SANTHOSH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>SANTHOSH</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
                 </button>
-                <button onclick="window.promptPassword('CHANDRA')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-bold py-3.5 px-4 rounded-xl transition text-center cursor-pointer focus:outline-none border border-transparent hover:border-blue-200 active:scale-[0.99]">
-                    CHANDRA
+                <button onclick="window.openPasswordModal('CHANDRA')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>CHANDRA</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- PROFESSIONAL PASSWORD MODAL LAYER -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all border border-gray-100">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Sign in as <span id="modal-target-user" class="text-blue-600"></span></h3>
+                <button onclick="window.closePasswordModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold focus:outline-none p-1">✕</button>
+            </div>
+            <form onsubmit="window.submitPassword(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Enter PIN / Password</label>
+                    <input type="password" id="modal-password-input" placeholder="••••" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                    <p id="login-error-msg" class="text-red-500 text-xs mt-1 text-center hidden font-medium">❌ Incorrect password. Try again.</p>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="window.closePasswordModal()" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl text-sm transition focus:outline-none">
+                        Cancel
+                    </button>
+                    <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm focus:outline-none">
+                        Verify & Login
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -40,7 +74,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 gap-4">
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Hello, <span id="current-user" class="text-blue-600">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-gray-400 font-medium">
+                <p class="text-xs sm:text-sm text-gray-400 font-medium">Private Database Dashboard. Isolated User View Enabled.</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
@@ -55,15 +89,15 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Side: Form -->
             <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Enter New Laundry</h3>
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
                 <form id="laundry-form" onsubmit="window.saveLog(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date</label>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date Sent</label>
                         <input type="date" id="log-date" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
                     </div>
                     
                     <div class="border-t border-gray-100 my-2 pt-3">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Items Count</p>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Item Counts</p>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                                 <label class="block text-xs font-medium text-gray-500 mb-1">Pants</label>
@@ -100,9 +134,9 @@
 
             <!-- Right Side: History Log Section -->
             <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Laundry History</h3>
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Your Private Laundry Logs</h3>
                 
-                <!-- 1. DESKTOP VIEW: Clean Structured Data Table -->
+                <!-- 1. DESKTOP VIEW -->
                 <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm" id="history-table">
                         <thead>
@@ -124,7 +158,7 @@
                     </table>
                 </div>
 
-                <!-- 2. MOBILE VIEW: Beautifully Stacked Adaptive Detail Cards -->
+                <!-- 2. MOBILE VIEW -->
                 <div id="mobile-cards-container" class="block sm:hidden space-y-3">
                     <p class="text-center text-gray-400 py-4 text-sm">Connecting to database logs...</p>
                 </div>
@@ -153,13 +187,12 @@
                     </tr>
                 </thead>
                 <tbody id="pdf-table-body" style="font-size: 13px; color: #4b5563;">
-                    <!-- Appended cleanly via JS -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- FIREBASE ARCHITECTURE ENGINE AND INTERACTION SCRIPT -->
+    <!-- SYSTEM LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -179,6 +212,7 @@
         const laundryRef = ref(db, 'laundry_records');
 
         let currentUser = "";
+        let selectedUserTarget = "";
         let globalLogs = []; 
 
         const userPasswords = {
@@ -193,14 +227,31 @@
             if(dateInput) dateInput.valueAsDate = new Date();
         });
 
-        window.promptPassword = function(personName) {
-            const enteredPassword = prompt(`Enter login password for ${personName}:`);
-            if (enteredPassword === null) return;
+        // MODAL MANAGEMENT CONTROLS
+        window.openPasswordModal = function(personName) {
+            selectedUserTarget = personName;
+            document.getElementById('modal-target-user').innerText = personName;
+            document.getElementById('modal-password-input').value = "";
+            document.getElementById('login-error-msg').classList.add('hidden');
+            document.getElementById('password-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('modal-password-input').focus(), 100);
+        };
 
-            if (enteredPassword === userPasswords[personName]) {
-                login(personName);
+        window.closePasswordModal = function() {
+            selectedUserTarget = "";
+            document.getElementById('password-modal').classList.add('hidden');
+        };
+
+        window.submitPassword = function(e) {
+            e.preventDefault();
+            const inputVal = document.getElementById('modal-password-input').value;
+
+            if (inputVal === userPasswords[selectedUserTarget]) {
+                window.closePasswordModal();
+                login(selectedUserTarget);
             } else {
-                alert("❌ Incorrect password! Access denied.");
+                document.getElementById('login-error-msg').classList.remove('hidden');
+                document.getElementById('modal-password-input').select();
             }
         };
 
@@ -266,7 +317,6 @@
             });
         }
 
-        // Renders Table Layout (Hidden automatically on phones, visible on Desktop)
         function renderTable(logs) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "";
@@ -296,7 +346,6 @@
             });
         }
 
-        // Renders Card Layout (Visible automatically on phones, hidden on Desktop)
         function renderMobileCards(logs) {
             const cardContainer = document.getElementById('mobile-cards-container');
             cardContainer.innerHTML = "";
