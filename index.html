@@ -33,6 +33,7 @@
             const firebaseConfig = {
                 apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
                 authDomain: "laundry-management-32c18.firebaseapp.com",
+                databaseURL: "https://laundry-management-32c18-default-rtdb.firebaseio.com", // Crucial for v8 targeting
                 projectId: "laundry-management-32c18",
                 storageBucket: "laundry-management-32c18.firebasestorage.app",
                 messagingSenderId: "195267320338",
@@ -129,6 +130,12 @@
                 }
                 renderTable(globalLogs);
                 renderMobileCards(globalLogs);
+            }, function(error) {
+                // Dynamic feedback overlay if permissions or database settings fail
+                console.error("Database connection failed:", error);
+                const errorMarkup = `<tr><td colspan="9" class="text-center text-red-500 py-8 font-semibold">Connection Error: ${error.message}<br><span class="text-xs text-gray-400 font-normal">Please check your Firebase Realtime Database Security Rules!</span></td></tr>`;
+                document.getElementById('table-body').innerHTML = errorMarkup;
+                document.getElementById('mobile-cards-container').innerHTML = `<p class="text-center text-red-500 py-4 text-sm font-semibold">Connection Error: ${error.message}</p>`;
             });
         }
 
@@ -164,7 +171,7 @@
             tbody.innerHTML = "";
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-gray-400 py-8">No records found for your account.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-gray-400 py-8">No records found for your account. Start by logging data on the left!</td></tr>`;
                 return;
             }
 
