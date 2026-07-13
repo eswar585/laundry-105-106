@@ -4,18 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Laundry Tracker</title>
+    
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-    <!-- html2pdf.js engine -->
+    
+    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <!-- UI MODAL CONTROL LAYER -->
+    <!-- UNIFIED APPLICATION CONTROLLER SCRIPT -->
     <script>
-        // Track the actively selected target user globally
-        window.activeModalUser = "";
+        // Global App State Scope
+        let db;
+        let currentUser = "";
+        let selectedUserTarget = "";
+        let globalLogs = [];
 
+        const userPasswords = {
+            "ESWAR": "2000",
+            "SNEHITH": "2001",
+            "SANTHOSH": "2002",
+            "CHANDRA": "2003"
+        };
+
+        // Initialize App Infrastructure Setup
+        document.addEventListener("DOMContentLoaded", function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
+                authDomain: "laundry-management-32c18.firebaseapp.com",
+                projectId: "laundry-management-32c18",
+                storageBucket: "laundry-management-32c18.firebasestorage.app",
+                messagingSenderId: "195267320338",
+                appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
+                measurementId: "G-XZYPE7WQBN"
+            };
+
+            // Safeguard initialization sequence
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+
+            // Setup default date context values
+            const dateInput = document.getElementById('log-date');
+            if(dateInput) dateInput.valueAsDate = new Date();
+
+            // Form Submit Router
+            document.getElementById('laundry-form').addEventListener('submit', saveLog);
+        });
+
+        // Modal Action Interfaces
         window.openPasswordModal = function(personName) {
-            window.activeModalUser = personName;
+            selectedUserTarget = personName;
             document.getElementById('modal-target-user').innerText = personName;
             document.getElementById('modal-password-input').value = "";
             document.getElementById('login-error-msg').classList.add('hidden');
@@ -24,255 +65,30 @@
         };
 
         window.closePasswordModal = function() {
-            window.activeModalUser = "";
+            selectedUserTarget = "";
             document.getElementById('password-modal').classList.add('hidden');
         };
 
         window.submitPassword = function(e) {
             e.preventDefault();
             const inputVal = document.getElementById('modal-password-input').value;
-            const contextUser = window.activeModalUser; // Lock in the user name being processed right now
 
-            const userPasswords = {
-                "ESWAR": "2000",
-                "SNEHITH": "2001",
-                "SANTHOSH": "2002",
-                "CHANDRA": "2003"
-            };
-
-            if (inputVal === userPasswords[contextUser]) {
+            if (inputVal === userPasswords[selectedUserTarget]) {
+                currentUser = selectedUserTarget;
                 window.closePasswordModal();
-                // Pass the verified user straight into the Firebase initialization routine
-                if (window.firebaseLoginTrigger) {
-                    window.firebaseLoginTrigger(contextUser);
-                }
+                executeDashboardLogin();
             } else {
                 document.getElementById('login-error-msg').classList.remove('hidden');
                 document.getElementById('modal-password-input').select();
             }
         };
-    </script>
-</head>
-<body class="bg-gray-50 min-h-screen font-sans antialiased text-gray-800">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-md border border-gray-100">
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mb-3">
-                    🧺
-                </div>
-                <h1 class="text-2xl font-black text-gray-900 tracking-tight">Laundry Tracker</h1>
-                <p class="text-gray-400 text-xs sm:text-sm font-medium mt-1">Select your account to sign in</p>
-            </div>
-            
-            <div class="space-y-3">
-                <button onclick="window.openPasswordModal('ESWAR')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
-                    <span>ESWAR</span>
-                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
-                </button>
-                <button onclick="window.openPasswordModal('SNEHITH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
-                    <span>SNEHITH</span>
-                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
-                </button>
-                <button onclick="window.openPasswordModal('SANTHOSH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
-                    <span>SANTHOSH</span>
-                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
-                </button>
-                <button onclick="window.openPasswordModal('CHANDRA')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
-                    <span>CHANDRA</span>
-                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PASSWORD MODAL LAYER -->
-    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all border border-gray-100">
-            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Sign in as <span id="modal-target-user" class="text-blue-600"></span></h3>
-                <button onclick="window.closePasswordModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold focus:outline-none p-1">✕</button>
-            </div>
-            <form id="password-form" onsubmit="window.submitPassword(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Enter PIN / Password</label>
-                    <input type="password" id="modal-password-input" placeholder="••••" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                    <p id="login-error-msg" class="text-red-500 text-xs mt-1 text-center hidden font-medium">❌ Incorrect password. Try again.</p>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="window.closePasswordModal()" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl text-sm transition focus:outline-none">
-                        Cancel
-                    </button>
-                    <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm focus:outline-none">
-                        Verify & Login
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MAIN DASHBOARD -->
-    <div id="dashboard" class="hidden max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 gap-4">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Hello, <span id="current-user" class="text-blue-600">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-gray-400 font-medium">Private Database Dashboard. Isolated User View Enabled.</p>
-            </div>
-            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
-                    📥 Download PDF
-                </button>
-                <button onclick="window.logout()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95">
-                    Logout
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Side: Form -->
-            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
-                <form id="laundry-form" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date Sent</label>
-                        <input type="date" id="log-date" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                    </div>
-                    
-                    <div class="border-t border-gray-100 my-2 pt-3">
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Item Counts</p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Pants</label>
-                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Shirts</label>
-                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Inners</label>
-                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Boxers</label>
-                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Towels</label>
-                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Bed Sheets</label>
-                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none active:scale-[0.99]">
-                        Save Entry
-                    </button>
-                </form>
-            </div>
-
-            <!-- Right Side: History Log Section -->
-            <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Your Private Laundry Logs</h3>
-                
-                <!-- 1. DESKTOP VIEW -->
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-left text-sm" id="history-table">
-                        <thead>
-                            <tr class="border-b border-gray-200 text-gray-400 font-medium">
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Date</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Owner</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Pant</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Shirt</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Inners</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Boxers</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Towel</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Bed Sheet</th>
-                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-right text-red-500">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-gray-100 text-gray-700">
-                            <tr><td colspan="9" class="text-center text-gray-400 py-8">Connecting to database logs...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- 2. MOBILE VIEW -->
-                <div id="mobile-cards-container" class="block sm:hidden space-y-3">
-                    <p class="text-center text-gray-400 py-4 text-sm">Connecting to database logs...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- OUT-OF-VIEWPORT CONTAINER FOR PERFECT PDF GENERATION -->
-    <div style="position: absolute; left: -9999px; top: -9999px;">
-        <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
-            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #1d4ed8; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
-            <p style="font-size: 14px; color: #666666; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
-                Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
-            </p>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr style="background-color: #f3f4f6; color: #374151; font-weight: bold; text-align: left; font-size: 13px;">
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; width: 22%;">Date Sent</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Pants</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Shirts</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Inners</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Boxers</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Towels</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Bed Sheets</th>
-                    </tr>
-                </thead>
-                <tbody id="pdf-table-body" style="font-size: 13px; color: #4b5563;">
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- FIREBASE MODULE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
-            authDomain: "laundry-management-32c18.firebaseapp.com",
-            projectId: "laundry-management-32c18",
-            storageBucket: "laundry-management-32c18.firebasestorage.app",
-            messagingSenderId: "195267320338",
-            appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
-            measurementId: "G-XZYPE7WQBN"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const rootRef = ref(db, ''); 
-
-        let currentUser = "";
-        let globalLogs = []; 
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const dateInput = document.getElementById('log-date');
-            if(dateInput) dateInput.valueAsDate = new Date();
-            
-            document.getElementById('laundry-form').addEventListener('submit', window.saveLog);
-        });
-
-        // Exact listener binding the secure session name directly to state updates
-        window.firebaseLoginTrigger = function(personName) {
-            currentUser = personName;
-            document.getElementById('current-user').innerText = personName;
+        function executeDashboardLogin() {
+            document.getElementById('current-user').innerText = currentUser;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             listenToDatabase();
-        };
+        }
 
         window.logout = function() {
             currentUser = "";
@@ -280,35 +96,9 @@
             document.getElementById('dashboard').classList.add('hidden');
         };
 
-        window.saveLog = function(e) {
-            e.preventDefault();
-            
-            const targetSaveRef = push(ref(db, 'laundry_records'));
-            set(targetSaveRef, {
-                user: currentUser,
-                date: document.getElementById('log-date').value,
-                pant: parseInt(document.getElementById('count-pant').value) || 0,
-                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
-                inners: parseInt(document.getElementById('count-inners').value) || 0,
-                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
-                towel: parseInt(document.getElementById('count-towels').value) || 0,
-                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
-            });
-
-            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
-                document.getElementById(id).value = 0;
-            });
-        };
-
-        window.deleteLog = function(fullPathKey) {
-            if(confirm("Are you sure you want to delete this log entry?")) {
-                const itemRef = ref(db, fullPathKey);
-                remove(itemRef);
-            }
-        };
-
+        // Realtime Synchronized Engine Layer
         function listenToDatabase() {
-            onValue(rootRef, (snapshot) => {
+            db.ref().on('value', function(snapshot) {
                 const rawData = snapshot.val();
                 globalLogs = [];
                 
@@ -342,6 +132,33 @@
             });
         }
 
+        function saveLog(e) {
+            e.preventDefault();
+            
+            const recordsRef = db.ref('laundry_records');
+            recordsRef.push({
+                user: currentUser,
+                date: document.getElementById('log-date').value,
+                pant: parseInt(document.getElementById('count-pant').value) || 0,
+                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
+                inners: parseInt(document.getElementById('count-inners').value) || 0,
+                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
+                towel: parseInt(document.getElementById('count-towels').value) || 0,
+                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
+            });
+
+            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
+                document.getElementById(id).value = 0;
+            });
+        }
+
+        window.deleteLog = function(fullPathKey) {
+            if(confirm("Are you sure you want to delete this entry?")) {
+                db.ref(fullPathKey).remove();
+            }
+        };
+
+        // Component UI Builders
         function renderTable(logs) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "";
@@ -376,7 +193,7 @@
             cardContainer.innerHTML = "";
 
             if (logs.length === 0) {
-                cardContainer.innerHTML = `<p class="text-center text-gray-400 py-6 text-sm">No records found for your account.</p>`;
+                cardContainer.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">No records found for your account.</p>`;
                 return;
             }
 
@@ -464,5 +281,188 @@
             });
         };
     </script>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased text-gray-800">
+
+    <!-- LOGIN SCREEN CONTAINER -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-md border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mb-3">
+                    🧺
+                </div>
+                <h1 class="text-2xl font-black text-gray-900 tracking-tight">Laundry Tracker</h1>
+                <p class="text-gray-400 text-xs sm:text-sm font-medium mt-1">Select your account to sign in</p>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="window.openPasswordModal('ESWAR')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>ESWAR</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
+                </button>
+                <button onclick="window.openPasswordModal('SNEHITH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>SNEHITH</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
+                </button>
+                <button onclick="window.openPasswordModal('SANTHOSH')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>SANTHOSH</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
+                </button>
+                <button onclick="window.openPasswordModal('CHANDRA')" class="w-full bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold py-3.5 px-4 rounded-xl transition text-left flex items-center justify-between border border-gray-100 hover:border-blue-200 cursor-pointer focus:outline-none group">
+                    <span>CHANDRA</span>
+                    <span class="text-gray-400 group-hover:text-blue-500 text-sm">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENTRY ACCESS PASSWORD MODAL OVERLAY -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all border border-gray-100">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Sign in as <span id="modal-target-user" class="text-blue-600"></span></h3>
+                <button onclick="window.closePasswordModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold focus:outline-none p-1">✕</button>
+            </div>
+            <form id="password-form" onsubmit="window.submitPassword(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Enter PIN / Password</label>
+                    <input type="password" id="modal-password-input" placeholder="••••" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                    <p id="login-error-msg" class="text-red-500 text-xs mt-1 text-center hidden font-medium">❌ Incorrect password. Try again.</p>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="window.closePasswordModal()" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl text-sm transition focus:outline-none">
+                        Cancel
+                    </button>
+                    <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm focus:outline-none">
+                        Verify & Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECURE APPLICATION MAIN WORKSPACE VIEW -->
+    <div id="dashboard" class="hidden max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <!-- Dashboard Workspace Header Block -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 gap-4">
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Hello, <span id="current-user" class="text-blue-600">User</span>!</h2>
+                <p class="text-xs sm:text-sm text-gray-400 font-medium">Private Database Dashboard. Isolated User View Enabled.</p>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
+                    📥 Download PDF
+                </button>
+                <button onclick="window.logout()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Grid Pane Component: Entry Generation Form -->
+            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
+                <form id="laundry-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date Sent</label>
+                        <input type="date" id="log-date" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                    </div>
+                    
+                    <div class="border-t border-gray-100 my-2 pt-3">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Item Counts</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Pants</label>
+                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Shirts</label>
+                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Inners</label>
+                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Boxers</label>
+                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Towels</label>
+                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Bed Sheets</label>
+                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none active:scale-[0.99]">
+                        Save Entry
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Grid Pane Component: Dynamic Sync Data Logger Viewports -->
+            <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Your Private Laundry Logs</h3>
+                
+                <!-- 1. RESPONSIVE DESKTOP DATA PORTAL -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="w-full text-left text-sm" id="history-table">
+                        <thead>
+                            <tr class="border-b border-gray-200 text-gray-400 font-medium">
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Date</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Owner</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Pant</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Shirt</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Inners</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Boxers</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Towel</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Bed Sheet</th>
+                                <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-right text-red-500">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-gray-100 text-gray-700">
+                            <tr><td colspan="9" class="text-center text-gray-400 py-8">Connecting to database logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. MOBILE CARD OVERFLOW CONTAINER -->
+                <div id="mobile-cards-container" class="block sm:hidden space-y-3">
+                    <p class="text-center text-gray-400 py-4 text-sm">Connecting to database logs...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABSTRACT HIDDEN RENDERING COMPONENT INJECTED FOR CLEAN HIGH RESOLUTION PRINT GENERATION -->
+    <div style="position: absolute; left: -9999px; top: -9999px;">
+        <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
+            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #1d4ed8; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
+            <p style="font-size: 14px; color: #666666; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
+                Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
+            </p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background-color: #f3f4f6; color: #374151; font-weight: bold; text-align: left; font-size: 13px;">
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; width: 22%;">Date Sent</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Pants</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Shirts</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Inners</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Boxers</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Towels</th>
+                        <th style="padding: 12px 10px; border: 1px solid #d1d5db; text-align: center; width: 13%;">Bed Sheets</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-table-body" style="font-size: 13px; color: #4b5563;">
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
