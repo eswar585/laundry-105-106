@@ -209,7 +209,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const laundryRef = ref(db, 'laundry_records');
+        
+        // UNIVERSAL SCANNER PATH
+        const rootRef = ref(db, ''); 
 
         let currentUser = "";
         let selectedUserTarget = "";
@@ -272,8 +274,8 @@
         window.saveLog = function(e) {
             e.preventDefault();
             
-            const newRecordRef = push(laundryRef);
-            set(newRecordRef, {
+            const targetSaveRef = push(ref(db, 'laundry_records'));
+            set(targetSaveRef, {
                 user: currentUser,
                 date: document.getElementById('log-date').value,
                 pant: parseInt(document.getElementById('count-pant').value) || 0,
@@ -289,27 +291,42 @@
             });
         };
 
-        window.deleteLog = function(key) {
+        window.deleteLog = function(fullPathKey) {
             if(confirm("Are you sure you want to delete this log entry?")) {
-                const itemRef = ref(db, 'laundry_records/' + key);
+                const itemRef = ref(db, fullPathKey);
                 remove(itemRef);
             }
         };
 
+        // UNIVERSAL SCANNER ENGINE (Fixes Missing Data)
         function listenToDatabase() {
-            onValue(laundryRef, (snapshot) => {
-                const data = snapshot.val();
+            onValue(rootRef, (snapshot) => {
+                const rawData = snapshot.val();
                 globalLogs = [];
                 
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        if (data[key].user === currentUser) {
-                            globalLogs.push({
-                                key: key,
-                                ...data[key]
+                if (rawData) {
+                    const checkAndPush = (item, pathString) => {
+                        if (item && typeof item === 'object' && item.date) {
+                            if (!item.user || item.user.toUpperCase() === currentUser.toUpperCase()) {
+                                globalLogs.push({
+                                    key: pathString,
+                                    ...item
+                                });
+                            }
+                        }
+                    };
+
+                    Object.keys(rawData).forEach(key => {
+                        if (key === 'laundry_records' && typeof rawData[key] === 'object') {
+                            const subFolder = rawData[key];
+                            Object.keys(subFolder).forEach(subKey => {
+                                checkAndPush(subFolder[subKey], `laundry_records/${subKey}`);
                             });
+                        } else {
+                            checkAndPush(rawData[key], key);
                         }
                     });
+
                     globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
                 }
                 renderTable(globalLogs);
@@ -331,7 +348,7 @@
                 tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
                 tr.innerHTML = `
                     <td class="py-3 font-medium text-gray-900">${log.date}</td>
-                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-600">${log.user}</span></td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-600">${log.user || 'Legacy'}</span></td>
                     <td class="py-3 text-center text-gray-600 font-medium">${log.pant}</td>
                     <td class="py-3 text-center text-gray-600 font-medium">${log.shirt}</td>
                     <td class="py-3 text-center text-gray-600 font-medium">${log.inners}</td>
@@ -362,7 +379,7 @@
                     <div class="flex items-center justify-between border-b border-gray-200 pb-2">
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-bold text-gray-800">${log.date}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">${log.user}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">${log.user || 'Legacy'}</span>
                         </div>
                         <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs focus:outline-none px-2 py-1">
                             Delete
