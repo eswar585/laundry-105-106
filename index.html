@@ -9,13 +9,13 @@
     <!-- html2pdf.js engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <!-- INSTANT REGULAR SCRIPT FOR THE UI MODAL ACTIONS -->
+    <!-- UI MODAL CONTROL LAYER -->
     <script>
-        // These are available globally the absolute millisecond the page renders
-        let selectedUserTarget = "";
+        // Track the actively selected target user globally
+        window.activeModalUser = "";
 
         window.openPasswordModal = function(personName) {
-            selectedUserTarget = personName;
+            window.activeModalUser = personName;
             document.getElementById('modal-target-user').innerText = personName;
             document.getElementById('modal-password-input').value = "";
             document.getElementById('login-error-msg').classList.add('hidden');
@@ -24,13 +24,15 @@
         };
 
         window.closePasswordModal = function() {
-            selectedUserTarget = "";
+            window.activeModalUser = "";
             document.getElementById('password-modal').classList.add('hidden');
         };
 
         window.submitPassword = function(e) {
             e.preventDefault();
             const inputVal = document.getElementById('modal-password-input').value;
+            const contextUser = window.activeModalUser; // Lock in the user name being processed right now
+
             const userPasswords = {
                 "ESWAR": "2000",
                 "SNEHITH": "2001",
@@ -38,11 +40,11 @@
                 "CHANDRA": "2003"
             };
 
-            if (inputVal === userPasswords[selectedUserTarget]) {
+            if (inputVal === userPasswords[contextUser]) {
                 window.closePasswordModal();
-                // Trigger the secure firebase login inside the module
+                // Pass the verified user straight into the Firebase initialization routine
                 if (window.firebaseLoginTrigger) {
-                    window.firebaseLoginTrigger(selectedUserTarget);
+                    window.firebaseLoginTrigger(contextUser);
                 }
             } else {
                 document.getElementById('login-error-msg').classList.remove('hidden');
@@ -234,7 +236,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE SECURE LOGIC MODULE -->
+    <!-- FIREBASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -263,7 +265,7 @@
             document.getElementById('laundry-form').addEventListener('submit', window.saveLog);
         });
 
-        // Bridge function linking the global UI click triggers securely to Firebase logic
+        // Exact listener binding the secure session name directly to state updates
         window.firebaseLoginTrigger = function(personName) {
             currentUser = personName;
             document.getElementById('current-user').innerText = personName;
