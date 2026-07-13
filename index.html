@@ -8,6 +8,48 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <!-- html2pdf.js engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- INSTANT REGULAR SCRIPT FOR THE UI MODAL ACTIONS -->
+    <script>
+        // These are available globally the absolute millisecond the page renders
+        let selectedUserTarget = "";
+
+        window.openPasswordModal = function(personName) {
+            selectedUserTarget = personName;
+            document.getElementById('modal-target-user').innerText = personName;
+            document.getElementById('modal-password-input').value = "";
+            document.getElementById('login-error-msg').classList.add('hidden');
+            document.getElementById('password-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('modal-password-input').focus(), 100);
+        };
+
+        window.closePasswordModal = function() {
+            selectedUserTarget = "";
+            document.getElementById('password-modal').classList.add('hidden');
+        };
+
+        window.submitPassword = function(e) {
+            e.preventDefault();
+            const inputVal = document.getElementById('modal-password-input').value;
+            const userPasswords = {
+                "ESWAR": "2000",
+                "SNEHITH": "2001",
+                "SANTHOSH": "2002",
+                "CHANDRA": "2003"
+            };
+
+            if (inputVal === userPasswords[selectedUserTarget]) {
+                window.closePasswordModal();
+                // Trigger the secure firebase login inside the module
+                if (window.firebaseLoginTrigger) {
+                    window.firebaseLoginTrigger(selectedUserTarget);
+                }
+            } else {
+                document.getElementById('login-error-msg').classList.remove('hidden');
+                document.getElementById('modal-password-input').select();
+            }
+        };
+    </script>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans antialiased text-gray-800">
 
@@ -43,14 +85,14 @@
         </div>
     </div>
 
-    <!-- PROFESSIONAL PASSWORD MODAL LAYER -->
+    <!-- PASSWORD MODAL LAYER -->
     <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all border border-gray-100">
             <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
                 <h3 class="text-lg font-bold text-gray-800">Sign in as <span id="modal-target-user" class="text-blue-600"></span></h3>
                 <button onclick="window.closePasswordModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold focus:outline-none p-1">✕</button>
             </div>
-            <form id="password-form" class="space-y-4">
+            <form id="password-form" onsubmit="window.submitPassword(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Enter PIN / Password</label>
                     <input type="password" id="modal-password-input" placeholder="••••" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
@@ -192,7 +234,7 @@
         </div>
     </div>
 
-    <!-- SYSTEM LOGIC -->
+    <!-- FIREBASE SECURE LOGIC MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -212,60 +254,23 @@
         const rootRef = ref(db, ''); 
 
         let currentUser = "";
-        let selectedUserTarget = "";
         let globalLogs = []; 
-
-        const userPasswords = {
-            "ESWAR": "2000",
-            "SNEHITH": "2001",
-            "SANTHOSH": "2002",
-            "CHANDRA": "2003"
-        };
 
         document.addEventListener("DOMContentLoaded", () => {
             const dateInput = document.getElementById('log-date');
             if(dateInput) dateInput.valueAsDate = new Date();
             
-            // Attach submittal listeners directly to forms to prevent module scoping bugs
-            document.getElementById('password-form').addEventListener('submit', window.submitPassword);
             document.getElementById('laundry-form').addEventListener('submit', window.saveLog);
         });
 
-        // FORCE ATTACH SYSTEM CONTROLS TO WINDOW GLOBAL OBJECT FOR INTEROPERABILITY
-        window.openPasswordModal = function(personName) {
-            selectedUserTarget = personName;
-            document.getElementById('modal-target-user').innerText = personName;
-            document.getElementById('modal-password-input').value = "";
-            document.getElementById('login-error-msg').classList.add('hidden');
-            document.getElementById('password-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('modal-password-input').focus(), 100);
-        };
-
-        window.closePasswordModal = function() {
-            selectedUserTarget = "";
-            document.getElementById('password-modal').classList.add('hidden');
-        };
-
-        window.submitPassword = function(e) {
-            e.preventDefault();
-            const inputVal = document.getElementById('modal-password-input').value;
-
-            if (inputVal === userPasswords[selectedUserTarget]) {
-                window.closePasswordModal();
-                login(selectedUserTarget);
-            } else {
-                document.getElementById('login-error-msg').classList.remove('hidden');
-                document.getElementById('modal-password-input').select();
-            }
-        };
-
-        function login(personName) {
+        // Bridge function linking the global UI click triggers securely to Firebase logic
+        window.firebaseLoginTrigger = function(personName) {
             currentUser = personName;
             document.getElementById('current-user').innerText = personName;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             listenToDatabase();
-        }
+        };
 
         window.logout = function() {
             currentUser = "";
