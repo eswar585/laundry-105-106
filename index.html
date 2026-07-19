@@ -14,7 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* Exact Theme & Animation Replication from the Video Layout */
         body {
             background-color: #0b0f19;
         }
@@ -28,7 +27,7 @@
             box-shadow: 0 0 25px rgba(249, 115, 22, 0.15);
         }
         
-        /* The Diagonal Split Panels matching the Cross Cut effect */
+        /* The Diagonal Split Panel Layout */
         .overlay-panel {
             position: absolute;
             top: 0;
@@ -36,7 +35,8 @@
             width: 45%;
             height: 100%;
             background: linear-gradient(135deg, #ea580c 0%, #dc2626 50%, #991b1b 100%);
-            transition: all 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            /* Smooth cubic-bezier cubic timing matches the video acceleration profile */
+            transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
         }
@@ -47,12 +47,11 @@
             left: 0;
             width: 55%;
             height: 100%;
-            transition: all 0.7s ease-in-out;
+            transition: all 0.8s ease-in-out;
             z-index: 10;
             background-color: #111827;
         }
 
-        /* Video Input Box styling cues */
         .neon-input {
             background-color: #1f2937 !important;
             border: 1px solid #374151 !important;
@@ -64,7 +63,6 @@
             box-shadow: 0 0 10px rgba(234, 88, 12, 0.3) !important;
         }
 
-        /* Small screen responsive adjustments */
         @media (max-width: 640px) {
             .overlay-panel {
                 display: none;
@@ -74,17 +72,16 @@
             }
         }
 
-        /* Cross Split Slide-Away Activation Sequence */
+        /* ACTIVATION: The panel swoops to the left completely covering the interface smoothly */
         .login-card-container.active-mode .overlay-panel {
-            transform: translateX(120%);
-            opacity: 0;
-            filter: blur(10px);
+            transform: translateX(-122%);
+            width: 100%;
+            clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
         }
         
         .login-card-container.active-mode .form-panel {
-            transform: translateX(0%);
-            opacity: 1;
-            filter: blur(0px);
+            opacity: 0.3;
+            filter: blur(4px);
         }
     </style>
 
@@ -136,13 +133,14 @@
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
                 
-                // Trigger crossing out-animation sequence 
+                // 1. Kickstart the orange slide-to-left screen sweep animation
                 cardContainer.classList.add('active-mode');
                 
+                // 2. Wait exactly for the custom 800ms transition to finish before painting workspace layout
                 setTimeout(() => {
                     executeDashboardLogin();
                     cardContainer.classList.remove('active-mode'); 
-                }, 700);
+                }, 800);
             } else {
                 errorMsg.classList.remove('hidden');
             }
@@ -365,7 +363,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password PIN</label>
                         <input type="password" id="modal-password-input" placeholder="••••" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input tracking-widest font-bold">
-                        <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Account Pin Signature.</p>
+                        <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Username or Password.</p>
                     </div>
                     <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-md cursor-pointer focus:outline-none mt-2">
                         Login
@@ -480,7 +478,7 @@
         </div>
     </div>
 
-    <!-- HIDE REPORT BLOCK -->
+    <!-- PRINT VIEW BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
             <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #ea580c; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
