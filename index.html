@@ -14,37 +14,57 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* Custom Styles for the Sliding Animation Split-Panel */
+        /* Exact Theme & Animation Replication from the Video Layout */
+        body {
+            background-color: #0b0f19;
+        }
+
         .login-card-container {
             position: relative;
             overflow: hidden;
-            min-height: 500px;
+            min-height: 550px;
+            background-color: #111827;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            box-shadow: 0 0 25px rgba(249, 115, 22, 0.15);
         }
         
-        /* Sliding Overlay Banner Panel */
+        /* The Diagonal Split Panels matching the Cross Cut effect */
         .overlay-panel {
             position: absolute;
             top: 0;
             right: 0;
-            width: 40%;
+            width: 45%;
             height: 100%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(135deg, #ea580c 0%, #dc2626 50%, #991b1b 100%);
+            transition: all 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             z-index: 20;
+            clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
         }
 
-        /* Form Interaction Fields Box */
         .form-panel {
             position: absolute;
             top: 0;
             left: 0;
-            width: 60%;
+            width: 55%;
             height: 100%;
-            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.7s ease-in-out;
             z-index: 10;
+            background-color: #111827;
         }
 
-        /* Responsive styling override for smaller mobile devices */
+        /* Video Input Box styling cues */
+        .neon-input {
+            background-color: #1f2937 !important;
+            border: 1px solid #374151 !important;
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+        .neon-input:focus {
+            border-color: #ea580c !important;
+            box-shadow: 0 0 10px rgba(234, 88, 12, 0.3) !important;
+        }
+
+        /* Small screen responsive adjustments */
         @media (max-width: 640px) {
             .overlay-panel {
                 display: none;
@@ -54,14 +74,15 @@
             }
         }
 
-        /* Animation class to mimic the sliding transformation from the video */
+        /* Cross Split Slide-Away Activation Sequence */
         .login-card-container.active-mode .overlay-panel {
-            transform: translateX(-150%);
-            border-radius: 0 1rem 1rem 0;
+            transform: translateX(120%);
+            opacity: 0;
+            filter: blur(10px);
         }
         
         .login-card-container.active-mode .form-panel {
-            transform: translateX(66.6%);
+            transform: translateX(0%);
             opacity: 1;
             filter: blur(0px);
         }
@@ -115,13 +136,13 @@
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
                 
-                // Trigger transition animation before rendering workspace
+                // Trigger crossing out-animation sequence 
                 cardContainer.classList.add('active-mode');
                 
                 setTimeout(() => {
                     executeDashboardLogin();
                     cardContainer.classList.remove('active-mode'); 
-                }, 600);
+                }, 700);
             } else {
                 errorMsg.classList.remove('hidden');
             }
@@ -211,18 +232,18 @@
 
             logs.forEach(log => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+                tr.className = "hover:bg-gray-800 transition border-b border-gray-700 text-gray-300";
                 tr.innerHTML = `
-                    <td class="py-3 font-medium text-gray-900">${log.date}</td>
-                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-600">${log.user || 'Legacy'}</span></td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.pant}</td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.shirt}</td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.inners}</td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.boxers}</td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.towel}</td>
-                    <td class="py-3 text-center text-gray-600 font-medium">${log.bedsheet}</td>
+                    <td class="py-3 font-medium text-white">${log.date}</td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-orange-950 text-orange-400 border border-orange-900">${log.user || 'Legacy'}</span></td>
+                    <td class="py-3 text-center font-medium">${log.pant}</td>
+                    <td class="py-3 text-center font-medium">${log.shirt}</td>
+                    <td class="py-3 text-center font-medium">${log.inners}</td>
+                    <td class="py-3 text-center font-medium">${log.boxers}</td>
+                    <td class="py-3 text-center font-medium">${log.towel}</td>
+                    <td class="py-3 text-center font-medium">${log.bedsheet}</td>
                     <td class="py-3 text-right">
-                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs cursor-pointer focus:outline-none">Delete</button>
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-400 hover:text-red-500 font-bold text-xs cursor-pointer focus:outline-none">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -234,47 +255,47 @@
             cardContainer.innerHTML = "";
 
             if (logs.length === 0) {
-                cardContainer.innerHTML = `<p class="text-center text-gray-400 py-4 text-sm">No records found for your account.</p>`;
+                cardContainer.innerHTML = `<p class="text-center text-gray-500 py-4 text-sm">No records found for your account.</p>`;
                 return;
             }
 
             logs.forEach(log => {
                 const card = document.createElement('div');
-                card.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-3";
+                card.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm flex flex-col gap-3 text-gray-300";
                 card.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                    <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-gray-800">${log.date}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">${log.user || 'Legacy'}</span>
+                            <span class="text-sm font-bold text-white">${log.date}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-950 text-orange-400">${log.user || 'Legacy'}</span>
                         </div>
-                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs focus:outline-none px-2 py-1">
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-400 hover:text-red-500 font-bold text-xs focus:outline-none px-2 py-1">
                             Delete
                         </button>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Pants</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.pant}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Pants</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.pant}</div>
                         </div>
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Shirts</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.shirt}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Shirts</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.shirt}</div>
                         </div>
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Inners</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.inners}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Inners</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.inners}</div>
                         </div>
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Boxers</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.boxers}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Boxers</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.boxers}</div>
                         </div>
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Towels</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.towel}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Towels</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.towel}</div>
                         </div>
-                        <div class="bg-white rounded-lg p-1.5 border border-gray-200/60">
-                            <div class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Sheets</div>
-                            <div class="text-sm font-bold text-gray-700 mt-0.5">${log.bedsheet}</div>
+                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                            <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Sheets</div>
+                            <div class="text-sm font-bold text-white mt-0.5">${log.bedsheet}</div>
                         </div>
                     </div>
                 `;
@@ -323,43 +344,43 @@
         };
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans antialiased text-gray-800 flex flex-col justify-center">
+<body class="min-h-screen font-sans antialiased text-gray-200 flex flex-col justify-center py-6">
 
-    <!-- ANIMATED SLIDING LOGIN INTERFACE LAYER -->
+    <!-- FIERY ORANGE DIAGONAL INTERFACE LAYER -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4">
-        <div id="animated-card-box" class="login-card-container bg-white rounded-2xl shadow-xl border border-gray-100 flex">
+        <div id="animated-card-box" class="login-card-container rounded-2xl flex">
             
-            <!-- Left Panel: Form UI Inputs -->
+            <!-- Left Side Inputs Form -->
             <div class="form-panel flex flex-col justify-center p-8 sm:p-12">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-black text-gray-900 tracking-tight">Login</h2>
-                    <p class="text-sm font-medium text-gray-400 mt-1">Access your personalized account panel</p>
+                    <h2 class="text-3xl font-black text-white tracking-tight">Login</h2>
+                    <p class="text-xs font-semibold text-gray-400 mt-1 uppercase tracking-wider">Access secure dashboard profile</p>
                 </div>
                 
                 <form id="password-form" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="E.g. ESWAR" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter name (e.g. ESWAR)" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input font-semibold uppercase">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password</label>
-                        <input type="password" id="modal-password-input" placeholder="••••" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 tracking-widest font-bold">
-                        <p id="login-error-msg" class="text-red-500 text-xs mt-2 hidden font-semibold">❌ Invalid Username or Password.</p>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password PIN</label>
+                        <input type="password" id="modal-password-input" placeholder="••••" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input tracking-widest font-bold">
+                        <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Account Pin Signature.</p>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-md cursor-pointer focus:outline-none active:scale-[0.99] mt-2">
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-md cursor-pointer focus:outline-none mt-2">
                         Login
                     </button>
                 </form>
             </div>
 
-            <!-- Right Panel: Graphic Overlay Banner (Slides left on activation matching video layout) -->
-            <div class="overlay-panel flex flex-col justify-center items-center text-center p-8 rounded-r-2xl text-white">
-                <div class="w-16 h-16 bg-white bg-opacity-10 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-inner">
+            <!-- Right Side Overlay Cross Cut Section Block -->
+            <div class="overlay-panel flex flex-col justify-center items-center text-center p-8 text-white">
+                <div class="w-14 h-14 bg-white bg-opacity-10 rounded-xl flex items-center justify-center text-2xl mb-4 border border-white border-opacity-10 shadow-lg">
                     🧺
                 </div>
-                <h2 class="text-2xl font-black tracking-tight mb-2">WELCOME BACK!</h2>
-                <p class="text-xs text-blue-100 font-medium px-4 leading-relaxed max-w-xs">
-                    Please key in your secure authentication details to track and manage your daily laundry tasks safely.
+                <h2 class="text-2xl font-black tracking-tight mb-2 uppercase">Welcome Back!</h2>
+                <p class="text-xs text-orange-100 font-medium px-6 leading-relaxed max-w-xs">
+                    We are happy to have you here. Enter your system code to securely log and view cloud assets.
                 </p>
             </div>
 
@@ -368,73 +389,73 @@
 
     <!-- MAIN DASHBOARD -->
     <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-800 mb-6 gap-4">
             <div>
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Hello, <span id="current-user" class="text-blue-600">User</span>!</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-white">Hello, <span id="current-user" class="text-orange-500">User</span>!</h2>
                 <p class="text-xs sm:text-sm text-gray-400 font-medium">Private Database Dashboard. Isolated User View Enabled.</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
                     📥 Download PDF
                 </button>
-                <button onclick="window.logout()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95">
+                <button onclick="window.logout()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95">
                     Logout
                 </button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Log New Laundry</h3>
+            <div class="bg-gray-900 p-5 sm:p-6 rounded-2xl shadow-md border border-gray-800 h-fit">
+                <h3 class="text-base sm:text-lg font-bold text-white mb-4">Log New Laundry</h3>
                 <form id="laundry-form" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date Sent</label>
-                        <input type="date" id="log-date" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Date Sent</label>
+                        <input type="date" id="log-date" required class="w-full border border-gray-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-gray-800 text-white">
                     </div>
                     
-                    <div class="border-t border-gray-100 my-2 pt-3">
+                    <div class="border-t border-gray-800 my-2 pt-3">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Item Counts</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Pants</label>
-                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Pants</label>
+                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Shirts</label>
-                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Shirts</label>
+                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Inners</label>
-                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Inners</label>
+                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Boxers</label>
-                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Boxers</label>
+                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Towels</label>
-                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Towels</label>
+                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
-                            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Bed Sheets</label>
-                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-sm font-semibold">
+                            <div class="bg-gray-800 p-2 rounded-xl border border-gray-700">
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Bed Sheets</label>
+                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white">
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none active:scale-[0.99]">
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none">
                         Save Entry
                     </button>
                 </form>
             </div>
 
-            <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-4">Your Private Laundry Logs</h3>
+            <div class="lg:col-span-2 bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-md border border-gray-800">
+                <h3 class="text-base sm:text-lg font-bold text-white mb-4">Your Private Laundry Logs</h3>
                 
                 <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm" id="history-table">
                         <thead>
-                            <tr class="border-b border-gray-200 text-gray-400 font-medium">
+                            <tr class="border-b border-gray-800 text-gray-400 font-medium">
                                 <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Date</th>
                                 <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Owner</th>
                                 <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-center">Pant</th>
@@ -446,23 +467,23 @@
                                 <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-right text-red-500">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body" class="divide-y divide-gray-100 text-gray-700">
-                            <tr><td colspan="9" class="text-center text-gray-400 py-8">Connecting to database logs...</td></tr>
+                        <tbody id="table-body" class="divide-y divide-gray-800 text-gray-300">
+                            <tr><td colspan="9" class="text-center text-gray-500 py-8">Connecting to database logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div id="mobile-cards-container" class="block sm:hidden space-y-3">
-                    <p class="text-center text-gray-400 py-4 text-sm">Connecting to database logs...</p>
+                    <p class="text-center text-gray-500 py-4 text-sm">Connecting to database logs...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- REPORT GENERATION CONTAINER -->
+    <!-- HIDE REPORT BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
-            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #1d4ed8; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
+            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #ea580c; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
             <p style="font-size: 14px; color: #666666; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
                 Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
             </p>
