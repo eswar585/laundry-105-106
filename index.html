@@ -35,7 +35,6 @@
             width: 45%;
             height: 100%;
             background: linear-gradient(135deg, #ea580c 0%, #dc2626 50%, #991b1b 100%);
-            /* Smooth cubic-bezier cubic timing matches the video acceleration profile */
             transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -91,10 +90,10 @@
         let currentUser = "";
         let globalLogs = [];
 
+        // Updated user records scheme mapping exact authorization signatures
         const userPasswords = {
             "ESWAR": "2000",
-            "KAVITHA": "1290",
-            "SANTHOSH": "2002",
+            "KAVITHA": "1290"
         };
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -156,6 +155,8 @@
             currentUser = "";
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('modal-username-input').value = "";
+            document.getElementById('modal-password-input').value = "";
         };
 
         function listenToDatabase() {
@@ -274,23 +275,23 @@
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Pants</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.pant}</div>
                         </div>
-                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                        <div class="bg-white bg-opacity-5 rounded-lg p-1.5 border border-gray-700">
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Shirts</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.shirt}</div>
                         </div>
-                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                        <div class="bg-white bg-opacity-5 rounded-lg p-1.5 border border-gray-700">
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Inners</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.inners}</div>
                         </div>
-                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                        <div class="bg-white bg-opacity-5 rounded-lg p-1.5 border border-gray-700">
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Boxers</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.boxers}</div>
                         </div>
-                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                        <div class="bg-white bg-opacity-5 rounded-lg p-1.5 border border-gray-700">
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Towels</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.towel}</div>
                         </div>
-                        <div class="bg-gray-900 rounded-lg p-1.5 border border-gray-700">
+                        <div class="bg-white bg-opacity-5 rounded-lg p-1.5 border border-gray-700">
                             <div class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Sheets</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.bedsheet}</div>
                         </div>
@@ -343,7 +344,7 @@
 </head>
 <body class="min-h-screen font-sans antialiased text-gray-200 flex flex-col justify-center py-6">
 
-    <!-- FIERY ORANGE DIAGONAL INTERFACE LAYER -->
+    <!-- THEME PANEL INTERFACE LAYER -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4">
         <div id="animated-card-box" class="login-card-container rounded-2xl flex">
             
@@ -357,15 +358,17 @@
                 <form id="password-form" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter USERNAME" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter name (ESWAR or KAVITHA)" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input font-semibold uppercase">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password PIN</label>
                         <input type="password" id="modal-password-input" placeholder="••••" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input tracking-widest font-bold">
-                        <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Username or Password.</p>
+                        <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Username or Password PIN.</p>
                     </div>
-                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-md cursor-pointer focus:outline-none mt-2">
-                        Login
+                    
+                    <!-- Glow Styled Orange/Red Transition Button -->
+                    <button type="submit" class="w-full bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_0_15px_rgba(234,88,12,0.4)] hover:shadow-[0_0_25px_rgba(234,88,12,0.7)] cursor-pointer focus:outline-none active:scale-[0.98] mt-2 border border-orange-500 border-opacity-30">
+                        <span style="text-shadow: 0 1px 4px rgba(0,0,0,0.4);">Login</span>
                     </button>
                 </form>
             </div>
@@ -477,7 +480,7 @@
         </div>
     </div>
 
-    <!-- PRINT VIEW BLOCK -->
+    <!-- REPORT VIEW BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
             <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #ea580c; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
