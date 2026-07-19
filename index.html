@@ -27,7 +27,7 @@
             box-shadow: 0 0 25px rgba(249, 115, 22, 0.15);
         }
         
-        /* The Diagonal Split Panel Layout */
+        /* The Diagonal Split Panel Layout - Default Desktop View */
         .overlay-panel {
             position: absolute;
             top: 0;
@@ -62,20 +62,41 @@
             box-shadow: 0 0 10px rgba(234, 88, 12, 0.3) !important;
         }
 
+        /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
         @media (max-width: 640px) {
-            .overlay-panel {
-                display: none;
+            .login-card-container {
+                display: flex;
+                flex-direction: column;
+                min-height: auto;
             }
             .form-panel {
+                position: relative;
                 width: 100%;
+                height: auto;
+                order: 1;
+            }
+            .overlay-panel {
+                position: relative;
+                width: 100%;
+                height: 180px;
+                order: 2;
+                clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%);
+            }
+            /* Reset absolute animation layers on mobile so it doesn't clip offscreen */
+            .login-card-container.active-mode .overlay-panel {
+                transform: none !important;
+                width: 100% !important;
+                clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%) !important;
             }
         }
 
-        /* ACTIVATION: The panel swoops to the left completely covering the interface smoothly */
-        .login-card-container.active-mode .overlay-panel {
-            transform: translateX(-122%);
-            width: 100%;
-            clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
+        /* ACTIVATION LAYERS (DESKTOP MODE) */
+        @media (min-width: 641px) {
+            .login-card-container.active-mode .overlay-panel {
+                transform: translateX(-122%);
+                width: 100%;
+                clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
+            }
         }
         
         .login-card-container.active-mode .form-panel {
@@ -90,7 +111,6 @@
         let currentUser = "";
         let globalLogs = [];
 
-        // Updated user records scheme mapping exact authorization signatures
         const userPasswords = {
             "ESWAR": "2000",
             "KAVITHA": "1290"
@@ -131,10 +151,8 @@
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
                 
-                // 1. Kickstart the orange slide-to-left screen sweep animation
                 cardContainer.classList.add('active-mode');
                 
-                // 2. Wait exactly for the custom 800ms transition to finish before painting workspace layout
                 setTimeout(() => {
                     executeDashboardLogin();
                     cardContainer.classList.remove('active-mode'); 
@@ -346,19 +364,20 @@
 
     <!-- THEME PANEL INTERFACE LAYER -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4">
-        <div id="animated-card-box" class="login-card-container rounded-2xl flex">
+        <div id="animated-card-box" class="login-card-container rounded-2xl">
             
-            <!-- Left Side Inputs Form -->
-            <div class="form-panel flex flex-col justify-center p-8 sm:p-12">
+            <!-- Form Inputs -->
+            <div class="form-panel flex flex-col justify-center p-6 sm:p-12">
                 <div class="mb-6">
                     <h2 class="text-3xl font-black text-white tracking-tight">Login</h2>
                     <p class="text-xs font-semibold text-gray-400 mt-1 uppercase tracking-wider">Access secure dashboard profile</p>
                 </div>
                 
                 <form id="password-form" class="space-y-4">
+                    <!-- Updated input context field matching request -->
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter name" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter username" required class="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none neon-input font-semibold uppercase">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Password PIN</label>
@@ -366,7 +385,6 @@
                         <p id="login-error-msg" class="text-red-400 text-xs mt-2 hidden font-semibold">❌ Invalid Username or Password PIN.</p>
                     </div>
                     
-                    <!-- Glow Styled Orange/Red Transition Button -->
                     <button type="submit" class="w-full bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_0_15px_rgba(234,88,12,0.4)] hover:shadow-[0_0_25px_rgba(234,88,12,0.7)] cursor-pointer focus:outline-none active:scale-[0.98] mt-2 border border-orange-500 border-opacity-30">
                         <span style="text-shadow: 0 1px 4px rgba(0,0,0,0.4);">Login</span>
                     </button>
@@ -374,12 +392,12 @@
             </div>
 
             <!-- Right Side Overlay Cross Cut Section Block -->
-            <div class="overlay-panel flex flex-col justify-center items-center text-center p-8 text-white">
-                <div class="w-14 h-14 bg-white bg-opacity-10 rounded-xl flex items-center justify-center text-2xl mb-4 border border-white border-opacity-10 shadow-lg">
+            <div class="overlay-panel flex flex-col justify-center items-center text-center p-6 sm:p-8 text-white">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white bg-opacity-10 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border border-white border-opacity-10 shadow-lg">
                     🧺
                 </div>
-                <h2 class="text-2xl font-black tracking-tight mb-2 uppercase">Welcome Back!</h2>
-                <p class="text-xs text-orange-100 font-medium px-6 leading-relaxed max-w-xs">
+                <h2 class="text-xl sm:text-2xl font-black tracking-tight mb-1 sm:mb-2 uppercase">Welcome Back!</h2>
+                <p class="text-[11px] sm:text-xs text-orange-100 font-medium px-4 sm:px-6 leading-relaxed max-w-xs">
                     We are happy to have you here. Enter your system code to securely log and view cloud assets.
                 </p>
             </div>
@@ -480,7 +498,7 @@
         </div>
     </div>
 
-    <!-- REPORT VIEW BLOCK -->
+    <!-- PRINT VIEW BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
             <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #ea580c; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
