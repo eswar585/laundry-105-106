@@ -20,11 +20,13 @@
 
         .login-card-container {
             position: relative;
-            overflow: hidden;
-            min-height: 600px;
             background-color: #ffffff;
             border: 1px solid rgba(14, 165, 233, 0.2);
             box-shadow: 0 10px 30px rgba(14, 165, 233, 0.1);
+            display: flex;
+            flex-direction: row;
+            border-radius: 1rem;
+            overflow: hidden;
         }
         
         /* The Diagonal Split Panel Layout */
@@ -38,6 +40,10 @@
             transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .form-panel {
@@ -49,6 +55,9 @@
             transition: all 0.8s ease-in-out;
             z-index: 10;
             background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .ice-input {
@@ -68,19 +77,16 @@
             .login-card-container {
                 display: flex;
                 flex-direction: column;
-                min-height: auto;
             }
             .form-panel {
                 position: relative;
                 width: 100%;
                 height: auto;
-                order: 1;
             }
             .overlay-panel {
                 position: relative;
                 width: 100%;
                 height: 160px;
-                order: 2;
                 clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%);
             }
             .login-card-container.active-mode .overlay-panel {
@@ -92,6 +98,9 @@
 
         /* ACTIVATION LAYERS (DESKTOP MODE) */
         @media (min-width: 641px) {
+            .login-card-container {
+                min-height: 520px;
+            }
             .login-card-container.active-mode .overlay-panel {
                 transform: translateX(-122%);
                 width: 100%;
@@ -401,12 +410,12 @@
             
             <!-- Form Inputs -->
             <div class="form-panel flex flex-col justify-center p-6 sm:p-12">
-                <div class="mb-5">
+                <div class="mb-4">
                     <h2 class="text-3xl font-black text-sky-950 tracking-tight">Login</h2>
                     <p class="text-xs font-semibold text-sky-600 mt-1 uppercase tracking-wider">Access your profile</p>
                 </div>
                 
-                <form id="password-form" class="space-y-4" autocomplete="off">
+                <form id="password-form" class="space-y-3.5" autocomplete="off">
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-1">Username</label>
                         <input type="text" id="modal-username-input" placeholder="Enter username" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
