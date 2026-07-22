@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laundry Tracker - Cyberpunk Utility</title>
+    <title>Live Laundry Tracker - Luxury Hotel</title>
     
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
@@ -15,16 +15,16 @@
 
     <style>
         body {
-            background-color: #09090b; /* Zinc 950 Deep Dark */
+            background-color: #121212; /* Rich matte black/charcoal background */
         }
 
         .login-card-container {
             position: relative;
             overflow: hidden;
             min-height: 600px;
-            background-color: #18181b; /* Zinc 900 */
-            border: 1px solid rgba(139, 92, 246, 0.3); /* Violet glow border */
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+            background-color: #1a1a1a;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         /* The Diagonal Split Panel Layout */
@@ -34,7 +34,7 @@
             right: 0;
             width: 45%;
             height: 100%;
-            background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%); /* Electric Violet to Neon Cyan */
+            background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); /* Amber to Metallic Gold */
             transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -48,19 +48,19 @@
             height: 100%;
             transition: all 0.8s ease-in-out;
             z-index: 10;
-            background-color: #18181b;
+            background-color: #1a1a1a;
         }
 
-        .cyber-input {
-            background-color: #27272a !important; /* Zinc 800 */
-            border: 1px solid #3f3f46 !important;
-            color: #f4f4f5 !important;
+        .amber-input {
+            background-color: #262626 !important;
+            border: 1px solid #404040 !important;
+            color: #f5f5f5 !important;
             transition: all 0.3s ease;
         }
-        .cyber-input:focus {
-            border-color: #06b6d4 !important;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.3) !important;
-            background-color: #18181b !important;
+        .amber-input:focus {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.25) !important;
+            background-color: #1f1f1f !important;
         }
 
         /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
@@ -275,16 +275,16 @@
             tbody.innerHTML = "";
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-zinc-500 py-8">No records found for your account.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-neutral-500 py-8">No records found for your account.</td></tr>`;
                 return;
             }
 
             logs.forEach(log => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-zinc-800 transition border-b border-zinc-800 text-zinc-300";
+                tr.className = "hover:bg-neutral-800 transition border-b border-neutral-800 text-neutral-300";
                 tr.innerHTML = `
                     <td class="py-3 font-medium text-white">${log.date}</td>
-                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-purple-950 text-cyan-400 border border-purple-900">${log.user || 'Legacy'}</span></td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-950 text-amber-400 border border-amber-900">${log.user || 'Legacy'}</span></td>
                     <td class="py-3 text-center font-medium">${log.pant}</td>
                     <td class="py-3 text-center font-medium">${log.shirt}</td>
                     <td class="py-3 text-center font-medium">${log.inners}</td>
@@ -304,46 +304,46 @@
             cardContainer.innerHTML = "";
 
             if (logs.length === 0) {
-                cardContainer.innerHTML = `<p class="text-center text-zinc-500 py-4 text-sm">No records found for your account.</p>`;
+                cardContainer.innerHTML = `<p class="text-center text-neutral-500 py-4 text-sm">No records found for your account.</p>`;
                 return;
             }
 
             logs.forEach(log => {
                 const card = document.createElement('div');
-                card.className = "bg-zinc-900 p-4 rounded-xl border border-zinc-800 shadow-sm flex flex-col gap-3 text-zinc-300";
+                card.className = "bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-sm flex flex-col gap-3 text-neutral-300";
                 card.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                    <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-bold text-white">${log.date}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950 text-cyan-400">${log.user || 'Legacy'}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-900">${log.user || 'Legacy'}</span>
                         </div>
                         <button onclick="window.deleteLog('${log.key}')" class="text-red-400 hover:text-red-500 font-bold text-xs focus:outline-none px-2 py-1">
                             Delete
                         </button>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Pants</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Pants</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.pant}</div>
                         </div>
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Shirts</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Shirts</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.shirt}</div>
                         </div>
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Inners</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Inners</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.inners}</div>
                         </div>
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Boxers</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Boxers</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.boxers}</div>
                         </div>
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Towels</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Towels</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.towel}</div>
                         </div>
-                        <div class="bg-zinc-950 rounded-lg p-1.5 border border-zinc-800">
-                            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Sheets</div>
+                        <div class="bg-neutral-950 rounded-lg p-1.5 border border-neutral-800">
+                            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Sheets</div>
                             <div class="text-sm font-bold text-white mt-0.5">${log.bedsheet}</div>
                         </div>
                     </div>
@@ -393,7 +393,7 @@
         };
     </script>
 </head>
-<body class="min-h-screen font-sans antialiased text-zinc-200 flex flex-col justify-center py-6">
+<body class="min-h-screen font-sans antialiased text-neutral-200 flex flex-col justify-center py-6">
 
     <!-- THEME PANEL INTERFACE LAYER -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4">
@@ -403,20 +403,20 @@
             <div class="form-panel flex flex-col justify-center p-6 sm:p-12">
                 <div class="mb-5">
                     <h2 class="text-3xl font-black text-white tracking-tight">Login</h2>
-                    <p class="text-xs font-semibold text-cyan-400 mt-1 uppercase tracking-wider">Access your profile</p>
+                    <p class="text-xs font-semibold text-amber-500 mt-1 uppercase tracking-wider">Access your profile</p>
                 </div>
                 
                 <form id="password-form" class="space-y-4" autocomplete="off">
                     <div>
-                        <label class="block text-xs font-bold text-zinc-400 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter username" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none cyber-input font-semibold uppercase">
+                        <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wide mb-1">Username</label>
+                        <input type="text" id="modal-username-input" placeholder="Enter username" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none amber-input font-semibold uppercase">
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-zinc-400 uppercase tracking-wide mb-1">PIN</label>
+                        <label class="block text-xs font-bold text-neutral-400 uppercase tracking-wide mb-1">PIN</label>
                         <div class="relative">
-                            <input type="password" id="modal-password-input" placeholder="••••" required autocomplete="new-password" class="w-full rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none cyber-input tracking-widest font-bold">
-                            <button type="button" onclick="window.togglePasswordVisibility()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-cyan-400 focus:outline-none transition-colors">
+                            <input type="password" id="modal-password-input" placeholder="••••" required autocomplete="new-password" class="w-full rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none amber-input tracking-widest font-bold">
+                            <button type="button" onclick="window.togglePasswordVisibility()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-amber-400 focus:outline-none transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path id="eye-icon-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
@@ -425,8 +425,8 @@
                         <p id="login-error-msg" class="text-red-400 text-xs mt-1 hidden font-semibold">❌ Invalid Username or PIN.</p>
                     </div>
                     
-                    <div class="pt-1">
-                        <button type="submit" class="w-full bg-gradient-to-r from-violet-600 via-cyan-500 to-violet-600 hover:from-violet-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_0_20px_rgba(139,92,246,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                    <div class="pt-1 relative z-30">
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-neutral-950 font-black py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(245,158,11,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
                             <span>Login</span>
                         </button>
                     </div>
@@ -434,12 +434,12 @@
             </div>
 
             <!-- Right Side Overlay Cross Cut Section Block -->
-            <div class="overlay-panel flex flex-col justify-center items-center text-center p-6 sm:p-8 text-white">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white bg-opacity-10 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border border-white border-opacity-20 shadow-lg">
+            <div class="overlay-panel flex flex-col justify-center items-center text-center p-6 sm:p-8 text-neutral-950">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-neutral-950 bg-opacity-15 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border border-neutral-950 border-opacity-20 shadow-lg">
                     🧺
                 </div>
-                <h2 class="text-xl sm:text-2xl font-black tracking-tight mb-1 sm:mb-2 uppercase drop-shadow-md">Welcome Back!</h2>
-                <div class="text-3xl mt-1 tracking-widest drop-shadow-md">
+                <h2 class="text-xl sm:text-2xl font-black tracking-tight mb-1 sm:mb-2 uppercase drop-shadow-sm">Welcome Back!</h2>
+                <div class="text-3xl mt-1 tracking-widest drop-shadow-sm">
                     👕👖🧦👗
                 </div>
             </div>
@@ -449,78 +449,78 @@
 
     <!-- MAIN DASHBOARD -->
     <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-zinc-900 p-4 sm:p-6 rounded-2xl shadow-md border border-zinc-800 mb-6 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-neutral-900 p-4 sm:p-6 rounded-2xl shadow-md border border-neutral-800 mb-6 gap-4">
             <div>
-                <h2 class="text-lg sm:text-xl font-bold text-white">Hello, <span id="current-user" class="text-cyan-400">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-zinc-400 font-medium">You can download all your previous laundry logs by clicking download button</p>
+                <h2 class="text-lg sm:text-xl font-bold text-white">Hello, <span id="current-user" class="text-amber-400">User</span>!</h2>
+                <p class="text-xs sm:text-sm text-neutral-400 font-medium">You can download all your previous laundry logs by clicking download button</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-violet-600 hover:bg-violet-500 text-white font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
+                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-amber-600 hover:bg-amber-500 text-neutral-950 font-bold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-sm active:scale-95">
                     📥 Download PDF
                 </button>
-                <button onclick="window.logout()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95 border border-zinc-700">
+                <button onclick="window.logout()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95 border border-neutral-700">
                     Logout
                 </button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-zinc-900 p-5 sm:p-6 rounded-2xl shadow-md border border-zinc-800 h-fit">
+            <div class="bg-neutral-900 p-5 sm:p-6 rounded-2xl shadow-md border border-neutral-800 h-fit">
                 <h3 class="text-base sm:text-lg font-bold text-white mb-4">Enter New Laundry</h3>
                 <form id="laundry-form" class="space-y-4" autocomplete="off">
                     <div>
-                        <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Date</label>
-                        <input type="date" id="log-date" required class="w-full border border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400 bg-zinc-800 text-white transition-colors">
+                        <label class="block text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Date</label>
+                        <input type="date" id="log-date" required class="w-full border border-neutral-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500 bg-neutral-800 text-white transition-colors">
                     </div>
                     
-                    <div class="border-t border-zinc-800 my-2 pt-3">
-                        <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Item Counts</p>
+                    <div class="border-t border-neutral-800 my-2 pt-3">
+                        <p class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">Item Counts</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Pants</label>
-                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Pants</label>
+                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Shirts</label>
-                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Shirts</label>
+                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Inners</label>
-                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Inners</label>
+                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Boxers</label>
-                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Boxers</label>
+                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Towels</label>
-                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Towels</label>
+                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
-                            <div class="bg-zinc-800 p-2 rounded-xl border border-zinc-700">
-                                <label class="block text-xs font-medium text-zinc-400 mb-1">Bed Sheets</label>
-                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-cyan-400">
+                            <div class="bg-neutral-800 p-2 rounded-xl border border-neutral-700">
+                                <label class="block text-xs font-medium text-neutral-400 mb-1">Bed Sheets</label>
+                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-1 text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
                             </div>
                         </div>
                         
-                        <div class="mt-4 flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3">
-                            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Total Items</span>
-                            <span id="live-total-count" class="text-lg font-black text-cyan-400">0</span>
+                        <div class="mt-4 flex items-center justify-between bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3">
+                            <span class="text-xs font-bold text-neutral-400 uppercase tracking-wider">Total Items</span>
+                            <span id="live-total-count" class="text-lg font-black text-amber-400">0</span>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-neutral-950 font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none">
                         Save Entry
                     </button>
                 </form>
             </div>
 
-            <div class="lg:col-span-2 bg-zinc-900 p-4 sm:p-6 rounded-2xl shadow-md border border-zinc-800">
+            <div class="lg:col-span-2 bg-neutral-900 p-4 sm:p-6 rounded-2xl shadow-md border border-neutral-800">
                 <h3 class="text-base sm:text-lg font-bold text-white mb-4">Your Laundry Logs</h3>
                 
                 <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm" id="history-table">
                         <thead>
-                            <tr class="border-b border-zinc-800 text-zinc-400 font-medium bg-zinc-900">
+                            <tr class="border-b border-neutral-800 text-neutral-400 font-medium bg-neutral-900">
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs">Date</th>
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs">Owner</th>
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Pant</th>
@@ -532,14 +532,14 @@
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-right text-red-400">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body" class="divide-y divide-zinc-800 text-zinc-300">
-                            <tr><td colspan="9" class="text-center text-zinc-500 py-8">Connecting to database logs...</td></tr>
+                        <tbody id="table-body" class="divide-y divide-neutral-800 text-neutral-300">
+                            <tr><td colspan="9" class="text-center text-neutral-500 py-8">Connecting to database logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div id="mobile-cards-container" class="block sm:hidden space-y-3">
-                    <p class="text-center text-zinc-500 py-4 text-sm">Connecting to database logs...</p>
+                    <p class="text-center text-neutral-500 py-4 text-sm">Connecting to database logs...</p>
                 </div>
             </div>
         </div>
@@ -548,24 +548,24 @@
     <!-- PRINT VIEW BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
-            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #7c3aed; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
+            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #f59e0b; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
             <p style="font-size: 14px; color: #666666; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
                 Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
             </p>
             
             <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <thead>
-                    <tr style="background-color: #f4f4f5; color: #18181b; font-weight: bold; text-align: left; font-size: 13px;">
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; width: 22%;">Date</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Pants</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Shirts</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Inners</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Boxers</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Towels</th>
-                        <th style="padding: 12px 10px; border: 1px solid #d4d4d8; text-align: center; width: 13%;">Bed Sheets</th>
+                    <tr style="background-color: #fffbeb; color: #b45309; font-weight: bold; text-align: left; font-size: 13px;">
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; width: 22%;">Date</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Pants</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Shirts</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Inners</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Boxers</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Towels</th>
+                        <th style="padding: 12px 10px; border: 1px solid #fde68a; text-align: center; width: 13%;">Bed Sheets</th>
                     </tr>
                 </thead>
-                <tbody id="pdf-table-body" style="font-size: 13px; color: #3f3f46;">
+                <tbody id="pdf-table-body" style="font-size: 13px; color: #525252;">
                 </tbody>
             </table>
         </div>
