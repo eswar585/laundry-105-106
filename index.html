@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laundry Tracker - Fixed Interactive Login</title>
+    <title>Live Laundry Tracker</title>
     
-    <!-- Tailwind CSS Stylesheet -->
+    <!-- Tailwind CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     
-    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core) -->
+    <!-- html2pdf.js & Firebase SDKs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -27,6 +27,7 @@
             flex-direction: row;
             border-radius: 1rem;
             overflow: hidden;
+            min-height: 520px;
         }
         
         .overlay-panel {
@@ -75,6 +76,7 @@
             .login-card-container {
                 display: flex;
                 flex-direction: column;
+                min-height: auto;
             }
             .form-panel {
                 position: relative;
@@ -87,22 +89,6 @@
                 height: 160px;
                 clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%);
             }
-        }
-
-        @media (min-width: 641px) {
-            .login-card-container {
-                min-height: 520px;
-            }
-            .login-card-container.active-mode .overlay-panel {
-                transform: translateX(-122%);
-                width: 100%;
-                clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
-            }
-        }
-        
-        .login-card-container.active-mode .form-panel {
-            opacity: 0.3;
-            filter: blur(4px);
         }
 
         /* PIN Input Base Styling */
@@ -120,7 +106,7 @@
             z-index: 60;
         }
 
-        /* Class applied while PIN boxes move/lift up from form into orbit position */
+        /* Animated class when PIN boxes lift into orbit */
         .pin-box-input.lifting-pin {
             position: fixed !important;
             background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
@@ -194,7 +180,6 @@
             const passwordInput = pins.map(p => p.value).join('');
 
             const errorMsg = document.getElementById('login-error-msg');
-            const cardContainer = document.getElementById('animated-card-box');
 
             if (userPasswords[usernameInput] && userPasswords[usernameInput] === passwordInput) {
                 currentUser = usernameInput;
@@ -205,13 +190,11 @@
                 const successStage = document.getElementById('otp-success-stage');
                 const spinContainer = document.getElementById('spinning-pin-container');
 
-                // Reveal background overlay
                 overlay.classList.remove('hidden');
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
                 spinContainer.classList.remove('active-orbit');
 
-                // Target center coordinates of orbit box
                 const stageRect = spinContainer.getBoundingClientRect();
                 const targetPositions = [
                     { top: stageRect.top, left: stageRect.left },
@@ -220,7 +203,6 @@
                     { top: stageRect.top + stageRect.height - 50, left: stageRect.left }
                 ];
 
-                // Lift off animation
                 pins.forEach((pin, i) => {
                     const rect = pin.getBoundingClientRect();
                     
@@ -239,7 +221,6 @@
                     }, 50);
                 });
 
-                // Attach to spinning container
                 setTimeout(() => {
                     spinContainer.classList.add('active-orbit');
                     pins.forEach((pin, index) => {
@@ -258,21 +239,14 @@
                     });
                 }, 650);
 
-                // Stage 2: Verified Tick
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
                 }, 2200);
 
-                // Stage 3: Open Dashboard
                 setTimeout(() => {
                     overlay.classList.add('hidden');
-                    cardContainer.classList.add('active-mode');
-                    
-                    setTimeout(() => {
-                        executeDashboardLogin();
-                        cardContainer.classList.remove('active-mode'); 
-                    }, 400);
+                    executeDashboardLogin();
                 }, 3400);
 
             } else {
@@ -284,6 +258,10 @@
             document.getElementById('current-user').innerText = currentUser;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
+            
+            const dateInput = document.getElementById('log-date');
+            if(dateInput) dateInput.valueAsDate = new Date();
+
             listenToDatabase();
         }
 
@@ -304,6 +282,11 @@
                     originalFormContainer.appendChild(pinBox);
                 }
             }
+        }
+
+        function getItemTotal(log) {
+            return (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
+                   (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
         }
 
         function listenToDatabase() {
@@ -338,34 +321,75 @@
             });
         }
 
+        function saveLog(e) {
+            if(e) e.preventDefault();
+            if(!db) return;
+
+            const recordsRef = db.ref('laundry_records');
+            recordsRef.push({
+                user: currentUser,
+                date: document.getElementById('log-date').value,
+                pant: parseInt(document.getElementById('count-pant').value) || 0,
+                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
+                inners: parseInt(document.getElementById('count-inners').value) || 0,
+                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
+                towel: parseInt(document.getElementById('count-towels').value) || 0,
+                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
+            });
+
+            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
+                document.getElementById(id).value = 0;
+            });
+        }
+
+        function deleteLog(key) {
+            if (confirm("Are you sure you want to delete this log?")) {
+                db.ref(key).remove();
+            }
+        }
+
         function renderTable(logs) {
             const tbody = document.getElementById('table-body');
             if(!tbody) return;
             tbody.innerHTML = "";
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-sky-600 py-8">No records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-sky-600 py-8 font-medium">No laundry records found.</td></tr>`;
                 return;
             }
 
             logs.forEach(log => {
-                const total = (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
-                              (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
+                const total = getItemTotal(log);
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-sky-900";
                 tr.innerHTML = `
-                    <td class="py-3 font-medium text-sky-950">${log.date}</td>
-                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-700 border border-sky-200">${log.user || 'Legacy'}</span></td>
-                    <td class="py-3 text-center font-medium">${log.pant || 0}</td>
-                    <td class="py-3 text-center font-medium">${log.shirt || 0}</td>
-                    <td class="py-3 text-center font-medium">${log.inners || 0}</td>
-                    <td class="py-3 text-center font-medium">${log.boxers || 0}</td>
-                    <td class="py-3 text-center font-medium">${log.towel || 0}</td>
-                    <td class="py-3 text-center font-medium">${log.bedsheet || 0}</td>
-                    <td class="py-3 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
+                    <td class="py-3 px-2 font-semibold text-sky-950">${log.date}</td>
+                    <td class="py-3 px-2"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-700 border border-sky-200">${log.user || currentUser}</span></td>
+                    <td class="py-3 px-2 text-center font-medium">${log.pant || 0}</td>
+                    <td class="py-3 px-2 text-center font-medium">${log.shirt || 0}</td>
+                    <td class="py-3 px-2 text-center font-medium">${log.inners || 0}</td>
+                    <td class="py-3 px-2 text-center font-medium">${log.boxers || 0}</td>
+                    <td class="py-3 px-2 text-center font-medium">${log.towel || 0}</td>
+                    <td class="py-3 px-2 text-center font-medium">${log.bedsheet || 0}</td>
+                    <td class="py-3 px-2 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
+                    <td class="py-3 px-2 text-center">
+                        <button onclick="deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded transition text-xs">🗑️</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('dashboard');
+            const opt = {
+                margin:       0.3,
+                filename:     `${currentUser}_Laundry_Report.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
 
         window.onload = function() {
@@ -402,7 +426,7 @@
                 <form id="password-form" class="space-y-4" onsubmit="triggerLogin(); return false;">
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter username" required class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter username (ESWAR, KAVITHA, SNEHITH)" required class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
                     </div>
                     
                     <div>
@@ -437,25 +461,85 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 mb-6 gap-4">
+    <!-- FULL DASHBOARD -->
+    <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8 space-y-6">
+        
+        <!-- Header Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 gap-4">
             <div>
-                <h2 class="text-lg sm:text-xl font-bold text-sky-950">Hello, <span id="current-user" class="text-sky-600">User</span>!</h2>
+                <h2 class="text-lg sm:text-2xl font-black text-sky-950">Hello, <span id="current-user" class="text-sky-600">User</span>!</h2>
+                <p class="text-xs font-semibold text-sky-600 uppercase tracking-wider mt-0.5">Live Laundry Management Dashboard</p>
             </div>
-            <button onclick="logout()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-3 rounded-xl transition text-xs sm:text-sm border border-sky-200">
-                Logout
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm border border-sky-200">
+                    🖨️ Print Page
+                </button>
+                <button onclick="downloadPDF()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm border border-indigo-200">
+                    📄 Export PDF
+                </button>
+                <button onclick="logout()" class="bg-red-50 hover:bg-red-100 text-red-700 font-semibold px-4 py-2.5 rounded-xl transition text-xs sm:text-sm border border-red-200">
+                    Logout
+                </button>
+            </div>
         </div>
 
+        <!-- Add New Log Form Panel -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
-            <h3 class="text-lg font-bold text-sky-950 mb-4">Laundry Logs</h3>
+            <h3 class="text-base sm:text-lg font-bold text-sky-950 mb-4 flex items-center gap-2">
+                <span>➕</span> Log New Laundry
+            </h3>
+            
+            <form id="laundry-form" onsubmit="saveLog(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-1">Date</label>
+                    <input type="date" id="log-date" required class="w-full max-w-xs rounded-xl px-4 py-2.5 text-sm focus:outline-none ice-input font-medium">
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Pants</label>
+                        <input type="number" id="count-pant" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Shirts</label>
+                        <input type="number" id="count-shirt" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Inners</label>
+                        <input type="number" id="count-inners" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Boxers</label>
+                        <input type="number" id="count-boxers" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Towels</label>
+                        <input type="number" id="count-towels" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-800 mb-1">Bed Sheets</label>
+                        <input type="number" id="count-bedsheet" min="0" value="0" class="w-full rounded-xl px-3 py-2 text-sm ice-input font-semibold">
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 py-2.5 rounded-xl transition text-xs sm:text-sm uppercase tracking-wider shadow">
+                    Save Record
+                </button>
+            </form>
+        </div>
+
+        <!-- History Table Panel -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
+            <h3 class="text-base sm:text-lg font-bold text-sky-950 mb-4 flex items-center gap-2">
+                <span>📋</span> Records History
+            </h3>
+            
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b border-sky-200 text-sky-700 bg-sky-50">
                             <th class="py-3 px-2 font-semibold text-xs">Date</th>
-                            <th class="py-3 px-2 font-semibold text-xs">Owner</th>
+                            <th class="py-3 px-2 font-semibold text-xs">User</th>
                             <th class="py-3 px-2 font-semibold text-xs text-center">Pant</th>
                             <th class="py-3 px-2 font-semibold text-xs text-center">Shirt</th>
                             <th class="py-3 px-2 font-semibold text-xs text-center">Inners</th>
@@ -463,14 +547,16 @@
                             <th class="py-3 px-2 font-semibold text-xs text-center">Towel</th>
                             <th class="py-3 px-2 font-semibold text-xs text-center">Bed Sheet</th>
                             <th class="py-3 px-2 font-semibold text-xs text-center text-sky-600">Total</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-sky-100 text-sky-900">
-                        <tr><td colspan="9" class="text-center text-sky-600 py-8">Loading logs...</td></tr>
+                        <tr><td colspan="10" class="text-center text-sky-600 py-8 font-medium">Loading logs...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 
     <!-- PIN VERIFICATION ANIMATION OVERLAY -->
