@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laundry Tracker - Crisp Air (Frost & Ice Blue)</title>
+    <title>Live Laundry Tracker - Smooth Box Lift Transition</title>
     
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
@@ -15,7 +15,7 @@
 
     <style>
         body {
-            background-color: #f0f9ff; /* Icy light sky background */
+            background-color: #f0f9ff;
         }
 
         .login-card-container {
@@ -29,14 +29,13 @@
             overflow: hidden;
         }
         
-        /* The Diagonal Split Panel Layout */
         .overlay-panel {
             position: absolute;
             top: 0;
             right: 0;
             width: 45%;
             height: 100%;
-            background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%); /* Frosty Sky to Deep Indigo */
+            background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%);
             transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -72,7 +71,6 @@
             background-color: #ffffff !important;
         }
 
-        /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
         @media (max-width: 640px) {
             .login-card-container {
                 display: flex;
@@ -89,14 +87,8 @@
                 height: 160px;
                 clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%);
             }
-            .login-card-container.active-mode .overlay-panel {
-                transform: none !important;
-                width: 100% !important;
-                clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%) !important;
-            }
         }
 
-        /* ACTIVATION LAYERS (DESKTOP MODE) */
         @media (min-width: 641px) {
             .login-card-container {
                 min-height: 520px;
@@ -113,7 +105,7 @@
             filter: blur(4px);
         }
 
-        /* 4-Box PIN Input Base Styling */
+        /* PIN Input Base Styling */
         .pin-box-input {
             width: 3.25rem;
             height: 3.5rem;
@@ -121,36 +113,31 @@
             font-size: 1.5rem;
             font-weight: 800;
             border-radius: 0.75rem;
-            transition: all 0.3s ease;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
+            z-index: 60;
         }
 
-        /* PIN Verification Circular Orbit Container */
+        /* Class applied while PIN boxes move/lift up from form into orbit position */
+        .pin-box-input.lifting-pin {
+            position: fixed !important;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+            border: 2px solid rgba(255, 255, 255, 0.8) !important;
+            color: white !important;
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.6) !important;
+            pointer-events: none;
+        }
+
+        /* Circular Orbit Container */
         .spinning-box-container {
             position: relative;
             width: 140px;
             height: 140px;
             animation: spinOrbit 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+            animation-delay: 0.6s; /* Wait until box lift animation completes */
         }
-
-        /* Style applied to the actual input elements while orbiting */
-        .pin-box-input.animating-pin {
-            position: absolute !important;
-            width: 50px !important;
-            height: 50px !important;
-            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
-            border: 2px solid rgba(255, 255, 255, 0.6) !important;
-            color: white !important;
-            font-size: 1.35rem !important;
-            font-weight: 900 !important;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5) !important;
-            pointer-events: none;
-        }
-
-        /* Orbiting positions for the 4 inputs */
-        .pin-box-input.animating-pin:nth-child(1) { top: 0; left: 0; }
-        .pin-box-input.animating-pin:nth-child(2) { top: 0; right: 0; }
-        .pin-box-input.animating-pin:nth-child(3) { bottom: 0; right: 0; }
-        .pin-box-input.animating-pin:nth-child(4) { bottom: 0; left: 0; }
 
         @keyframes spinOrbit {
             0% { transform: rotate(0deg) scale(1); }
@@ -158,7 +145,6 @@
             100% { transform: rotate(360deg) scale(1); }
         }
 
-        /* Explicit Green Tick Animation Keyframe */
         @keyframes greenPop {
             0% { transform: scale(0.6); opacity: 0; }
             70% { transform: scale(1.15); opacity: 1; }
@@ -170,7 +156,6 @@
         }
     </style>
 
-    <!-- APPLICATION CONTROLLER SCRIPT -->
     <script>
         let db;
         let currentUser = "";
@@ -204,27 +189,10 @@
 
             document.getElementById('laundry-form').addEventListener('submit', saveLog);
             document.getElementById('password-form').addEventListener('submit', submitPassword);
-
-            const itemInputs = ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'];
-            itemInputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', calculateTotal);
-            });
         });
 
-        /* Calculate Row Total helper function */
-        function getItemTotal(log) {
-            return (parseInt(log.pant) || 0) + 
-                   (parseInt(log.shirt) || 0) + 
-                   (parseInt(log.inners) || 0) + 
-                   (parseInt(log.boxers) || 0) + 
-                   (parseInt(log.towel) || 0) + 
-                   (parseInt(log.bedsheet) || 0);
-        }
-
-        /* Handle 4 PIN Boxes Focus Transitions */
         window.handlePinInput = function(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
-
             if (element.value.length === 1 && index < 3) {
                 document.getElementById(`pin-box-${index + 1}`).focus();
             }
@@ -236,24 +204,17 @@
             }
         };
 
-        window.calculateTotal = function() {
-            const inputs = ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'];
-            let total = 0;
-            inputs.forEach(id => {
-                total += parseInt(document.getElementById(id).value) || 0;
-            });
-            document.getElementById('live-total-count').innerText = total;
-        };
-
         window.submitPassword = function(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
             
-            const b0 = document.getElementById('pin-box-0');
-            const b1 = document.getElementById('pin-box-1');
-            const b2 = document.getElementById('pin-box-2');
-            const b3 = document.getElementById('pin-box-3');
-            const passwordInput = `${b0.value}${b1.value}${b2.value}${b3.value}`;
+            const pins = [
+                document.getElementById('pin-box-0'),
+                document.getElementById('pin-box-1'),
+                document.getElementById('pin-box-2'),
+                document.getElementById('pin-box-3')
+            ];
+            const passwordInput = pins.map(p => p.value).join('');
 
             const errorMsg = document.getElementById('login-error-msg');
             const cardContainer = document.getElementById('animated-card-box');
@@ -262,31 +223,65 @@
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
 
-                // Move actual PIN input elements into the spinning stage
-                const spinContainer = document.getElementById('spinning-pin-container');
-                const pins = [b0, b1, b2, b3];
-                
-                pins.forEach(pin => {
-                    pin.type = "text"; // Show numbers while orbiting
-                    pin.classList.add('animating-pin');
-                    spinContainer.appendChild(pin);
-                });
-
                 const overlay = document.getElementById('otp-animation-overlay');
                 const spinningStage = document.getElementById('otp-spinning-stage');
                 const successStage = document.getElementById('otp-success-stage');
+                const spinContainer = document.getElementById('spinning-pin-container');
 
+                // Reveal background overlay first
                 overlay.classList.remove('hidden');
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.6 seconds, switch to GREEN TICK verification screen
+                // Get target circular center coordinates
+                const stageRect = spinContainer.getBoundingClientRect();
+                const targetPositions = [
+                    { top: stageRect.top, left: stageRect.left },
+                    { top: stageRect.top, left: stageRect.left + stageRect.width - 50 },
+                    { top: stageRect.top + stageRect.height - 50, left: stageRect.left + stageRect.width - 50 },
+                    { top: stageRect.top + stageRect.height - 50, left: stageRect.left }
+                ];
+
+                // Smooth Lift Off Animation from Form Positions to Overlay Orbit Stage
+                pins.forEach((pin, i) => {
+                    const rect = pin.getBoundingClientRect();
+                    
+                    // Freeze initial screen position
+                    pin.style.top = `${rect.top}px`;
+                    pin.style.left = `${rect.left}px`;
+                    pin.style.width = `${rect.width}px`;
+                    pin.style.height = `${rect.height}px`;
+                    pin.type = "text"; // Show entered PIN number
+                    pin.classList.add('lifting-pin');
+
+                    // Trigger smooth trajectory fly animation to destination target
+                    setTimeout(() => {
+                        pin.style.top = `${targetPositions[i].top}px`;
+                        pin.style.left = `${targetPositions[i].left}px`;
+                        pin.style.width = `50px`;
+                        pin.style.height = `50px`;
+                    }, 50);
+                });
+
+                // Attach to spinning container after flying transition completes
+                setTimeout(() => {
+                    pins.forEach(pin => {
+                        pin.style.top = '';
+                        pin.style.left = '';
+                        pin.style.width = '';
+                        pin.style.height = '';
+                        pin.style.position = 'absolute';
+                        spinContainer.appendChild(pin);
+                    });
+                }, 650);
+
+                // Stage 2: Verified Tick
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
-                }, 1600);
+                }, 2200);
 
-                // Transition to dashboard after verification
+                // Stage 3: Open Dashboard
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     cardContainer.classList.add('active-mode');
@@ -295,7 +290,7 @@
                         executeDashboardLogin();
                         cardContainer.classList.remove('active-mode'); 
                     }, 400);
-                }, 2800);
+                }, 3400);
 
             } else {
                 errorMsg.classList.remove('hidden');
@@ -306,7 +301,6 @@
             document.getElementById('current-user').innerText = currentUser;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
-            listenToDatabase();
         }
 
         window.logout = function() {
@@ -315,52 +309,22 @@
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('modal-username-input').value = "";
             
-            // Move PIN boxes back to original form container and reset them
             const originalFormContainer = document.getElementById('pin-inputs-wrapper');
             for(let i=0; i<4; i++) {
                 const pinBox = document.getElementById(`pin-box-${i}`);
                 if(pinBox) {
                     pinBox.value = "";
                     pinBox.type = "password";
-                    pinBox.classList.remove('animating-pin');
+                    pinBox.removeAttribute('style');
+                    pinBox.classList.remove('lifting-pin');
                     originalFormContainer.appendChild(pinBox);
                 }
             }
         };
 
-        function listenToDatabase() {
-            db.ref().on('value', function(snapshot) {
-                const rawData = snapshot.val();
-                globalLogs = [];
-                
-                if (rawData) {
-                    const checkAndPush = (item, pathString) => {
-                        if (item && typeof item === 'object' && item.date) {
-                            if (!item.user || item.user.toUpperCase() === currentUser.toUpperCase()) {
-                                globalLogs.push({
-                                    key: pathString,
-                                    ...item
-                                });
-                            }
-                        }
-                    };
-
-                    Object.keys(rawData).forEach(key => {
-                        if (key === 'laundry_records' && typeof rawData[key] === 'object') {
-                            const subFolder = rawData[key];
-                            Object.keys(subFolder).forEach(subKey => {
-                                checkAndPush(subFolder[subKey], `laundry_records/${subKey}`);
-                            });
-                        } else {
-                            checkAndPush(rawData[key], key);
-                        }
-                    });
-
-                    globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-                }
-                renderTable(globalLogs);
-                renderMobileCards(globalLogs);
-            });
+        function getItemTotal(log) {
+            return (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
+                   (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
         }
 
         function saveLog(e) {
@@ -380,155 +344,15 @@
             ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
                 document.getElementById(id).value = 0;
             });
-            
-            calculateTotal();
         }
-
-        window.deleteLog = function(fullPathKey) {
-            if(confirm("Are you sure you want to delete this entry?")) {
-                db.ref(fullPathKey).remove();
-            }
-        };
-
-        function renderTable(logs) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = "";
-
-            if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-sky-600 py-8">No records found for your account.</td></tr>`;
-                return;
-            }
-
-            logs.forEach(log => {
-                const total = getItemTotal(log);
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-sky-900";
-                tr.innerHTML = `
-                    <td class="py-3 font-medium text-sky-950">${log.date}</td>
-                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-700 border border-sky-200">${log.user || 'Legacy'}</span></td>
-                    <td class="py-3 text-center font-medium">${log.pant}</td>
-                    <td class="py-3 text-center font-medium">${log.shirt}</td>
-                    <td class="py-3 text-center font-medium">${log.inners}</td>
-                    <td class="py-3 text-center font-medium">${log.boxers}</td>
-                    <td class="py-3 text-center font-medium">${log.towel}</td>
-                    <td class="py-3 text-center font-medium">${log.bedsheet}</td>
-                    <td class="py-3 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
-                    <td class="py-3 text-right">
-                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs cursor-pointer focus:outline-none">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderMobileCards(logs) {
-            const cardContainer = document.getElementById('mobile-cards-container');
-            cardContainer.innerHTML = "";
-
-            if (logs.length === 0) {
-                cardContainer.innerHTML = `<p class="text-center text-sky-600 py-4 text-sm">No records found for your account.</p>`;
-                return;
-            }
-
-            logs.forEach(log => {
-                const total = getItemTotal(log);
-                const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-xl border border-sky-200 shadow-sm flex flex-col gap-3 text-sky-900";
-                card.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-sky-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-sky-950">${log.date}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-200">${log.user || 'Legacy'}</span>
-                        </div>
-                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs focus:outline-none px-2 py-1">
-                            Delete
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Pants</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.pant}</div>
-                        </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Shirts</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.shirt}</div>
-                        </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Inners</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.inners}</div>
-                        </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Boxers</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.boxers}</div>
-                        </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Towels</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.towel}</div>
-                        </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
-                            <div class="text-[10px] uppercase tracking-wider text-sky-600 font-semibold">Sheets</div>
-                            <div class="text-sm font-bold text-sky-900 mt-0.5">${log.bedsheet}</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-sky-100/70 border border-sky-200 rounded-lg px-3 py-2 mt-1">
-                        <span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Total Items</span>
-                        <span class="text-base font-black text-sky-600">${total}</span>
-                    </div>
-                `;
-                cardContainer.appendChild(card);
-            });
-        }
-
-        window.downloadPDF = function() {
-            if(globalLogs.length === 0) {
-                alert("There are no personal logs to generate a PDF for!");
-                return;
-            }
-
-            document.getElementById('pdf-user-name').innerText = currentUser;
-            document.getElementById('pdf-gen-date').innerText = new Date().toLocaleDateString();
-            const pdfTbody = document.getElementById('pdf-table-body');
-            pdfTbody.innerHTML = "";
-
-            globalLogs.forEach(log => {
-                const total = getItemTotal(log);
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid #e5e7eb";
-                tr.innerHTML = `
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb;">${log.date}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.pant}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.shirt}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.inners}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.boxers}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.towel}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.bedsheet}</td>
-                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; color: #0ea5e9;">${total}</td>
-                `;
-                pdfTbody.appendChild(tr);
-            });
-
-            const element = document.getElementById('pdf-template');
-            const opt = {
-                margin:       0.3,
-                filename:     `laundry-report-${currentUser}-${new Date().toISOString().slice(0,10)}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().catch(err => {
-                console.error("PDF generation failure: ", err);
-            });
-        };
     </script>
 </head>
 <body class="min-h-screen font-sans antialiased text-sky-900 flex flex-col justify-center py-6">
 
-    <!-- THEME PANEL INTERFACE LAYER -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4">
         <div id="animated-card-box" class="login-card-container rounded-2xl">
             
-            <!-- Form Inputs -->
             <div class="form-panel flex flex-col justify-center p-6 sm:p-12">
                 <div class="mb-4">
                     <h2 class="text-3xl font-black text-sky-950 tracking-tight">Login</h2>
@@ -544,7 +368,6 @@
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-2">PIN</label>
                         
-                        <!-- 4 Input Boxes Container -->
                         <div id="pin-inputs-wrapper" class="flex items-center justify-between gap-2 max-w-xs">
                             <input type="password" id="pin-box-0" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 0)" onkeydown="handlePinKeyDown(event, 0)">
                             <input type="password" id="pin-box-1" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 1)" onkeydown="handlePinKeyDown(event, 1)">
@@ -563,143 +386,26 @@
                 </form>
             </div>
 
-            <!-- Right Side Overlay Cross Cut Section Block -->
             <div class="overlay-panel flex flex-col justify-center items-center text-center p-6 sm:p-8 text-white">
                 <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border border-white border-opacity-30 shadow-lg">
                     🧺
                 </div>
                 <h2 class="text-xl sm:text-2xl font-black tracking-tight mb-1 sm:mb-2 uppercase drop-shadow-md">Welcome Back!</h2>
-                <div class="text-3xl mt-1 tracking-widest drop-shadow-md">
-                    👕👖🧦👗
-                </div>
+                <div class="text-3xl mt-1 tracking-widest drop-shadow-md">👕👖🧦👗</div>
             </div>
 
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 mb-6 gap-4">
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-sky-950">Hello, <span id="current-user" class="text-sky-600">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-sky-700 font-medium">You can download all your previous laundry logs by clicking download button</p>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-700 hover:to-indigo-800 text-white font-bold px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(37,99,235,0.3)] active:scale-95 uppercase tracking-wider">
-                    📥 Download PDF
-                </button>
-                <button onclick="window.logout()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-3 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95 border border-sky-200">
-                    Logout
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-sky-100 h-fit">
-                <h3 class="text-base sm:text-lg font-bold text-sky-950 mb-4">Enter New Laundry</h3>
-                <form id="laundry-form" class="space-y-4" autocomplete="off">
-                    <div>
-                        <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider mb-1">Date</label>
-                        <input type="date" id="log-date" required class="w-full border border-sky-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-sky-500 bg-sky-50 text-sky-950 transition-colors">
-                    </div>
-                    
-                    <div class="border-t border-sky-100 my-2 pt-3">
-                        <p class="text-xs font-semibold text-sky-700 uppercase tracking-wider mb-3">Item Counts</p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Pants</label>
-                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Shirts</label>
-                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Inners</label>
-                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Boxers</label>
-                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Towels</label>
-                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
-                                <label class="block text-xs font-medium text-sky-700 mb-1">Bed Sheets</label>
-                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-sky-950 focus:outline-none focus:border-sky-500">
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4 flex items-center justify-between bg-sky-50 border border-sky-200 rounded-xl px-4 py-3">
-                            <span class="text-xs font-bold text-sky-700 uppercase tracking-wider">Total Items</span>
-                            <span id="live-total-count" class="text-lg font-black text-sky-600">0</span>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-sm mt-2 cursor-pointer focus:outline-none">
-                        Save Entry
-                    </button>
-                </form>
-            </div>
-
-            <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100">
-                <h3 class="text-base sm:text-lg font-bold text-sky-950 mb-4">Your Laundry Logs</h3>
-                
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-left text-sm" id="history-table">
-                        <thead>
-                            <tr class="border-b border-sky-200 text-sky-700 font-medium bg-sky-50">
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs rounded-tl-lg">Date</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs">Owner</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Pant</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Shirt</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Inners</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Boxers</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Towel</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Bed Sheet</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center text-sky-600">Total</th>
-                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-right text-red-500 rounded-tr-lg">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-sky-100 text-sky-900">
-                            <tr><td colspan="10" class="text-center text-sky-600 py-8">Connecting to database logs...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="mobile-cards-container" class="block sm:hidden space-y-3">
-                    <p class="text-center text-sky-600 py-4 text-sm">Connecting to database logs...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PRINT VIEW BLOCK -->
-    <div style="position: absolute; left: -9999px; top: -9999px;">
-        <div id="pdf-template" style="width: 700px; padding: 25px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
-            <h1 style="font-size: 22px; font-weight: bold; margin-bottom: 4px; color: #0ea5e9; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
-            <p style="font-size: 12px; color: #666666; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
-                Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
-            </p>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed;">
-                <thead>
-                    <tr style="background-color: #f0f9ff; color: #0369a1; font-weight: bold; text-align: left; font-size: 11px;">
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; width: 20%;">Date</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Pants</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Shirts</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Inners</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Boxers</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Towels</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Sheets</th>
-                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 14%;">Total</th>
-                    </tr>
-                </thead>
-                <tbody id="pdf-table-body" style="font-size: 11px; color: #4b5563;">
-                </tbody>
-            </table>
+            <button onclick="window.logout()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-3 rounded-xl transition text-xs sm:text-sm border border-sky-200">
+                Logout
+            </button>
         </div>
     </div>
 
@@ -713,7 +419,6 @@
                 <p class="text-xs text-sky-400 mb-6 uppercase tracking-wider">Please wait a moment...</p>
                 
                 <div class="relative w-44 h-44 mx-auto my-2 flex items-center justify-center">
-                    <!-- Container into which form PIN inputs get dynamically attached during verification -->
                     <div id="spinning-pin-container" class="spinning-box-container"></div>
                 </div>
             </div>
