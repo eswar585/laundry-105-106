@@ -202,7 +202,6 @@
 
         /* Handle 4 PIN Boxes Focus Transitions */
         window.handlePinInput = function(element, index) {
-            // Strip any non-digit character
             element.value = element.value.replace(/[^0-9]/g, '');
 
             if (element.value.length === 1 && index < 3) {
@@ -229,7 +228,6 @@
             e.preventDefault();
             const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
             
-            // Gather 4 box digits
             const p0 = document.getElementById('pin-box-0').value;
             const p1 = document.getElementById('pin-box-1').value;
             const p2 = document.getElementById('pin-box-2').value;
@@ -243,13 +241,11 @@
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
                 
-                // Set digits into rotating box animation
                 document.getElementById('anim-box-0').innerText = p0 || '0';
                 document.getElementById('anim-box-1').innerText = p1 || '0';
                 document.getElementById('anim-box-2').innerText = p2 || '0';
                 document.getElementById('anim-box-3').innerText = p3 || '0';
 
-                // Show OTP Verification Reel Animation Overlay
                 const overlay = document.getElementById('otp-animation-overlay');
                 const spinningStage = document.getElementById('otp-spinning-stage');
                 const successStage = document.getElementById('otp-success-stage');
@@ -258,7 +254,7 @@
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.6 seconds, switch to green tick mark verification screen
+                // After 1.6 seconds, switch to verification screen with GREEN TICK
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
@@ -680,11 +676,12 @@
                 </div>
             </div>
 
-            <!-- Stage 2: Green Checkmark Verification Box -->
+            <!-- Stage 2: Bright Green Checkmark Verification Screen -->
             <div id="otp-success-stage" class="py-4 hidden flex flex-col items-center">
-                <div class="w-16 h-16 bg-emerald-500 border-2 border-emerald-400 rounded-2xl flex items-center justify-center text-white mb-4 shadow-[0_0_25px_rgba(16,185,129,0.6)]">
-                    <svg class="w-9 h-9 animate-bounce text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                <div class="w-20 h-20 bg-white border-2 border-emerald-400 rounded-3xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(16,185,129,0.75)]">
+                    <!-- Emerald/Green Tick Mark SVG -->
+                    <svg class="w-12 h-12 text-emerald-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
                 <h3 class="text-2xl font-black text-white tracking-tight mb-1">Verified Successfully</h3>
