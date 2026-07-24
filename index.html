@@ -211,6 +211,16 @@
             });
         });
 
+        /* Calculate Row Total helper function */
+        function getItemTotal(log) {
+            return (parseInt(log.pant) || 0) + 
+                   (parseInt(log.shirt) || 0) + 
+                   (parseInt(log.inners) || 0) + 
+                   (parseInt(log.boxers) || 0) + 
+                   (parseInt(log.towel) || 0) + 
+                   (parseInt(log.bedsheet) || 0);
+        }
+
         /* Handle 4 PIN Boxes Focus Transitions */
         window.handlePinInput = function(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
@@ -371,11 +381,12 @@
             tbody.innerHTML = "";
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-sky-600 py-8">No records found for your account.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-sky-600 py-8">No records found for your account.</td></tr>`;
                 return;
             }
 
             logs.forEach(log => {
+                const total = getItemTotal(log);
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-sky-900";
                 tr.innerHTML = `
@@ -387,6 +398,7 @@
                     <td class="py-3 text-center font-medium">${log.boxers}</td>
                     <td class="py-3 text-center font-medium">${log.towel}</td>
                     <td class="py-3 text-center font-medium">${log.bedsheet}</td>
+                    <td class="py-3 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
                     <td class="py-3 text-right">
                         <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs cursor-pointer focus:outline-none">Delete</button>
                     </td>
@@ -405,6 +417,7 @@
             }
 
             logs.forEach(log => {
+                const total = getItemTotal(log);
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-xl border border-sky-200 shadow-sm flex flex-col gap-3 text-sky-900";
                 card.innerHTML = `
@@ -443,6 +456,11 @@
                             <div class="text-sm font-bold text-sky-900 mt-0.5">${log.bedsheet}</div>
                         </div>
                     </div>
+                    <!-- Total Count Banner at the Bottom of Every Log Card -->
+                    <div class="flex items-center justify-between bg-sky-100/70 border border-sky-200 rounded-lg px-3 py-2 mt-1">
+                        <span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Total Items</span>
+                        <span class="text-base font-black text-sky-600">${total}</span>
+                    </div>
                 `;
                 cardContainer.appendChild(card);
             });
@@ -460,27 +478,29 @@
             pdfTbody.innerHTML = "";
 
             globalLogs.forEach(log => {
+                const total = getItemTotal(log);
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid #e5e7eb";
                 tr.innerHTML = `
-                    <td style="padding: 10px; border: 1px solid #e5e7eb;">${log.date}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.pant}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.shirt}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.inners}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.boxers}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.towel}</td>
-                    <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">${log.bedsheet}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb;">${log.date}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.pant}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.shirt}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.inners}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.boxers}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.towel}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center;">${log.bedsheet}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; color: #0ea5e9;">${total}</td>
                 `;
                 pdfTbody.appendChild(tr);
             });
 
             const element = document.getElementById('pdf-template');
             const opt = {
-                margin:       0.4,
+                margin:       0.3,
                 filename:     `laundry-report-${currentUser}-${new Date().toISOString().slice(0,10)}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().catch(err => {
@@ -626,11 +646,12 @@
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Boxers</th>
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Towel</th>
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center">Bed Sheet</th>
+                                <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-center text-sky-600">Total</th>
                                 <th class="py-3 px-2 font-semibold uppercase tracking-wider text-xs text-right text-red-500 rounded-tr-lg">Action</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="divide-y divide-sky-100 text-sky-900">
-                            <tr><td colspan="9" class="text-center text-sky-600 py-8">Connecting to database logs...</td></tr>
+                            <tr><td colspan="10" class="text-center text-sky-600 py-8">Connecting to database logs...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -642,27 +663,28 @@
         </div>
     </div>
 
-    <!-- PRINT VIEW BLOCK -->
+    <!-- PRINT VIEW BLOCK (Fixed dimensions & exact width proportions) -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
-        <div id="pdf-template" style="width: 800px; padding: 40px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
-            <h1 style="font-size: 26px; font-weight: bold; margin-bottom: 5px; color: #0ea5e9; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
-            <p style="font-size: 14px; color: #666666; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px;">
+        <div id="pdf-template" style="width: 700px; padding: 25px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
+            <h1 style="font-size: 22px; font-weight: bold; margin-bottom: 4px; color: #0ea5e9; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
+            <p style="font-size: 12px; color: #666666; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
                 Account Owner: <strong style="color: #111111;" id="pdf-user-name">User</strong> &nbsp;|&nbsp; Generated on: <span id="pdf-gen-date"></span>
             </p>
             
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed;">
                 <thead>
-                    <tr style="background-color: #f0f9ff; color: #0369a1; font-weight: bold; text-align: left; font-size: 13px;">
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; width: 22%;">Date</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Pants</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Shirts</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Inners</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Boxers</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Towels</th>
-                        <th style="padding: 12px 10px; border: 1px solid #bae6fd; text-align: center; width: 13%;">Bed Sheets</th>
+                    <tr style="background-color: #f0f9ff; color: #0369a1; font-weight: bold; text-align: left; font-size: 11px;">
+                        <th style="padding: 8px 6px; border: 1px solid #bae6fd; width: 20%;">Date</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Pants</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Shirts</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Inners</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Boxers</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Towels</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Sheets</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 14%;">Total</th>
                     </tr>
                 </thead>
-                <tbody id="pdf-table-body" style="font-size: 13px; color: #4b5563;">
+                <tbody id="pdf-table-body" style="font-size: 11px; color: #4b5563;">
                 </tbody>
             </table>
         </div>
