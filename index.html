@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laundry Tracker - Smooth Box Lift Transition</title>
+    <title>Live Laundry Tracker - Fixed Login Animation</title>
     
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
@@ -124,7 +124,7 @@
         .pin-box-input.lifting-pin {
             position: fixed !important;
             background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
-            border: 2px solid rgba(255, 255, 255, 0.8) !important;
+            border: 2px solid rgba(255, 255, 255, 0.9) !important;
             color: white !important;
             box-shadow: 0 15px 35px rgba(37, 99, 235, 0.6) !important;
             pointer-events: none;
@@ -135,9 +135,17 @@
             position: relative;
             width: 140px;
             height: 140px;
-            animation: spinOrbit 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
-            animation-delay: 0.6s; /* Wait until box lift animation completes */
         }
+
+        .spinning-box-container.active-orbit {
+            animation: spinOrbit 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+
+        /* Positions inside orbit box */
+        .pin-box-input.in-orbit:nth-child(1) { top: 0; left: 0; }
+        .pin-box-input.in-orbit:nth-child(2) { top: 0; right: 0; }
+        .pin-box-input.in-orbit:nth-child(3) { bottom: 0; right: 0; }
+        .pin-box-input.in-orbit:nth-child(4) { bottom: 0; left: 0; }
 
         @keyframes spinOrbit {
             0% { transform: rotate(0deg) scale(1); }
@@ -167,30 +175,7 @@
             "SNEHITH": "2001"
         };
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const firebaseConfig = {
-                apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
-                authDomain: "laundry-management-32c18.firebaseapp.com",
-                databaseURL: "https://laundry-management-32c18-default-rtdb.firebaseio.com",
-                projectId: "laundry-management-32c18",
-                storageBucket: "laundry-management-32c18.firebasestorage.app",
-                messagingSenderId: "195267320338",
-                appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
-                measurementId: "G-XZYPE7WQBN"
-            };
-
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.database();
-
-            const dateInput = document.getElementById('log-date');
-            if(dateInput) dateInput.valueAsDate = new Date();
-
-            document.getElementById('laundry-form').addEventListener('submit', saveLog);
-            document.getElementById('password-form').addEventListener('submit', submitPassword);
-        });
-
+        // Define functions before attaching them
         window.handlePinInput = function(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
             if (element.value.length === 1 && index < 3) {
@@ -205,7 +190,8 @@
         };
 
         window.submitPassword = function(e) {
-            e.preventDefault();
+            if(e) e.preventDefault();
+            
             const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
             
             const pins = [
@@ -228,12 +214,13 @@
                 const successStage = document.getElementById('otp-success-stage');
                 const spinContainer = document.getElementById('spinning-pin-container');
 
-                // Reveal background overlay first
+                // Reveal background overlay
                 overlay.classList.remove('hidden');
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
+                spinContainer.classList.remove('active-orbit');
 
-                // Get target circular center coordinates
+                // Get coordinates of the circular orbit container on screen
                 const stageRect = spinContainer.getBoundingClientRect();
                 const targetPositions = [
                     { top: stageRect.top, left: stageRect.left },
@@ -242,40 +229,42 @@
                     { top: stageRect.top + stageRect.height - 50, left: stageRect.left }
                 ];
 
-                // Smooth Lift Off Animation from Form Positions to Overlay Orbit Stage
+                // Fly animation: Lift PIN boxes from form inputs and glide to destination
                 pins.forEach((pin, i) => {
                     const rect = pin.getBoundingClientRect();
                     
-                    // Freeze initial screen position
+                    // Set starting pixel coordinates
                     pin.style.top = `${rect.top}px`;
                     pin.style.left = `${rect.left}px`;
                     pin.style.width = `${rect.width}px`;
                     pin.style.height = `${rect.height}px`;
-                    pin.type = "text"; // Show entered PIN number
+                    pin.type = "text"; 
                     pin.classList.add('lifting-pin');
 
-                    // Trigger smooth trajectory fly animation to destination target
+                    // Glide to target circle position
                     setTimeout(() => {
                         pin.style.top = `${targetPositions[i].top}px`;
                         pin.style.left = `${targetPositions[i].left}px`;
                         pin.style.width = `50px`;
                         pin.style.height = `50px`;
-                    }, 50);
+                    }, 40);
                 });
 
-                // Attach to spinning container after flying transition completes
+                // Attach to spinning container and activate spin orbit
                 setTimeout(() => {
+                    spinContainer.classList.add('active-orbit');
                     pins.forEach(pin => {
-                        pin.style.top = '';
-                        pin.style.left = '';
-                        pin.style.width = '';
-                        pin.style.height = '';
+                        pin.removeAttribute('style');
+                        pin.classList.remove('lifting-pin');
+                        pin.classList.add('in-orbit');
                         pin.style.position = 'absolute';
+                        pin.style.width = '50px';
+                        pin.style.height = '50px';
                         spinContainer.appendChild(pin);
                     });
                 }, 650);
 
-                // Stage 2: Verified Tick
+                // Stage 2: Green Tick Verification
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
@@ -301,6 +290,7 @@
             document.getElementById('current-user').innerText = currentUser;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
+            listenToDatabase();
         }
 
         window.logout = function() {
@@ -316,7 +306,7 @@
                     pinBox.value = "";
                     pinBox.type = "password";
                     pinBox.removeAttribute('style');
-                    pinBox.classList.remove('lifting-pin');
+                    pinBox.className = "ice-input pin-box-input focus:outline-none";
                     originalFormContainer.appendChild(pinBox);
                 }
             }
@@ -325,6 +315,37 @@
         function getItemTotal(log) {
             return (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
                    (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
+        }
+
+        function listenToDatabase() {
+            db.ref().on('value', function(snapshot) {
+                const rawData = snapshot.val();
+                globalLogs = [];
+                
+                if (rawData) {
+                    const checkAndPush = (item, pathString) => {
+                        if (item && typeof item === 'object' && item.date) {
+                            if (!item.user || item.user.toUpperCase() === currentUser.toUpperCase()) {
+                                globalLogs.push({ key: pathString, ...item });
+                            }
+                        }
+                    };
+
+                    Object.keys(rawData).forEach(key => {
+                        if (key === 'laundry_records' && typeof rawData[key] === 'object') {
+                            const subFolder = rawData[key];
+                            Object.keys(subFolder).forEach(subKey => {
+                                checkAndPush(subFolder[subKey], `laundry_records/${subKey}`);
+                            });
+                        } else {
+                            checkAndPush(rawData[key], key);
+                        }
+                    });
+
+                    globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                }
+                renderTable(globalLogs);
+            });
         }
 
         function saveLog(e) {
@@ -345,6 +366,59 @@
                 document.getElementById(id).value = 0;
             });
         }
+
+        function renderTable(logs) {
+            const tbody = document.getElementById('table-body');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-sky-600 py-8">No records found.</td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const total = getItemTotal(log);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-sky-900";
+                tr.innerHTML = `
+                    <td class="py-3 font-medium text-sky-950">${log.date}</td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-700 border border-sky-200">${log.user || 'Legacy'}</span></td>
+                    <td class="py-3 text-center font-medium">${log.pant}</td>
+                    <td class="py-3 text-center font-medium">${log.shirt}</td>
+                    <td class="py-3 text-center font-medium">${log.inners}</td>
+                    <td class="py-3 text-center font-medium">${log.boxers}</td>
+                    <td class="py-3 text-center font-medium">${log.towel}</td>
+                    <td class="py-3 text-center font-medium">${log.bedsheet}</td>
+                    <td class="py-3 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
+                authDomain: "laundry-management-32c18.firebaseapp.com",
+                databaseURL: "https://laundry-management-32c18-default-rtdb.firebaseio.com",
+                projectId: "laundry-management-32c18",
+                storageBucket: "laundry-management-32c18.firebasestorage.app",
+                messagingSenderId: "195267320338",
+                appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
+                measurementId: "G-XZYPE7WQBN"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+
+            const dateInput = document.getElementById('log-date');
+            if(dateInput) dateInput.valueAsDate = new Date();
+
+            document.getElementById('laundry-form').addEventListener('submit', saveLog);
+            document.getElementById('password-form').addEventListener('submit', window.submitPassword);
+        });
     </script>
 </head>
 <body class="min-h-screen font-sans antialiased text-sky-900 flex flex-col justify-center py-6">
@@ -362,7 +436,7 @@
                 <form id="password-form" class="space-y-4" autocomplete="off">
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter username" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter username (e.g. ESWAR)" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
                     </div>
                     
                     <div>
@@ -407,13 +481,37 @@
                 Logout
             </button>
         </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
+            <h3 class="text-lg font-bold text-sky-950 mb-4">Laundry Logs</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-sky-200 text-sky-700 bg-sky-50">
+                            <th class="py-3 px-2 font-semibold text-xs">Date</th>
+                            <th class="py-3 px-2 font-semibold text-xs">Owner</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Pant</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Shirt</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Inners</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Boxers</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Towel</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center">Bed Sheet</th>
+                            <th class="py-3 px-2 font-semibold text-xs text-center text-sky-600">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-sky-100 text-sky-900">
+                        <tr><td colspan="9" class="text-center text-sky-600 py-8">Loading logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- PIN VERIFICATION REEL ANIMATION OVERLAY -->
+    <!-- PIN VERIFICATION ANIMATION OVERLAY -->
     <div id="otp-animation-overlay" class="fixed inset-0 bg-slate-950 bg-opacity-85 backdrop-blur-md z-50 flex items-center justify-center hidden">
         <div class="bg-slate-900 border border-sky-500/30 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center text-white relative overflow-hidden">
             
-            <!-- Stage 1: Orbiting Input Boxes Animation -->
+            <!-- Orbiting Stage -->
             <div id="otp-spinning-stage" class="py-4">
                 <h3 class="text-xl font-bold mb-1 tracking-tight">Verifying PIN</h3>
                 <p class="text-xs text-sky-400 mb-6 uppercase tracking-wider">Please wait a moment...</p>
@@ -423,7 +521,7 @@
                 </div>
             </div>
 
-            <!-- Stage 2: Green Tick Verification Screen -->
+            <!-- Green Tick Stage -->
             <div id="otp-success-stage" class="py-4 hidden flex flex-col items-center">
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 green-tick-animated" style="border: 3px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);">
                     <svg style="width: 48px; height: 48px; color: #10b981;" fill="none" stroke="#10b981" viewBox="0 0 24 24">
