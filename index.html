@@ -157,6 +157,17 @@
             50% { transform: rotate(180deg) scale(1.12); }
             100% { transform: rotate(360deg) scale(1); }
         }
+
+        /* Explicit Green Tick Animation Keyframe */
+        @keyframes greenPop {
+            0% { transform: scale(0.6); opacity: 0; }
+            70% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .green-tick-animated {
+            animation: greenPop 0.5s ease-out forwards;
+        }
     </style>
 
     <!-- APPLICATION CONTROLLER SCRIPT -->
@@ -254,13 +265,13 @@
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.6 seconds, switch to verification screen with GREEN TICK
+                // After 1.6 seconds, switch to GREEN TICK verification screen
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
                 }, 1600);
 
-                // After another 1.2 seconds, transition to dashboard
+                // Transition to dashboard after verification
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     cardContainer.classList.add('active-mode');
@@ -676,16 +687,21 @@
                 </div>
             </div>
 
-            <!-- Stage 2: Bright Green Checkmark Verification Screen -->
+            <!-- Stage 2: Guaranteed Green Tick Verification Screen -->
             <div id="otp-success-stage" class="py-4 hidden flex flex-col items-center">
-                <div class="w-20 h-20 bg-white border-2 border-emerald-400 rounded-3xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(16,185,129,0.75)]">
-                    <!-- Emerald/Green Tick Mark SVG -->
-                    <svg class="w-12 h-12 text-emerald-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                
+                <!-- White circular background with glowing green border and green tick -->
+                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 green-tick-animated" style="border: 3px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);">
+                    
+                    <!-- Direct Inline Green SVG Checkmark -->
+                    <svg style="width: 48px; height: 48px; color: #10b981;" fill="none" stroke="#10b981" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path>
                     </svg>
+
                 </div>
+
                 <h3 class="text-2xl font-black text-white tracking-tight mb-1">Verified Successfully</h3>
-                <p class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Verified & Secured 🔒</p>
+                <p class="text-xs font-bold uppercase tracking-wider" style="color: #10b981;">Verified & Secured 🔒</p>
             </div>
             
         </div>
