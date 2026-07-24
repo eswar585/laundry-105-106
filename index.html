@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Laundry Tracker - Fixed Login Animation</title>
+    <title>Live Laundry Tracker - Fixed Interactive Login</title>
     
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
@@ -141,12 +141,6 @@
             animation: spinOrbit 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
         }
 
-        /* Positions inside orbit box */
-        .pin-box-input.in-orbit:nth-child(1) { top: 0; left: 0; }
-        .pin-box-input.in-orbit:nth-child(2) { top: 0; right: 0; }
-        .pin-box-input.in-orbit:nth-child(3) { bottom: 0; right: 0; }
-        .pin-box-input.in-orbit:nth-child(4) { bottom: 0; left: 0; }
-
         @keyframes spinOrbit {
             0% { transform: rotate(0deg) scale(1); }
             50% { transform: rotate(180deg) scale(1.12); }
@@ -175,23 +169,20 @@
             "SNEHITH": "2001"
         };
 
-        // Define functions before attaching them
-        window.handlePinInput = function(element, index) {
+        function handlePinInput(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
             if (element.value.length === 1 && index < 3) {
                 document.getElementById(`pin-box-${index + 1}`).focus();
             }
-        };
+        }
 
-        window.handlePinKeyDown = function(event, index) {
+        function handlePinKeyDown(event, index) {
             if (event.key === 'Backspace' && !event.target.value && index > 0) {
                 document.getElementById(`pin-box-${index - 1}`).focus();
             }
-        };
+        }
 
-        window.submitPassword = function(e) {
-            if(e) e.preventDefault();
-            
+        function triggerLogin() {
             const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
             
             const pins = [
@@ -220,7 +211,7 @@
                 successStage.classList.add('hidden');
                 spinContainer.classList.remove('active-orbit');
 
-                // Get coordinates of the circular orbit container on screen
+                // Target center coordinates of orbit box
                 const stageRect = spinContainer.getBoundingClientRect();
                 const targetPositions = [
                     { top: stageRect.top, left: stageRect.left },
@@ -229,11 +220,10 @@
                     { top: stageRect.top + stageRect.height - 50, left: stageRect.left }
                 ];
 
-                // Fly animation: Lift PIN boxes from form inputs and glide to destination
+                // Lift off animation
                 pins.forEach((pin, i) => {
                     const rect = pin.getBoundingClientRect();
                     
-                    // Set starting pixel coordinates
                     pin.style.top = `${rect.top}px`;
                     pin.style.left = `${rect.left}px`;
                     pin.style.width = `${rect.width}px`;
@@ -241,30 +231,34 @@
                     pin.type = "text"; 
                     pin.classList.add('lifting-pin');
 
-                    // Glide to target circle position
                     setTimeout(() => {
                         pin.style.top = `${targetPositions[i].top}px`;
                         pin.style.left = `${targetPositions[i].left}px`;
                         pin.style.width = `50px`;
                         pin.style.height = `50px`;
-                    }, 40);
+                    }, 50);
                 });
 
-                // Attach to spinning container and activate spin orbit
+                // Attach to spinning container
                 setTimeout(() => {
                     spinContainer.classList.add('active-orbit');
-                    pins.forEach(pin => {
+                    pins.forEach((pin, index) => {
                         pin.removeAttribute('style');
                         pin.classList.remove('lifting-pin');
-                        pin.classList.add('in-orbit');
                         pin.style.position = 'absolute';
                         pin.style.width = '50px';
                         pin.style.height = '50px';
+
+                        if(index === 0) { pin.style.top = '0'; pin.style.left = '0'; }
+                        if(index === 1) { pin.style.top = '0'; pin.style.right = '0'; }
+                        if(index === 2) { pin.style.bottom = '0'; pin.style.right = '0'; }
+                        if(index === 3) { pin.style.bottom = '0'; pin.style.left = '0'; }
+
                         spinContainer.appendChild(pin);
                     });
                 }, 650);
 
-                // Stage 2: Green Tick Verification
+                // Stage 2: Verified Tick
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
@@ -284,7 +278,7 @@
             } else {
                 errorMsg.classList.remove('hidden');
             }
-        };
+        }
 
         function executeDashboardLogin() {
             document.getElementById('current-user').innerText = currentUser;
@@ -293,7 +287,7 @@
             listenToDatabase();
         }
 
-        window.logout = function() {
+        function logout() {
             currentUser = "";
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
@@ -310,14 +304,10 @@
                     originalFormContainer.appendChild(pinBox);
                 }
             }
-        };
-
-        function getItemTotal(log) {
-            return (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
-                   (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
         }
 
         function listenToDatabase() {
+            if(!db) return;
             db.ref().on('value', function(snapshot) {
                 const rawData = snapshot.val();
                 globalLogs = [];
@@ -348,55 +338,37 @@
             });
         }
 
-        function saveLog(e) {
-            e.preventDefault();
-            const recordsRef = db.ref('laundry_records');
-            recordsRef.push({
-                user: currentUser,
-                date: document.getElementById('log-date').value,
-                pant: parseInt(document.getElementById('count-pant').value) || 0,
-                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
-                inners: parseInt(document.getElementById('count-inners').value) || 0,
-                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
-                towel: parseInt(document.getElementById('count-towels').value) || 0,
-                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
-            });
-
-            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
-                document.getElementById(id).value = 0;
-            });
-        }
-
         function renderTable(logs) {
             const tbody = document.getElementById('table-body');
             if(!tbody) return;
             tbody.innerHTML = "";
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-sky-600 py-8">No records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-sky-600 py-8">No records found.</td></tr>`;
                 return;
             }
 
             logs.forEach(log => {
-                const total = getItemTotal(log);
+                const total = (parseInt(log.pant) || 0) + (parseInt(log.shirt) || 0) + (parseInt(log.inners) || 0) + 
+                              (parseInt(log.boxers) || 0) + (parseInt(log.towel) || 0) + (parseInt(log.bedsheet) || 0);
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-sky-900";
                 tr.innerHTML = `
                     <td class="py-3 font-medium text-sky-950">${log.date}</td>
                     <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-700 border border-sky-200">${log.user || 'Legacy'}</span></td>
-                    <td class="py-3 text-center font-medium">${log.pant}</td>
-                    <td class="py-3 text-center font-medium">${log.shirt}</td>
-                    <td class="py-3 text-center font-medium">${log.inners}</td>
-                    <td class="py-3 text-center font-medium">${log.boxers}</td>
-                    <td class="py-3 text-center font-medium">${log.towel}</td>
-                    <td class="py-3 text-center font-medium">${log.bedsheet}</td>
+                    <td class="py-3 text-center font-medium">${log.pant || 0}</td>
+                    <td class="py-3 text-center font-medium">${log.shirt || 0}</td>
+                    <td class="py-3 text-center font-medium">${log.inners || 0}</td>
+                    <td class="py-3 text-center font-medium">${log.boxers || 0}</td>
+                    <td class="py-3 text-center font-medium">${log.towel || 0}</td>
+                    <td class="py-3 text-center font-medium">${log.bedsheet || 0}</td>
                     <td class="py-3 text-center font-black text-sky-600"><span class="bg-sky-100 border border-sky-200 px-2 py-0.5 rounded-lg">${total}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        window.onload = function() {
             const firebaseConfig = {
                 apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
                 authDomain: "laundry-management-32c18.firebaseapp.com",
@@ -408,17 +380,11 @@
                 measurementId: "G-XZYPE7WQBN"
             };
 
-            if (!firebase.apps.length) {
+            if (typeof firebase !== 'undefined' && !firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
             }
-            db = firebase.database();
-
-            const dateInput = document.getElementById('log-date');
-            if(dateInput) dateInput.valueAsDate = new Date();
-
-            document.getElementById('laundry-form').addEventListener('submit', saveLog);
-            document.getElementById('password-form').addEventListener('submit', window.submitPassword);
-        });
+        };
     </script>
 </head>
 <body class="min-h-screen font-sans antialiased text-sky-900 flex flex-col justify-center py-6">
@@ -433,10 +399,10 @@
                     <p class="text-xs font-semibold text-sky-600 mt-1 uppercase tracking-wider">Access your profile</p>
                 </div>
                 
-                <form id="password-form" class="space-y-4" autocomplete="off">
+                <form id="password-form" class="space-y-4" onsubmit="triggerLogin(); return false;">
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-1">Username</label>
-                        <input type="text" id="modal-username-input" placeholder="Enter username (e.g. ESWAR)" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
+                        <input type="text" id="modal-username-input" placeholder="Enter username" required class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none ice-input font-semibold uppercase">
                     </div>
                     
                     <div>
@@ -453,7 +419,7 @@
                     </div>
                     
                     <div class="pt-2 relative z-30">
-                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(37,99,235,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                        <button type="button" onclick="triggerLogin()" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(37,99,235,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
                             <span>Login</span>
                         </button>
                     </div>
@@ -477,7 +443,7 @@
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-sky-950">Hello, <span id="current-user" class="text-sky-600">User</span>!</h2>
             </div>
-            <button onclick="window.logout()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-3 rounded-xl transition text-xs sm:text-sm border border-sky-200">
+            <button onclick="logout()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold px-4 py-3 rounded-xl transition text-xs sm:text-sm border border-sky-200">
                 Logout
             </button>
         </div>
@@ -511,7 +477,7 @@
     <div id="otp-animation-overlay" class="fixed inset-0 bg-slate-950 bg-opacity-85 backdrop-blur-md z-50 flex items-center justify-center hidden">
         <div class="bg-slate-900 border border-sky-500/30 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center text-white relative overflow-hidden">
             
-            <!-- Orbiting Stage -->
+            <!-- Stage 1: Orbiting Inputs -->
             <div id="otp-spinning-stage" class="py-4">
                 <h3 class="text-xl font-bold mb-1 tracking-tight">Verifying PIN</h3>
                 <p class="text-xs text-sky-400 mb-6 uppercase tracking-wider">Please wait a moment...</p>
@@ -521,7 +487,7 @@
                 </div>
             </div>
 
-            <!-- Green Tick Stage -->
+            <!-- Stage 2: Green Tick -->
             <div id="otp-success-stage" class="py-4 hidden flex flex-col items-center">
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 green-tick-animated" style="border: 3px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);">
                     <svg style="width: 48px; height: 48px; color: #10b981;" fill="none" stroke="#10b981" viewBox="0 0 24 24">
