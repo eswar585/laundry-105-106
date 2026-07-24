@@ -123,7 +123,7 @@
             border-radius: 0.75rem;
         }
 
-        /* NEW LAUNDRY-THEMED SPINNING ANIMATION */
+        /* LAUNDRY-THEMED SPINNING ANIMATION */
         .washing-machine-outer {
             width: 120px;
             height: 120px;
@@ -164,15 +164,20 @@
             100% { transform: scale(1.1) rotate(15deg); }
         }
 
-        /* Explicit Green Tick Animation Keyframe */
+        /* GREEN TICK POP ANIMATION */
         @keyframes greenPop {
-            0% { transform: scale(0.6); opacity: 0; }
-            70% { transform: scale(1.15); opacity: 1; }
+            0% { transform: scale(0.4); opacity: 0; }
+            70% { transform: scale(1.18); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
 
         .green-tick-animated {
-            animation: greenPop 0.5s ease-out forwards;
+            animation: greenPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .green-tick-circle {
+            background-color: #10b981; /* Emerald Green */
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
         }
     </style>
 
@@ -276,11 +281,11 @@
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.6 seconds, switch to GREEN TICK verification screen
+                // After 1.5 seconds, switch to GREEN TICK stage
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
-                }, 1600);
+                }, 1500);
 
                 // Transition to dashboard after verification
                 setTimeout(() => {
@@ -457,7 +462,6 @@
                             <div class="text-sm font-bold text-sky-900 mt-0.5">${log.bedsheet}</div>
                         </div>
                     </div>
-                    <!-- Total Count Banner at the Bottom of Every Log Card -->
                     <div class="flex items-center justify-between bg-sky-100/70 border border-sky-200 rounded-lg px-3 py-2 mt-1">
                         <span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Total Items</span>
                         <span class="text-base font-black text-sky-600">${total}</span>
@@ -564,7 +568,7 @@
 
         </div>
 
-        <!-- NEW LAUNDRY SPINNING ANIMATION OVERLAY -->
+        <!-- LAUNDRY SPINNING & GREEN TICK ANIMATION OVERLAY -->
         <div id="otp-animation-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-50 rounded-2xl flex flex-col items-center justify-center hidden transition-all duration-300">
             
             <!-- STAGE 1: WASHING MACHINE SPINNING STAGE -->
@@ -577,10 +581,10 @@
                 <p class="text-sky-900 font-black text-lg tracking-wide uppercase mt-2">Washing & Verifying...</p>
             </div>
 
-            <!-- STAGE 2: SUCCESS CHECKMARK STAGE -->
+            <!-- STAGE 2: GREEN TICK SUCCESS STAGE -->
             <div id="otp-success-stage" class="hidden flex flex-col items-center gap-3">
-                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center green-tick-animated shadow-lg shadow-emerald-500/30">
-                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <div class="w-20 h-20 green-tick-circle rounded-full flex items-center justify-center green-tick-animated">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
