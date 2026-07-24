@@ -113,7 +113,7 @@
             filter: blur(4px);
         }
 
-        /* 4-Box PIN Input Styling */
+        /* 4-Box PIN Input Base Styling */
         .pin-box-input {
             width: 3.25rem;
             height: 3.5rem;
@@ -121,9 +121,10 @@
             font-size: 1.5rem;
             font-weight: 800;
             border-radius: 0.75rem;
+            transition: all 0.3s ease;
         }
 
-        /* PIN Verification Reel Animation Styles */
+        /* PIN Verification Circular Orbit Container */
         .spinning-box-container {
             position: relative;
             width: 140px;
@@ -131,26 +132,25 @@
             animation: spinOrbit 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
         }
 
-        .otp-box-item {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
-            font-weight: 900;
-            color: white;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+        /* Style applied to the actual input elements while orbiting */
+        .pin-box-input.animating-pin {
+            position: absolute !important;
+            width: 50px !important;
+            height: 50px !important;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+            border: 2px solid rgba(255, 255, 255, 0.6) !important;
+            color: white !important;
+            font-size: 1.35rem !important;
+            font-weight: 900 !important;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5) !important;
+            pointer-events: none;
         }
 
-        .otp-box-item:nth-child(1) { top: 0; left: 0; }
-        .otp-box-item:nth-child(2) { top: 0; right: 0; }
-        .otp-box-item:nth-child(3) { bottom: 0; right: 0; }
-        .otp-box-item:nth-child(4) { bottom: 0; left: 0; }
+        /* Orbiting positions for the 4 inputs */
+        .pin-box-input.animating-pin:nth-child(1) { top: 0; left: 0; }
+        .pin-box-input.animating-pin:nth-child(2) { top: 0; right: 0; }
+        .pin-box-input.animating-pin:nth-child(3) { bottom: 0; right: 0; }
+        .pin-box-input.animating-pin:nth-child(4) { bottom: 0; left: 0; }
 
         @keyframes spinOrbit {
             0% { transform: rotate(0deg) scale(1); }
@@ -249,11 +249,11 @@
             e.preventDefault();
             const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
             
-            const p0 = document.getElementById('pin-box-0').value;
-            const p1 = document.getElementById('pin-box-1').value;
-            const p2 = document.getElementById('pin-box-2').value;
-            const p3 = document.getElementById('pin-box-3').value;
-            const passwordInput = `${p0}${p1}${p2}${p3}`;
+            const b0 = document.getElementById('pin-box-0');
+            const b1 = document.getElementById('pin-box-1');
+            const b2 = document.getElementById('pin-box-2');
+            const b3 = document.getElementById('pin-box-3');
+            const passwordInput = `${b0.value}${b1.value}${b2.value}${b3.value}`;
 
             const errorMsg = document.getElementById('login-error-msg');
             const cardContainer = document.getElementById('animated-card-box');
@@ -261,11 +261,16 @@
             if (userPasswords[usernameInput] && userPasswords[usernameInput] === passwordInput) {
                 currentUser = usernameInput;
                 errorMsg.classList.add('hidden');
+
+                // Move actual PIN input elements into the spinning stage
+                const spinContainer = document.getElementById('spinning-pin-container');
+                const pins = [b0, b1, b2, b3];
                 
-                document.getElementById('anim-box-0').innerText = p0 || '0';
-                document.getElementById('anim-box-1').innerText = p1 || '0';
-                document.getElementById('anim-box-2').innerText = p2 || '0';
-                document.getElementById('anim-box-3').innerText = p3 || '0';
+                pins.forEach(pin => {
+                    pin.type = "text"; // Show numbers while orbiting
+                    pin.classList.add('animating-pin');
+                    spinContainer.appendChild(pin);
+                });
 
                 const overlay = document.getElementById('otp-animation-overlay');
                 const spinningStage = document.getElementById('otp-spinning-stage');
@@ -309,8 +314,17 @@
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('modal-username-input').value = "";
+            
+            // Move PIN boxes back to original form container and reset them
+            const originalFormContainer = document.getElementById('pin-inputs-wrapper');
             for(let i=0; i<4; i++) {
-                document.getElementById(`pin-box-${i}`).value = "";
+                const pinBox = document.getElementById(`pin-box-${i}`);
+                if(pinBox) {
+                    pinBox.value = "";
+                    pinBox.type = "password";
+                    pinBox.classList.remove('animating-pin');
+                    originalFormContainer.appendChild(pinBox);
+                }
             }
         };
 
@@ -456,7 +470,6 @@
                             <div class="text-sm font-bold text-sky-900 mt-0.5">${log.bedsheet}</div>
                         </div>
                     </div>
-                    <!-- Total Count Banner at the Bottom of Every Log Card -->
                     <div class="flex items-center justify-between bg-sky-100/70 border border-sky-200 rounded-lg px-3 py-2 mt-1">
                         <span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Total Items</span>
                         <span class="text-base font-black text-sky-600">${total}</span>
@@ -531,8 +544,8 @@
                     <div>
                         <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-2">PIN</label>
                         
-                        <!-- 4 Input Boxes for PIN Entry -->
-                        <div class="flex items-center justify-between gap-2 max-w-xs">
+                        <!-- 4 Input Boxes Container -->
+                        <div id="pin-inputs-wrapper" class="flex items-center justify-between gap-2 max-w-xs">
                             <input type="password" id="pin-box-0" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 0)" onkeydown="handlePinKeyDown(event, 0)">
                             <input type="password" id="pin-box-1" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 1)" onkeydown="handlePinKeyDown(event, 1)">
                             <input type="password" id="pin-box-2" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 2)" onkeydown="handlePinKeyDown(event, 2)">
@@ -663,7 +676,7 @@
         </div>
     </div>
 
-    <!-- PRINT VIEW BLOCK (Fixed dimensions & exact width proportions) -->
+    <!-- PRINT VIEW BLOCK -->
     <div style="position: absolute; left: -9999px; top: -9999px;">
         <div id="pdf-template" style="width: 700px; padding: 25px; color: #333333; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; box-sizing: border-box;">
             <h1 style="font-size: 22px; font-weight: bold; margin-bottom: 4px; color: #0ea5e9; letter-spacing: -0.5px;">Laundry Tracking Report</h1>
@@ -674,7 +687,7 @@
             <table style="width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed;">
                 <thead>
                     <tr style="background-color: #f0f9ff; color: #0369a1; font-weight: bold; text-align: left; font-size: 11px;">
-                        <th style="padding: 8px 6px; border: 1px solid #bae6fd; width: 20%;">Date</th>
+                        <th style="padding: 8px 4px; border: 1px solid #bae6fd; width: 20%;">Date</th>
                         <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Pants</th>
                         <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Shirts</th>
                         <th style="padding: 8px 4px; border: 1px solid #bae6fd; text-align: center; width: 11%;">Inners</th>
@@ -694,34 +707,24 @@
     <div id="otp-animation-overlay" class="fixed inset-0 bg-slate-950 bg-opacity-85 backdrop-blur-md z-50 flex items-center justify-center hidden">
         <div class="bg-slate-900 border border-sky-500/30 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center text-white relative overflow-hidden">
             
-            <!-- Stage 1: Spinning PIN Animation -->
+            <!-- Stage 1: Orbiting Input Boxes Animation -->
             <div id="otp-spinning-stage" class="py-4">
                 <h3 class="text-xl font-bold mb-1 tracking-tight">Verifying PIN</h3>
                 <p class="text-xs text-sky-400 mb-6 uppercase tracking-wider">Please wait a moment...</p>
                 
                 <div class="relative w-44 h-44 mx-auto my-2 flex items-center justify-center">
-                    <div class="spinning-box-container">
-                        <div class="otp-box-item" id="anim-box-0">0</div>
-                        <div class="otp-box-item" id="anim-box-1">0</div>
-                        <div class="otp-box-item" id="anim-box-2">0</div>
-                        <div class="otp-box-item" id="anim-box-3">0</div>
-                    </div>
+                    <!-- Container into which form PIN inputs get dynamically attached during verification -->
+                    <div id="spinning-pin-container" class="spinning-box-container"></div>
                 </div>
             </div>
 
-            <!-- Stage 2: Guaranteed Green Tick Verification Screen -->
+            <!-- Stage 2: Green Tick Verification Screen -->
             <div id="otp-success-stage" class="py-4 hidden flex flex-col items-center">
-                
-                <!-- White circular background with glowing green border and green tick -->
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 green-tick-animated" style="border: 3px solid #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);">
-                    
-                    <!-- Direct Inline Green SVG Checkmark -->
                     <svg style="width: 48px; height: 48px; color: #10b981;" fill="none" stroke="#10b981" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path>
                     </svg>
-
                 </div>
-
                 <h3 class="text-2xl font-black text-white tracking-tight mb-1">Verified Successfully</h3>
                 <p class="text-xs font-bold uppercase tracking-wider" style="color: #10b981;">Verified & Secured 🔒</p>
             </div>
