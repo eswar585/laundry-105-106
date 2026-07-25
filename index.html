@@ -64,12 +64,13 @@
             background-color: #f0f9ff !important;
             border: 1px solid #bae6fd !important;
             color: #0369a1 !important;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .ice-input:focus {
             border-color: #0ea5e9 !important;
-            box-shadow: 0 0 10px rgba(14, 165, 233, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25) !important;
             background-color: #ffffff !important;
+            transform: scale(1.03);
         }
 
         /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
@@ -164,15 +165,27 @@
             100% { transform: scale(1.1) rotate(15deg); }
         }
 
-        /* GREEN TICK POP ANIMATION */
+        /* SPRING SCALE & POP ANIMATION FOR SUCCESS */
         @keyframes greenPop {
-            0% { transform: scale(0.4); opacity: 0; }
-            70% { transform: scale(1.18); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+            80% { transform: scale(0.95) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes strokeCheck {
+            0% { stroke-dashoffset: 50; }
+            100% { stroke-dashoffset: 0; }
         }
 
         .green-tick-animated {
-            animation: greenPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: greenPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .checkmark-path {
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: strokeCheck 0.4s ease-in-out 0.2s forwards;
         }
 
         .green-tick-circle {
@@ -232,18 +245,20 @@
                    (parseInt(log.bedsheet) || 0);
         }
 
-        /* Handle 4 PIN Boxes Focus Transitions */
+        /* Handle 4 PIN Boxes Focus Transitions & Auto Advance */
         window.handlePinInput = function(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
 
             if (element.value.length === 1 && index < 3) {
-                document.getElementById(`pin-box-${index + 1}`).focus();
+                const nextBox = document.getElementById(`pin-box-${index + 1}`);
+                if (nextBox) nextBox.focus();
             }
         };
 
         window.handlePinKeyDown = function(event, index) {
             if (event.key === 'Backspace' && !event.target.value && index > 0) {
-                document.getElementById(`pin-box-${index - 1}`).focus();
+                const prevBox = document.getElementById(`pin-box-${index - 1}`);
+                if (prevBox) prevBox.focus();
             }
         };
 
@@ -281,13 +296,13 @@
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.5 seconds, switch to GREEN TICK stage
+                // After 1.5 seconds, switch to GREEN TICK success stage
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
                 }, 1500);
 
-                // Transition to dashboard after verification
+                // Transition smoothly into dashboard after verification sequence completes
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     cardContainer.classList.add('active-mode');
@@ -296,7 +311,7 @@
                         executeDashboardLogin();
                         cardContainer.classList.remove('active-mode'); 
                     }, 400);
-                }, 2800);
+                }, 2900);
 
             } else {
                 errorMsg.classList.remove('hidden');
@@ -316,7 +331,8 @@
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('modal-username-input').value = "";
             for(let i=0; i<4; i++) {
-                document.getElementById(`pin-box-${i}`).value = "";
+                const box = document.getElementById(`pin-box-${i}`);
+                if (box) box.value = "";
             }
         };
 
@@ -534,9 +550,9 @@
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-2">PIN</label>
+                        <label class="block text-xs font-bold text-sky-700 uppercase tracking-wide mb-2">PIN / OTP</label>
                         
-                        <!-- 4 Input Boxes for PIN Entry -->
+                        <!-- 4 Input Boxes for PIN Entry with Auto-Focus -->
                         <div class="flex items-center justify-between gap-2 max-w-xs">
                             <input type="password" id="pin-box-0" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 0)" onkeydown="handlePinKeyDown(event, 0)">
                             <input type="password" id="pin-box-1" maxlength="1" required class="ice-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 1)" onkeydown="handlePinKeyDown(event, 1)">
@@ -549,7 +565,7 @@
                     
                     <div class="pt-2 relative z-30">
                         <button type="submit" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(37,99,235,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
-                            <span>Login</span>
+                            <span>Verify & Login</span>
                         </button>
                     </div>
                 </form>
@@ -585,10 +601,13 @@
             <div id="otp-success-stage" class="hidden flex flex-col items-center gap-3">
                 <div class="w-20 h-20 green-tick-circle rounded-full flex items-center justify-center green-tick-animated">
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        <path class="checkmark-path" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
-                <p class="text-emerald-600 font-black text-xl tracking-wide uppercase">Access Granted!</p>
+                <p class="text-emerald-600 font-black text-xl tracking-wide uppercase mt-2">Verified Successfully</p>
+                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 uppercase tracking-wider">
+                    Verified & Secured
+                </span>
             </div>
 
         </div>
@@ -703,7 +722,6 @@
             <div style="border-bottom: 2px solid #0ea5e9; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: #0369a1; margin: 0;">Laundry Activity Report</h1>
-                    <p style="font-size: 12px; color: #0284c7; margin-top: 4px;">These are all your laundry logs</p>
                 </div>
                 <div style="text-align: right; font-size: 11px; color: #64748b;">
                     <p style="margin: 0;"><strong>User:</strong> <span id="pdf-user-name"></span></p>
