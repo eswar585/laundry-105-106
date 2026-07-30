@@ -82,7 +82,7 @@
             border-radius: 4px;
         }
 
-        /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
+        /* RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
         @media (max-width: 640px) {
             .login-card-container {
                 display: flex;
@@ -209,10 +209,10 @@
         let currentUser = "";
         let globalLogs = [];
 
-        // Fixed location configuration (Modify lat/lon for your exact location)
-        const LOCATION_LAT = 16.2335;
-        const LOCATION_LON = 80.5511;
-        const LOCATION_NAME = "Vadlamudi, AP";
+        // Exact location coordinates updated: Vadlamudi
+        let LOCATION_LAT = 16.2335;
+        let LOCATION_LON = 80.5511;
+        let LOCATION_NAME = "Vadlamudi";
 
         const userPasswords = {
             "ESWAR": "2000",
@@ -248,7 +248,6 @@
                 document.getElementById(id).addEventListener('input', calculateTotal);
             });
 
-            // Fetch 24-Hour Weather Prediction on load
             fetch24HourWeather();
         });
 
@@ -265,17 +264,14 @@
                 const now = new Date();
                 const currentHourISO = now.toISOString().slice(0, 13); // "YYYY-MM-THH"
 
-                // Find index matching current time
                 let startIndex = hourly.time.findIndex(t => t.startsWith(currentHourISO));
                 if (startIndex === -1) startIndex = 0;
 
-                // Extract next 24 hours
                 const next24Times = hourly.time.slice(startIndex, startIndex + 24);
                 const next24Temps = hourly.temperature_2m.slice(startIndex, startIndex + 24);
                 const next24Rain = hourly.precipitation_probability.slice(startIndex, startIndex + 24);
                 const next24Codes = hourly.weather_code.slice(startIndex, startIndex + 24);
 
-                // Render Hourly Cards
                 let hourlyHTML = "";
                 let maxRainChance = 0;
                 let maxRainTime = "";
@@ -306,7 +302,6 @@
                 document.getElementById('weather-location-label').innerText = LOCATION_NAME;
                 document.getElementById('weather-hourly-container').innerHTML = hourlyHTML;
 
-                // Check for Rain Warning (>30% probability)
                 const rainNoteEl = document.getElementById('rain-warning-note');
                 const rainTextEl = document.getElementById('rain-warning-text');
 
@@ -325,16 +320,15 @@
         }
 
         function getWeatherIcon(code) {
-            if (code === 0) return '☀️'; // Clear
-            if (code >= 1 && code <= 3) return '⛅'; // Partbly cloudy
-            if (code >= 45 && code <= 48) return '🌫️'; // Fog
-            if (code >= 51 && code <= 67) return '🌧️'; // Drizzle / Light rain
-            if (code >= 80 && code <= 82) return '🌦️'; // Showers
-            if (code >= 95) return '⛈️'; // Thunderstorm
+            if (code === 0) return '☀️'; 
+            if (code >= 1 && code <= 3) return '⛅'; 
+            if (code >= 45 && code <= 48) return '🌫️'; 
+            if (code >= 51 && code <= 67) return '🌧️'; 
+            if (code >= 80 && code <= 82) return '🌦️'; 
+            if (code >= 95) return '⛈️'; 
             return '☁️';
         }
 
-        /* Calculate Row Total helper function */
         function getItemTotal(log) {
             return (parseInt(log.pant) || 0) + 
                    (parseInt(log.shirt) || 0) + 
@@ -344,7 +338,6 @@
                    (parseInt(log.bedsheet) || 0);
         }
 
-        /* Handle 4 PIN Boxes Focus Transitions & Auto Advance */
         window.handlePinInput = function(element, index) {
             element.value = element.value.replace(/[^0-9]/g, '');
 
@@ -395,13 +388,11 @@
                 spinningStage.classList.remove('hidden');
                 successStage.classList.add('hidden');
 
-                // After 1.5 seconds, switch to GREEN TICK success stage
                 setTimeout(() => {
                     spinningStage.classList.add('hidden');
                     successStage.classList.remove('hidden');
                 }, 1500);
 
-                // Transition smoothly into dashboard after verification sequence completes
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     cardContainer.classList.add('active-mode');
@@ -635,7 +626,6 @@
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4 relative">
 
         <!-- 🌤️ 24-HOUR WEATHER FORECAST COMPONENT -->
-        <!-- Desktop: Top Right Float | Mobile: Top of Login Screen -->
         <div id="weather-card" class="mb-4 bg-white/90 backdrop-blur border border-sky-200 rounded-2xl p-3 shadow-md">
             <div class="flex items-center justify-between mb-2 px-1">
                 <div class="flex items-center gap-1.5">
