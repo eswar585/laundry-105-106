@@ -73,6 +73,15 @@
             transform: scale(1.03);
         }
 
+        /* Weather forecast scrollbar styling */
+        .weather-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        .weather-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
         /* 📱 RESPONSIVE ADJUSTMENTS FOR PHONE VIEWPORTS */
         @media (max-width: 640px) {
             .login-card-container {
@@ -200,6 +209,11 @@
         let currentUser = "";
         let globalLogs = [];
 
+        // Fixed location configuration (Modify lat/lon for your exact location)
+        const LOCATION_LAT = 16.2335;
+        const LOCATION_LON = 80.5511;
+        const LOCATION_NAME = "Vadlamudi, AP";
+
         const userPasswords = {
             "ESWAR": "2000",
             "KAVITHA": "1290",
@@ -233,7 +247,92 @@
             itemInputs.forEach(id => {
                 document.getElementById(id).addEventListener('input', calculateTotal);
             });
+
+            // Fetch 24-Hour Weather Prediction on load
+            fetch24HourWeather();
         });
+
+        /* 24-HOUR WEATHER FORECAST MODULE */
+        async function fetch24HourWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LOCATION_LAT}&longitude=${LOCATION_LON}&hourly=temperature_2m,precipitation_probability,weather_code&current_weather=true&forecast_days=2&timezone=auto`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data || !data.hourly) return;
+
+                const hourly = data.hourly;
+                const now = new Date();
+                const currentHourISO = now.toISOString().slice(0, 13); // "YYYY-MM-THH"
+
+                // Find index matching current time
+                let startIndex = hourly.time.findIndex(t => t.startsWith(currentHourISO));
+                if (startIndex === -1) startIndex = 0;
+
+                // Extract next 24 hours
+                const next24Times = hourly.time.slice(startIndex, startIndex + 24);
+                const next24Temps = hourly.temperature_2m.slice(startIndex, startIndex + 24);
+                const next24Rain = hourly.precipitation_probability.slice(startIndex, startIndex + 24);
+                const next24Codes = hourly.weather_code.slice(startIndex, startIndex + 24);
+
+                // Render Hourly Cards
+                let hourlyHTML = "";
+                let maxRainChance = 0;
+                let maxRainTime = "";
+
+                for (let i = 0; i < next24Times.length; i++) {
+                    const timeObj = new Date(next24Times[i]);
+                    const hourLabel = timeObj.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+                    const temp = Math.round(next24Temps[i]);
+                    const rain = next24Rain[i] || 0;
+                    const code = next24Codes[i];
+                    const icon = getWeatherIcon(code);
+
+                    if (rain > maxRainChance) {
+                        maxRainChance = rain;
+                        maxRainTime = hourLabel;
+                    }
+
+                    hourlyHTML += `
+                        <div class="flex-shrink-0 flex flex-col items-center bg-sky-50 border border-sky-100 rounded-xl p-2 min-w-[65px] text-center">
+                            <span class="text-[10px] font-bold text-sky-700 uppercase">${i === 0 ? 'Now' : hourLabel}</span>
+                            <span class="text-lg my-1">${icon}</span>
+                            <span class="text-xs font-black text-sky-950">${temp}°C</span>
+                            <span class="text-[9px] font-semibold text-blue-600 mt-0.5">${rain > 0 ? rain + '%' : ''}</span>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('weather-location-label').innerText = LOCATION_NAME;
+                document.getElementById('weather-hourly-container').innerHTML = hourlyHTML;
+
+                // Check for Rain Warning (>30% probability)
+                const rainNoteEl = document.getElementById('rain-warning-note');
+                const rainTextEl = document.getElementById('rain-warning-text');
+
+                if (maxRainChance >= 30) {
+                    rainTextEl.innerText = `⚠️ Chance of rain (${maxRainChance}%) expected around ${maxRainTime}. Consider drying clothes indoors!`;
+                    rainNoteEl.classList.remove('hidden');
+                } else {
+                    rainTextEl.innerText = `☀️ Clear skies expected for the next 24 hours. Great weather to dry clothes outside!`;
+                    rainNoteEl.classList.remove('hidden');
+                    rainNoteEl.className = "mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2";
+                }
+
+            } catch (err) {
+                console.error("Weather fetch failed:", err);
+            }
+        }
+
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️'; // Clear
+            if (code >= 1 && code <= 3) return '⛅'; // Partbly cloudy
+            if (code >= 45 && code <= 48) return '🌫️'; // Fog
+            if (code >= 51 && code <= 67) return '🌧️'; // Drizzle / Light rain
+            if (code >= 80 && code <= 82) return '🌦️'; // Showers
+            if (code >= 95) return '⛈️'; // Thunderstorm
+            return '☁️';
+        }
 
         /* Calculate Row Total helper function */
         function getItemTotal(log) {
@@ -534,6 +633,29 @@
 
     <!-- THEME PANEL INTERFACE LAYER -->
     <div id="login-screen" class="w-full max-w-4xl mx-auto p-4 relative">
+
+        <!-- 🌤️ 24-HOUR WEATHER FORECAST COMPONENT -->
+        <!-- Desktop: Top Right Float | Mobile: Top of Login Screen -->
+        <div id="weather-card" class="mb-4 bg-white/90 backdrop-blur border border-sky-200 rounded-2xl p-3 shadow-md">
+            <div class="flex items-center justify-between mb-2 px-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-base">📍</span>
+                    <span id="weather-location-label" class="text-xs font-black text-sky-950 uppercase tracking-wide">Loading Weather...</span>
+                </div>
+                <span class="text-[10px] font-bold text-sky-600 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200 uppercase">24-Hour Forecast</span>
+            </div>
+
+            <!-- Scrollable Hourly Forecast Track -->
+            <div id="weather-hourly-container" class="flex gap-2 overflow-x-auto pb-1 weather-scroll">
+                <!-- Hourly forecast items populate here -->
+            </div>
+
+            <!-- Rain Warning Alert Note -->
+            <div id="rain-warning-note" class="hidden mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+                <span id="rain-warning-text">Checking rain probability...</span>
+            </div>
+        </div>
+
         <div id="animated-card-box" class="login-card-container rounded-2xl">
             
             <!-- Form Inputs -->
@@ -722,6 +844,7 @@
             <div style="border-bottom: 2px solid #0ea5e9; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
                     <h1 style="font-size: 24px; font-weight: 800; color: #0369a1; margin: 0;">Laundry Activity Report</h1>
+                    <p style="font-size: 12px; color: #0284c7; margin-top: 4px;">Crisp Air Tracker • Verified Account</p>
                 </div>
                 <div style="text-align: right; font-size: 11px; color: #64748b;">
                     <p style="margin: 0;"><strong>User:</strong> <span id="pdf-user-name"></span></p>
