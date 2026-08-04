@@ -4,95 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Laundry Tracker</title>
+    <title>Laundry Tracker V2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="css/responsive.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<div class="background"></div>
+<div class="background">
 
-<div class="login-container">
+    <div class="blur one"></div>
+    <div class="blur two"></div>
+    <div class="blur three"></div>
 
-    <div class="left-side">
+</div>
 
-        <div class="logo-circle">
-            🧺
+<div class="login-page">
+
+    <div class="left-panel">
+
+        <div class="brand">
+
+            <div class="logo">
+
+                🧺
+
+            </div>
+
+            <h1>Laundry Tracker</h1>
+
+            <p>
+
+                Smart Laundry Management System
+
+            </p>
+
         </div>
 
-        <h1>Laundry Tracker</h1>
+        <div class="features">
 
-        <p>
-            Smart Laundry Management System
-        </p>
+            <div class="feature-card">
 
-        <div class="feature-list">
+                <span>🌦</span>
 
-            <div class="feature">
-                ✔ Live Weather
+                <div>
+
+                    <h3>Live Weather</h3>
+
+                    <p>Outdoor drying recommendations.</p>
+
+                </div>
+
             </div>
 
-            <div class="feature">
-                ✔ Laundry History
+            <div class="feature-card">
+
+                <span>📊</span>
+
+                <div>
+
+                    <h3>Analytics</h3>
+
+                    <p>Track your laundry history.</p>
+
+                </div>
+
             </div>
 
-            <div class="feature">
-                ✔ PDF Reports
+            <div class="feature-card">
+
+                <span>📄</span>
+
+                <div>
+
+                    <h3>PDF Reports</h3>
+
+                    <p>Export all records instantly.</p>
+
+                </div>
+
             </div>
 
-            <div class="feature">
-                ✔ Mobile Friendly
+            <div class="feature-card">
+
+                <span>☁</span>
+
+                <div>
+
+                    <h3>Cloud Sync</h3>
+
+                    <p>Realtime Firebase Database.</p>
+
+                </div>
+
             </div>
 
         </div>
 
     </div>
 
-
-    <div class="right-side">
+    <div class="right-panel">
 
         <div class="login-card">
 
-            <h2>Welcome Back 👋</h2>
+            <div class="card-header">
 
-            <p>Please login to continue</p>
+                <h2>
 
-            <form>
+                    Welcome Back 👋
 
-                <div class="input-group">
+                </h2>
 
-                    <label>Username</label>
+                <p>
+
+                    Login to continue
+
+                </p>
+
+            </div>
+
+            <form id="loginForm">
+
+                <div class="input-box">
+
+                    <label>
+
+                        Username
+
+                    </label>
 
                     <input
+                        id="username"
                         type="text"
-                        placeholder="Enter username">
+                        placeholder="Enter Username"
+                        autocomplete="off">
 
                 </div>
 
-                <div class="input-group">
+                <div class="input-box">
 
-                    <label>PIN</label>
+                    <label>
+
+                        PIN
+
+                    </label>
 
                     <input
+                        id="pin"
                         type="password"
                         maxlength="4"
                         placeholder="••••">
 
                 </div>
 
-                <button>
+                <button
+                    class="login-btn"
+                    type="submit">
 
                     Login
 
                 </button>
 
             </form>
+
+            <div class="divider"></div>
+
+            <div class="weather-box">
+
+                <div>
+
+                    <h3>
+
+                        Today's Weather
+
+                    </h3>
+
+                    <p id="weatherText">
+
+                        Loading...
+
+                    </p>
+
+                </div>
+
+                <div class="weather-icon">
+
+                    ☀
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -103,4 +211,5 @@
 <script src="js/app.js"></script>
 
 </body>
+
 </html>
