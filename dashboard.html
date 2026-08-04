@@ -1,15 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard</title>
+<title>Laundry Tracker | Dashboard</title>
 
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/dashboard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<link rel="stylesheet" href="css/dashboard.css">
+
+<link rel="stylesheet" href="css/responsive.css">
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 </head>
 
@@ -17,129 +31,834 @@
 
 <div class="dashboard">
 
-    <!-- Sidebar -->
+<!-- ================= Sidebar ================= -->
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <div class="logo">
+<div class="sidebar-top">
 
-            🧺
+<div class="brand">
 
-            <span>Laundry</span>
+<div class="brand-icon">
 
-        </div>
-
-        <nav>
-
-            <a class="active">🏠 Dashboard</a>
-
-            <a>➕ New Entry</a>
-
-            <a>📋 History</a>
-
-            <a>📊 Reports</a>
-
-            <a>⚙ Settings</a>
-
-        </nav>
-
-    </aside>
-
-    <!-- Main -->
-
-    <main class="main-content">
-
-        <!-- Top Bar -->
-
-        <header class="topbar">
-
-            <div>
-
-                <h1>Good Afternoon 👋</h1>
-
-                <p>Welcome back, Eswar</p>
-
-            </div>
-
-            <button class="logout">
-
-                Logout
-
-            </button>
-
-        </header>
-
-        <!-- Statistics -->
-
-        <section class="stats">
-
-            <div class="stat-card">
-
-                <h3>Today's Items</h3>
-
-                <span>12</span>
-
-            </div>
-
-            <div class="stat-card">
-
-                <h3>This Week</h3>
-
-                <span>67</span>
-
-            </div>
-
-            <div class="stat-card">
-
-                <h3>This Month</h3>
-
-                <span>214</span>
-
-            </div>
-
-            <div class="stat-card">
-
-                <h3>Weather</h3>
-
-                <span>31°C ☀</span>
-
-            </div>
-
-        </section>
-
-        <!-- Content -->
-
-        <section class="content-grid">
-
-            <div class="card large">
-
-                <h2>Add Laundry</h2>
-
-                <p>Form goes here...</p>
-
-            </div>
-
-            <div class="card">
-
-                <h2>Weather</h2>
-
-                <p>Weather widget...</p>
-
-            </div>
-
-            <div class="card full">
-
-                <h2>Recent Laundry</h2>
-
-                <p>History table...</p>
-
-            </div>
-
-        </section>
-
-    </main>
+🧺
 
 </div>
 
+<div>
+
+<h2>Laundry</h2>
+
+<p>Tracker V2</p>
+
+</div>
+
+</div>
+
+</div>
+
+<nav class="sidebar-menu">
+
+<a href="#" class="active">
+
+<i class="fa-solid fa-house"></i>
+
+<span>Dashboard</span>
+
+</a>
+
+<a href="#">
+
+<i class="fa-solid fa-plus"></i>
+
+<span>New Entry</span>
+
+</a>
+
+<a href="#">
+
+<i class="fa-solid fa-clock-rotate-left"></i>
+
+<span>History</span>
+
+</a>
+
+<a href="#">
+
+<i class="fa-solid fa-chart-line"></i>
+
+<span>Analytics</span>
+
+</a>
+
+<a href="#">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+<span>Reports</span>
+
+</a>
+
+<a href="#">
+
+<i class="fa-solid fa-gear"></i>
+
+<span>Settings</span>
+
+</a>
+
+</nav>
+
+<div class="sidebar-bottom">
+
+<button class="logout-btn">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+</button>
+
+</div>
+
+</aside>
+
+<!-- ================= Main ================= -->
+
+<main class="main-content">
+
+<!-- Topbar -->
+
+<header class="topbar">
+
+<div>
+
+<h1>
+
+Good Afternoon 👋
+
+</h1>
+
+<p>
+
+Welcome back, Eswar
+
+</p>
+
+</div>
+
+<div class="top-actions">
+
+<button>
+
+<i class="fa-solid fa-bell"></i>
+
+</button>
+
+<button>
+
+<i class="fa-solid fa-user"></i>
+
+</button>
+
+</div>
+
+</header>
+
+<!-- Statistics -->
+
+<section class="stats-grid">
+
+<div class="stat-card purple">
+
+<div>
+
+<p>
+
+Today's Items
+
+</p>
+
+<h2 id="todayTotal">
+
+0
+
+</h2>
+
+</div>
+
+<i class="fa-solid fa-basket-shopping"></i>
+
+</div>
+
+<div class="stat-card green">
+
+<div>
+
+<p>
+
+This Week
+
+</p>
+
+<h2>
+
+38
+
+</h2>
+
+</div>
+
+<i class="fa-solid fa-calendar-week"></i>
+
+</div>
+
+<div class="stat-card blue">
+
+<div>
+
+<p>
+
+This Month
+
+</p>
+
+<h2>
+
+142
+
+</h2>
+
+</div>
+
+<i class="fa-solid fa-chart-column"></i>
+
+</div>
+
+<div class="stat-card orange">
+
+<div>
+
+<p>
+
+Weather
+
+</p>
+
+<h2>
+
+31°C
+
+</h2>
+
+</div>
+
+<i class="fa-solid fa-sun"></i>
+
+</div>
+
+</section>
+
+<!-- Main Grid -->
+
+<section class="dashboard-grid">
+
+<!-- Laundry Entry -->
+
+<div class="card laundry-card">
+
+<div class="card-title">
+
+<h2>
+
+Laundry Entry
+
+</h2>
+
+<p>
+
+Tap + or − to change quantity
+
+</p>
+
+</div>
+
+<div class="laundry-items">
+
+<!-- Pants -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+👖
+
+</div>
+
+<div>
+
+<h3>Pants</h3>
+
+<small>Regular Wear</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('pants',-1)">
+
+−
+
+</button>
+
+<span id="pants">
+
+0
+
+</span>
+
+<button onclick="changeCount('pants',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Shirts -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+👕
+
+</div>
+
+<div>
+
+<h3>Shirts</h3>
+
+<small>T-Shirts</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('shirts',-1)">
+
+−
+
+</button>
+
+<span id="shirts">
+
+0
+
+</span>
+
+<button onclick="changeCount('shirts',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Boxers -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+🩳
+
+</div>
+
+<div>
+
+<h3>Boxers</h3>
+
+<small>Inner Wear</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('boxers',-1)">
+
+−
+
+</button>
+
+<span id="boxers">
+
+0
+
+</span>
+
+<button onclick="changeCount('boxers',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Inners -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+🧦
+
+</div>
+
+<div>
+
+<h3>Inners</h3>
+
+<small>Vest</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('inners',-1)">
+
+−
+
+</button>
+
+<span id="inners">
+
+0
+
+</span>
+
+<button onclick="changeCount('inners',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Towels -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+🧺
+
+</div>
+
+<div>
+
+<h3>Towels</h3>
+
+<small>Bath Towels</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('towels',-1)">
+
+−
+
+</button>
+
+<span id="towels">
+
+0
+
+</span>
+
+<button onclick="changeCount('towels',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Bedsheets -->
+
+<div class="laundry-item">
+
+<div class="item-left">
+
+<div class="icon">
+
+🛏️
+
+</div>
+
+<div>
+
+<h3>Bed Sheets</h3>
+
+<small>Large Items</small>
+
+</div>
+
+</div>
+
+<div class="counter">
+
+<button onclick="changeCount('bedsheets',-1)">
+
+−
+
+</button>
+
+<span id="bedsheets">
+
+0
+
+</span>
+
+<button onclick="changeCount('bedsheets',1)">
+
++
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="save-area">
+
+<div class="total-items">
+
+Total Items
+
+<h2 id="grandTotal">
+
+0
+
+</h2>
+
+</div>
+
+<button class="save-entry">
+
+<i class="fa-solid fa-floppy-disk"></i>
+
+Save Entry
+
+</button>
+
+</div>
+<!-- ================= Right Side ================= -->
+
+<div class="right-column">
+
+    <!-- Weather Card -->
+
+    <div class="card weather-card">
+
+        <div class="card-title">
+
+            <h2>Today's Weather</h2>
+
+            <i class="fa-solid fa-cloud-sun"></i>
+
+        </div>
+
+        <div class="weather-main">
+
+            <div>
+
+                <h1 id="temperature">
+
+                    31°C
+
+                </h1>
+
+                <p id="weatherCondition">
+
+                    Sunny
+
+                </p>
+
+            </div>
+
+            <div class="weather-icon">
+
+                ☀️
+
+            </div>
+
+        </div>
+
+        <div class="weather-info">
+
+            <div>
+
+                <span>Humidity</span>
+
+                <strong>65%</strong>
+
+            </div>
+
+            <div>
+
+                <span>Wind</span>
+
+                <strong>12 km/h</strong>
+
+            </div>
+
+            <div>
+
+                <span>Rain</span>
+
+                <strong>10%</strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Summary -->
+
+    <div class="card">
+
+        <div class="card-title">
+
+            <h2>Today's Summary</h2>
+
+        </div>
+
+        <div class="summary-list">
+
+            <div>
+
+                <span>Total Items</span>
+
+                <strong id="summaryItems">0</strong>
+
+            </div>
+
+            <div>
+
+                <span>Status</span>
+
+                <strong>Ready</strong>
+
+            </div>
+
+            <div>
+
+                <span>Last Saved</span>
+
+                <strong>--</strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- ================= Recent Activity ================= -->
+
+<section class="card history-card">
+
+<div class="history-header">
+
+<h2>
+
+Recent Laundry Records
+
+</h2>
+
+<div>
+
+<input
+type="search"
+placeholder="Search...">
+
+<button>
+
+<i class="fa-solid fa-filter"></i>
+
+</button>
+
+</div>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Pants</th>
+
+<th>Shirts</th>
+
+<th>Boxers</th>
+
+<th>Inners</th>
+
+<th>Towels</th>
+
+<th>Sheets</th>
+
+<th>Total</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="historyTable">
+
+<tr>
+
+<td colspan="9" style="text-align:center;padding:40px;">
+
+No Laundry Records Yet
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</section>
+
+<!-- ================= Charts ================= -->
+
+<section class="analytics-grid">
+
+<div class="card chart-card">
+
+<div class="card-title">
+
+<h2>
+
+Weekly Analytics
+
+</h2>
+
+</div>
+
+<div class="chart-placeholder">
+
+<i class="fa-solid fa-chart-column"></i>
+
+<p>
+
+Weekly chart will appear here
+
+</p>
+
+</div>
+
+</div>
+
+<div class="card chart-card">
+
+<div class="card-title">
+
+<h2>
+
+Most Washed Items
+
+</h2>
+
+</div>
+
+<div class="chart-placeholder">
+
+<i class="fa-solid fa-ranking-star"></i>
+
+<p>
+
+Statistics will appear here
+
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ================= Footer ================= -->
+
+<footer class="footer">
+
+<p>
+
+© 2026 Laundry Tracker V2
+
+</p>
+
+<p>
+
+Designed with ❤️
+
+</p>
+
+</footer>
+
+</main>
+
+</div>
+
+<script src="js/dashboard.js"></script>
+
 </body>
+
 </html>
+</div>
