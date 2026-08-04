@@ -1,0 +1,27 @@
+@media(max-width:900px){
+
+.login-container{
+
+flex-direction:column;
+
+text-align:center;
+
+gap:50px;
+
+}
+
+.left-side h1{
+
+font-size:40px;
+
+}
+
+.login-card{
+
+width:100%;
+
+max-width:420px;
+
+}
+
+}
