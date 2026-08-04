@@ -1,27 +1,234 @@
-@media(max-width:900px){
+/* ===========================
+   Large Screens
+=========================== */
 
-.login-container{
+@media (max-width:1200px){
 
-flex-direction:column;
+    .login-page{
+        gap:50px;
+        padding:30px;
+    }
 
-text-align:center;
+    .brand h1{
+        font-size:48px;
+    }
 
-gap:50px;
+    .features{
+        gap:18px;
+    }
+
+}
+
+/* ===========================
+   Tablet
+=========================== */
+
+@media (max-width:992px){
+
+    .login-page{
+
+        flex-direction:column;
+
+        justify-content:center;
+
+        text-align:center;
+
+        gap:45px;
+
+        padding:30px;
+
+    }
+
+    .left-panel{
+
+        width:100%;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+    }
+
+    .brand{
+
+        margin-bottom:35px;
+
+    }
+
+    .brand h1{
+
+        font-size:42px;
+
+    }
+
+    .brand p{
+
+        font-size:18px;
+
+    }
+
+    .features{
+
+        width:100%;
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .right-panel{
+
+        width:100%;
+
+        max-width:480px;
+
+    }
 
 }
 
-.left-side h1{
+/* ===========================
+   Mobile
+=========================== */
 
-font-size:40px;
+@media (max-width:768px){
+
+    body{
+
+        overflow:auto;
+
+    }
+
+    .login-page{
+
+        padding:20px;
+
+        min-height:100vh;
+
+    }
+
+    .brand h1{
+
+        font-size:34px;
+
+    }
+
+    .brand p{
+
+        font-size:16px;
+
+    }
+
+    .features{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .feature-card{
+
+        padding:18px;
+
+    }
+
+    .feature-card span{
+
+        font-size:28px;
+
+    }
+
+    .feature-card h3{
+
+        font-size:17px;
+
+    }
+
+    .login-card{
+
+        padding:28px;
+
+        border-radius:22px;
+
+    }
+
+    .card-header h2{
+
+        font-size:28px;
+
+    }
+
+    .weather-box{
+
+        flex-direction:column;
+
+        text-align:center;
+
+        gap:15px;
+
+    }
 
 }
 
-.login-card{
+/* ===========================
+   Small Phones
+=========================== */
 
-width:100%;
+@media (max-width:480px){
 
-max-width:420px;
+    .login-page{
 
-}
+        padding:15px;
+
+    }
+
+    .logo{
+
+        width:80px;
+
+        height:80px;
+
+        font-size:38px;
+
+    }
+
+    .brand h1{
+
+        font-size:28px;
+
+    }
+
+    .brand p{
+
+        font-size:15px;
+
+    }
+
+    .login-card{
+
+        padding:22px;
+
+    }
+
+    .input-box input{
+
+        height:52px;
+
+        font-size:15px;
+
+    }
+
+    .login-btn{
+
+        height:52px;
+
+        font-size:16px;
+
+    }
+
+    .weather-icon{
+
+        font-size:42px;
+
+    }
 
 }
