@@ -39,19 +39,11 @@ if (loginForm) {
 // Login Success
 function loginSuccess() {
 
-    const btn = document.querySelector(".login-btn");
+    sessionStorage.setItem("laundryLoggedIn","true");
 
-    btn.innerHTML = "Logging In...";
+    sessionStorage.setItem("laundryUser",username.value);
 
-    btn.disabled = true;
-
-    btn.style.opacity = ".8";
-
-    setTimeout(() => {
-
-        window.location.href = "dashboard.html";
-
-    }, 1000);
+    window.location.href="dashboard.html";
 
 }
 
