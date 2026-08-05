@@ -1,214 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Laundry Tracker V2</title>
+<meta charset="UTF-8">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Laundry Tracker</title>
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="stylesheet" href="css/responsive.css">
+<meta name="theme-color" content="#FFD600">
+
+<meta name="description" content="Laundry Tracker">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
 
+<!--================ LOADER ================-->
+
+<div id="loader">
+
+<div class="loader-box">
+
+<div class="loader-circle"></div>
+
+<h2>Laundry Tracker</h2>
+
+<p>Loading...</p>
+
+</div>
+
+</div>
+
+<!--================ BACKGROUND ================-->
+
 <div class="background">
 
-    <div class="blur one"></div>
-    <div class="blur two"></div>
-    <div class="blur three"></div>
+<div class="circle c1"></div>
+
+<div class="circle c2"></div>
+
+<div class="circle c3"></div>
 
 </div>
 
-<div class="login-page">
+<!--================ LOGIN PAGE ================-->
 
-    <div class="left-panel">
+<div class="login-container">
 
-        <div class="brand">
+<div class="login-card">
 
-            <div class="logo">
+<!-- Logo -->
 
-                🧺
+<div class="logo">
 
-            </div>
+<div class="logo-icon">
 
-            <h1>Laundry Tracker</h1>
+🧺
 
-            <p>
+</div>
 
-                Smart Laundry Management System
+<h1>Laundry Tracker</h1>
 
-            </p>
+<p>
 
-        </div>
+Simple • Fast • Smart
 
-        <div class="features">
+</p>
 
-            <div class="feature-card">
+</div>
 
-                <span>🌦</span>
+<!-- Welcome -->
 
-                <div>
+<div class="welcome">
 
-                    <h3>Live Weather</h3>
+<h2>
 
-                    <p>Outdoor drying recommendations.</p>
+Welcome Back
 
-                </div>
+</h2>
 
-            </div>
+<p>
 
-            <div class="feature-card">
+Login to continue
 
-                <span>📊</span>
+</p>
 
-                <div>
+</div>
 
-                    <h3>Analytics</h3>
+<!-- Login Form -->
 
-                    <p>Track your laundry history.</p>
+<form id="loginForm">
 
-                </div>
+<div class="input-group">
 
-            </div>
+<label>
 
-            <div class="feature-card">
+Username
 
-                <span>📄</span>
+</label>
 
-                <div>
+<div class="input-box">
 
-                    <h3>PDF Reports</h3>
+<i class="fa-solid fa-user"></i>
 
-                    <p>Export all records instantly.</p>
+<input
 
-                </div>
+type="text"
 
-            </div>
+id="username"
 
-            <div class="feature-card">
+placeholder="Enter username"
 
-                <span>☁</span>
+autocomplete="off"
 
-                <div>
+required>
 
-                    <h3>Cloud Sync</h3>
+</div>
 
-                    <p>Realtime Firebase Database.</p>
+</div>
 
-                </div>
+<div class="input-group">
 
-            </div>
+<label>
+
+PIN
+
+</label>
+
+<div class="input-box">
+
+<i class="fa-solid fa-lock"></i>
+
+<input
+
+type="password"
+
+id="pin"
+
+maxlength="4"
+
+placeholder="Enter 4 digit PIN"
+
+required>
+
+<button
+
+type="button"
+
+id="togglePassword"
+
+class="eye-btn">
+
+<i class="fa-solid fa-eye"></i>
+
+</button>
+
+</div>
+
+</div>
+
+<div class="remember-row">
+
+<label class="remember">
+
+<input
+
+type="checkbox"
+
+id="rememberMe">
+
+<span>
+
+Remember Me
+
+</span>
+
+</label>
+
+<a href="#">
+
+Forgot PIN?
+
+</a>
+
+</div>
+
+<button
+
+type="submit"
+
+class="login-btn">
+
+<i class="fa-solid fa-right-to-bracket"></i>
+
+Login
+
+</button>
+
+</form>
+
+<!-- Demo Users -->
+
+<div class="demo-users">
+
+<h3>
+
+Available Users
+
+</h3>
+
+<div class="user-list">
+
+<div class="user-card">
+
+<div class="avatar">
+
+E
+
+</div>
+
+<div>
+
+<h4>
+
+Eswar
+
+</h4>
+
+<p>
+
+PIN • 2000
+
+</p>
+
+</div>
+
+</div>
+
+<div class="user-card">
+
+<div class="avatar">
+
+K
+
+</div>
+
+<div>
+
+<h4>
+
+Kavitha
+
+</h4>
+
+<p>
+
+PIN • 1290
+
+</p>
+
+</div>
+
+</div>
+
+<div class="user-card">
+
+<div class="avatar">
+
+S
+
+</div>
+
+<div>
+
+<h4>
+
+Snehith
+
+</h4>
+
+<p>
+
+PIN • 2001
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<!--================ FOOTER ================-->
+
+<div class="login-footer">
+
+    <div class="footer-card">
+
+        <i class="fa-solid fa-cloud"></i>
+
+        <div>
+
+            <h4>Cloud Sync</h4>
+
+            <p>Firebase Realtime Database</p>
 
         </div>
 
     </div>
 
-    <div class="right-panel">
+    <div class="footer-card">
 
-        <div class="login-card">
+        <i class="fa-solid fa-shield-halved"></i>
 
-            <div class="card-header">
+        <div>
 
-                <h2>
+            <h4>Secure Login</h4>
 
-                    Welcome Back 👋
-
-                </h2>
-
-                <p>
-
-                    Login to continue
-
-                </p>
-
-            </div>
-
-            <form id="loginForm">
-
-                <div class="input-box">
-
-                    <label>
-
-                        Username
-
-                    </label>
-
-                    <input
-                        id="username"
-                        type="text"
-                        placeholder="Enter Username"
-                        autocomplete="off">
-
-                </div>
-
-                <div class="input-box">
-
-                    <label>
-
-                        PIN
-
-                    </label>
-
-                    <input
-                        id="pin"
-                        type="password"
-                        maxlength="4"
-                        placeholder="••••">
-
-                </div>
-
-                <button
-                    class="login-btn"
-                    type="submit">
-
-                    Login
-
-                </button>
-
-            </form>
-
-            <div class="divider"></div>
-
-            <div class="weather-box">
-
-                <div>
-
-                    <h3>
-
-                        Today's Weather
-
-                    </h3>
-
-                    <p id="weatherText">
-
-                        Loading...
-
-                    </p>
-
-                </div>
-
-                <div class="weather-icon">
-
-                    ☀
-
-                </div>
-
-            </div>
+            <p>4 Digit PIN Authentication</p>
 
         </div>
 
     </div>
 
 </div>
+
+</div>
+
+</div>
+
+<!--================ TOAST ================-->
+
+<div id="toast">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<span id="toastMessage">
+
+Login Successful
+
+</span>
+
+</div>
+
+<!--================ VERSION ================-->
+
+<div class="version">
+
+Version 3.0 • Laundry Tracker
+
+</div>
+
+<!--================ SCRIPTS ================-->
+
+<script type="module" src="js/firebase.js"></script>
+
+<script src="js/auth.js"></script>
 
 <script src="js/app.js"></script>
+
+<script>
+
+window.addEventListener("load",()=>{
+
+    setTimeout(()=>{
+
+        document.getElementById("loader").classList.add("hide");
+
+    },800);
+
+});
+
+const togglePassword=document.getElementById("togglePassword");
+
+const pinInput=document.getElementById("pin");
+
+togglePassword.addEventListener("click",()=>{
+
+    if(pinInput.type==="password"){
+
+        pinInput.type="text";
+
+        togglePassword.innerHTML='<i class="fa-solid fa-eye-slash"></i>';
+
+    }else{
+
+        pinInput.type="password";
+
+        togglePassword.innerHTML='<i class="fa-solid fa-eye"></i>';
+
+    }
+
+});
+
+</script>
 
 </body>
 
