@@ -3,21 +3,48 @@
 // Authentication
 // ===========================================
 
-// Demo Login Credentials
-const LOGIN_USERNAME = "admin";
-const LOGIN_PIN = "1234";
+// ===========================================
+// Users
+// ===========================================
 
-// ----------------------------
+const USERS = [
+
+    {
+        username: "eswar",
+        pin: "2000"
+    },
+
+    {
+        username: "kavitha",
+        pin: "1290"
+    },
+
+    {
+        username: "snehith",
+        pin: "2001"
+    }
+
+];
+
+// ===========================================
 // Login
-// ----------------------------
+// ===========================================
 
 function login(username, pin) {
 
-    if (username === LOGIN_USERNAME && pin === LOGIN_PIN) {
+    const user = USERS.find(
+
+        u =>
+        u.username.toLowerCase() === username.toLowerCase() &&
+        u.pin === pin
+
+    );
+
+    if (user) {
 
         sessionStorage.setItem("laundryLoggedIn", "true");
 
-        sessionStorage.setItem("laundryUser", username);
+        sessionStorage.setItem("laundryUser", user.username);
 
         window.location.href = "dashboard.html";
 
@@ -25,10 +52,11 @@ function login(username, pin) {
 
     }
 
+    alert("Invalid Username or PIN");
+
     return false;
 
 }
-
 // ----------------------------
 // Logout
 // ----------------------------
