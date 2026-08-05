@@ -1,181 +1,319 @@
-// =========================================
-// Laundry Tracker V2
-// app.js
-// =========================================
+// ==========================================
+// Laundry Tracker V3
+// app.js - Part 1
+// ==========================================
 
+// Users
+const USERS = [
+    {
+        username: "eswar",
+        pin: "2000",
+        name: "Eswar"
+    },
+    {
+        username: "kavitha",
+        pin: "1290",
+        name: "Kavitha"
+    },
+    {
+        username: "snehith",
+        pin: "2001",
+        name: "Snehith"
+    }
+];
+
+// Elements
 const loginForm = document.getElementById("loginForm");
-const username = document.getElementById("username");
-const pin = document.getElementById("pin");
-const weatherText = document.getElementById("weatherText");
+const usernameInput = document.getElementById("username");
+const pinInput = document.getElementById("pin");
+const rememberCheck = document.getElementById("rememberMe");
 
-// Demo Credentials
-const USERNAME = "admin";
-const PIN = "1234";
+// ==========================================
+// Remember Me
+// ==========================================
 
+window.addEventListener("DOMContentLoaded", () => {
+
+    const savedUser = localStorage.getItem("rememberUser");
+
+    if (savedUser) {
+
+        usernameInput.value = savedUser;
+        rememberCheck.checked = true;
+
+    }
+
+});
+
+// ==========================================
 // Login
-if (loginForm) {
+// ==========================================
 
-    loginForm.addEventListener("submit", function (e) {
+loginForm.addEventListener("submit", function (e) {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const user = username.value.trim();
-        const pass = pin.value.trim();
+    const username =
+        usernameInput.value.trim().toLowerCase();
 
-        if (user === USERNAME && pass === PIN) {
+    const pin =
+        pinInput.value.trim();
 
-            loginSuccess();
+    const user =
+        USERS.find(u =>
+            u.username === username &&
+            u.pin === pin
+        );
 
-        } else {
+    if (!user) {
 
-            loginFailed();
+        showToast(
+            "Invalid Username or PIN",
+            "#EF4444"
+        );
 
-        }
+        pinInput.value = "";
 
-    });
+        pinInput.focus();
 
-}
+        return;
 
-// Login Success
-function loginSuccess() {
+    }
 
-    sessionStorage.setItem("laundryLoggedIn","true");
+    // Remember User
 
-    sessionStorage.setItem("laundryUser",username.value);
+    if (rememberCheck.checked) {
 
-    window.location.href="dashboard.html";
+        localStorage.setItem(
+            "rememberUser",
+            user.username
+        );
 
-}
+    } else {
 
-// Login Failed
-function loginFailed() {
+        localStorage.removeItem(
+            "rememberUser"
+        );
 
-    pin.style.borderColor = "#ef4444";
+    }
 
-    username.style.borderColor = "#ef4444";
+    // Save Session
 
-    shakeCard();
+    sessionStorage.setItem(
+        "loggedIn",
+        "true"
+    );
 
-    alert("Invalid Username or PIN");
+    sessionStorage.setItem(
+        "username",
+        user.username
+    );
+
+    sessionStorage.setItem(
+        "displayName",
+        user.name
+    );
+
+    showToast(
+        "Login Successful",
+        "#22C55E"
+    );
 
     setTimeout(() => {
 
-        pin.style.borderColor = "#334155";
-        username.style.borderColor = "#334155";
+        window.location.href =
+            "dashboard.html";
 
     }, 1200);
 
+});
+// ==========================================
+// Laundry Tracker V3
+// app.js - Part 2
+// ==========================================
+
+// ==========================================
+// Toast
+// ==========================================
+
+function showToast(message, color = "#22C55E") {
+
+    const toast = document.getElementById("toast");
+    const text = document.getElementById("toastMessage");
+
+    if (!toast || !text) return;
+
+    text.innerText = message;
+
+    toast.style.background = color;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 2500);
+
 }
 
-// Shake Animation
-function shakeCard() {
+// ==========================================
+// Auto Login
+// ==========================================
 
-    const card = document.querySelector(".login-card");
+window.addEventListener("load", () => {
 
-    card.animate(
+    const logged =
+        sessionStorage.getItem("loggedIn");
+
+    if (
+        logged === "true" &&
+        !window.location.pathname.includes("index.html")
+    ) {
+        return;
+    }
+
+});
+
+// ==========================================
+// Logout
+// ==========================================
+
+function logout() {
+
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("displayName");
+
+    window.location.href = "index.html";
+
+}
+
+window.logout = logout;
+
+// ==========================================
+// PIN Validation
+// ==========================================
+
+pinInput.addEventListener("input", () => {
+
+    pinInput.value =
+        pinInput.value
+            .replace(/\D/g, "")
+            .slice(0, 4);
+
+});
+
+// ==========================================
+// Username Formatting
+// ==========================================
+
+usernameInput.addEventListener("input", () => {
+
+    usernameInput.value =
+        usernameInput.value
+            .replace(/\s+/g, "")
+            .toLowerCase();
+
+});
+
+// ==========================================
+// Card Animation
+// ==========================================
+
+const loginCard =
+    document.querySelector(".login-card");
+
+if (loginCard) {
+
+    loginCard.animate(
 
         [
-
-            { transform: "translateX(0px)" },
-
-            { transform: "translateX(-10px)" },
-
-            { transform: "translateX(10px)" },
-
-            { transform: "translateX(-8px)" },
-
-            { transform: "translateX(8px)" },
-
-            { transform: "translateX(0px)" }
-
+            {
+                opacity: 0,
+                transform: "translateY(30px)"
+            },
+            {
+                opacity: 1,
+                transform: "translateY(0)"
+            }
         ],
 
         {
-
-            duration: 450
-
+            duration: 700,
+            easing: "ease-out"
         }
 
     );
 
 }
 
-// Weather Demo
-const weatherList = [
+// ==========================================
+// Auto Focus
+// ==========================================
 
-    "☀ Sunny • 31°C",
+window.addEventListener("load", () => {
 
-    "⛅ Cloudy • 29°C",
-
-    "🌧 Rain Expected • 27°C",
-
-    "🌤 Pleasant • 30°C"
-
-];
-
-let weatherIndex = 0;
-
-function rotateWeather() {
-
-    if (!weatherText) return;
-
-    weatherText.style.opacity = 0;
-
-    setTimeout(() => {
-
-        weatherText.innerHTML = weatherList[weatherIndex];
-
-        weatherText.style.opacity = 1;
-
-        weatherIndex++;
-
-        if (weatherIndex >= weatherList.length) {
-
-            weatherIndex = 0;
-
-        }
-
-    }, 300);
-
-}
-
-rotateWeather();
-
-setInterval(rotateWeather, 4000);
-
-// Input Animation
-document.querySelectorAll("input").forEach(input => {
-
-    input.addEventListener("focus", () => {
-
-        input.parentElement.style.transform = "scale(1.02)";
-
-    });
-
-    input.addEventListener("blur", () => {
-
-        input.parentElement.style.transform = "scale(1)";
-
-    });
+    usernameInput.focus();
 
 });
 
-// Floating Effect
-const logo = document.querySelector(".logo");
+// ==========================================
+// Enter Key
+// ==========================================
 
-if (logo) {
+document.addEventListener("keydown", (event) => {
 
-    let direction = 1;
+    if (event.key === "Enter") {
 
-    setInterval(() => {
+        if (
+            document.activeElement === usernameInput
+        ) {
 
-        logo.style.transform = `translateY(${direction * 6}px)`;
+            pinInput.focus();
 
-        direction *= -1;
+        }
 
-    }, 1500);
+    }
 
-}
+});
 
-// Console Message
-console.log("%cLaundry Tracker V2 Loaded Successfully", "color:#7C3AED;font-size:16px;font-weight:bold;");
+// ==========================================
+// Connection Status
+// ==========================================
+
+window.addEventListener("online", () => {
+
+    showToast(
+        "Internet Connected",
+        "#22C55E"
+    );
+
+});
+
+window.addEventListener("offline", () => {
+
+    showToast(
+        "No Internet Connection",
+        "#EF4444"
+    );
+
+});
+
+// ==========================================
+// Prevent Back After Login
+// ==========================================
+
+history.pushState(null, null, location.href);
+
+window.onpopstate = function () {
+
+    history.go(1);
+
+};
+
+// ==========================================
+// App Ready
+// ==========================================
+
+console.log("✅ Laundry Tracker V3 Loaded");
