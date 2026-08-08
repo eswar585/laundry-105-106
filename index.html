@@ -15,30 +15,30 @@
 
     <style>
         body {
-            background-color: #f0f9ff; /* Pale Sky Base */
+            background-color: #E0F2FE; /* Pale Sky Base */
             color: #1e293b;
         }
 
-        /* CUSTOM THEME UTILITIES */
+        /* CUSTOM EXACT COLOR UTILITIES */
         .bg-raspberry {
-            background-color: #C71585 !important;
+            background-color: #C2185B !important;
             color: #ffffff !important;
         }
         .text-raspberry {
-            color: #C71585 !important;
+            color: #C2185B !important;
         }
         .border-raspberry {
-            border-color: #C71585 !important;
+            border-color: #C2185B !important;
         }
         .bg-palesky {
-            background-color: #e0f2fe !important;
+            background-color: #E0F2FE !important;
         }
 
         .login-card-container {
             position: relative;
             background-color: #ffffff;
-            border: 1px solid rgba(199, 21, 133, 0.2);
-            box-shadow: 0 10px 30px rgba(199, 21, 133, 0.1);
+            border: 1px solid rgba(194, 24, 91, 0.2);
+            box-shadow: 0 10px 30px rgba(194, 24, 91, 0.1);
             display: flex;
             flex-direction: row;
             border-radius: 1rem;
@@ -52,7 +52,7 @@
             right: 0;
             width: 45%;
             height: 100%;
-            background: linear-gradient(135deg, #C71585 0%, #800040 100%);
+            background: linear-gradient(135deg, #C2185B 0%, #880e4f 100%);
             transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
             z-index: 20;
             clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -77,14 +77,14 @@
         }
 
         .theme-input {
-            background-color: #f0f9ff !important;
+            background-color: #E0F2FE !important;
             border: 1px solid #bae6fd !important;
-            color: #800040 !important;
+            color: #880e4f !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .theme-input:focus {
-            border-color: #C71585 !important;
-            box-shadow: 0 0 0 3px rgba(199, 21, 133, 0.2) !important;
+            border-color: #C2185B !important;
+            box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.2) !important;
             background-color: #ffffff !important;
             transform: scale(1.03);
         }
@@ -153,13 +153,13 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 6px solid #e0f2fe;
-            background: linear-gradient(135deg, #C71585 0%, #800040 100%);
+            border: 6px solid #E0F2FE;
+            background: linear-gradient(135deg, #C2185B 0%, #880e4f 100%);
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 25px rgba(199, 21, 133, 0.3);
+            box-shadow: 0 10px 25px rgba(194, 24, 91, 0.3);
             overflow: hidden;
         }
 
@@ -213,8 +213,8 @@
         }
 
         .tick-circle {
-            background-color: #C71585;
-            box-shadow: 0 10px 25px rgba(199, 21, 133, 0.3);
+            background-color: #C2185B;
+            box-shadow: 0 10px 25px rgba(194, 24, 91, 0.3);
         }
     </style>
 
@@ -303,7 +303,7 @@
                     }
 
                     hourlyHTML += `
-                        <div class="flex-shrink-0 flex flex-col items-center bg-sky-50 border border-sky-100 rounded-xl p-2 min-w-[65px] text-center">
+                        <div class="flex-shrink-0 flex flex-col items-center bg-[#E0F2FE] border border-sky-200 rounded-xl p-2 min-w-[65px] text-center">
                             <span class="text-[10px] font-bold text-raspberry uppercase">${i === 0 ? 'Now' : hourLabel}</span>
                             <span class="text-lg my-1">${icon}</span>
                             <span class="text-xs font-black text-slate-800">${temp}°C</span>
@@ -512,7 +512,7 @@
             logs.forEach(log => {
                 const total = getItemTotal(log);
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-sky-50 transition border-b border-sky-100 text-slate-800";
+                tr.className = "hover:bg-[#E0F2FE]/50 transition border-b border-sky-100 text-slate-800";
                 tr.innerHTML = `
                     <td class="py-3 font-medium">${log.date}</td>
                     <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-bold bg-palesky text-raspberry border border-sky-200">${log.user || 'Legacy'}</span></td>
@@ -555,27 +555,27 @@
                         </button>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Pants</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.pant}</div>
                         </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Shirts</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.shirt}</div>
                         </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Inners</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.inners}</div>
                         </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Boxers</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.boxers}</div>
                         </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Towels</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.towel}</div>
                         </div>
-                        <div class="bg-sky-50 rounded-lg p-1.5 border border-sky-100">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
                             <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Sheets</div>
                             <div class="text-sm font-bold text-slate-900 mt-0.5">${log.bedsheet}</div>
                         </div>
@@ -612,7 +612,7 @@
                     <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.boxers}</td>
                     <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.towel}</td>
                     <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.bedsheet}</td>
-                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center; font-weight: bold; color: #C71585;">${total}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center; font-weight: bold; color: #C2185B;">${total}</td>
                 `;
                 pdfTbody.appendChild(tr);
             });
@@ -688,7 +688,7 @@
                     </div>
                     
                     <div class="pt-2 relative z-30">
-                        <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(199,21,133,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                        <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(194,24,91,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
                             <span>Verify & Login</span>
                         </button>
                     </div>
@@ -745,7 +745,7 @@
                 <p class="text-xs sm:text-sm text-slate-600 font-medium">You can download all your previous laundry logs by clicking download button</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(199,21,133,0.25)] active:scale-95 uppercase tracking-wider">
+                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
                     📥 Download PDF
                 </button>
                 <button onclick="window.logout()" class="bg-palesky hover:bg-sky-200 text-raspberry font-bold px-4 py-3 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95 border border-sky-200">
@@ -760,33 +760,33 @@
                 <form id="laundry-form" class="space-y-4" autocomplete="off">
                     <div>
                         <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-1">Date</label>
-                        <input type="date" id="log-date" required class="w-full border border-sky-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-raspberry bg-sky-50 text-slate-900 font-medium transition-colors">
+                        <input type="date" id="log-date" required class="w-full border border-sky-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-raspberry bg-[#E0F2FE] text-slate-900 font-medium transition-colors">
                     </div>
                     
                     <div class="border-t border-sky-100 my-2 pt-3">
                         <p class="text-xs font-bold text-raspberry uppercase tracking-wider mb-3">Item Counts</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Pants</label>
                                 <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Shirts</label>
                                 <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Inners</label>
                                 <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Boxers</label>
                                 <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Towels</label>
                                 <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
-                            <div class="bg-sky-50 p-2 rounded-xl border border-sky-100">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">Bed Sheets</label>
                                 <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                             </div>
@@ -794,12 +794,12 @@
                     </div>
 
                     <!-- TOTAL ITEMS SUMMARY BOX WITH HIGH CONTRAST -->
-                    <div class="flex items-center justify-between bg-palesky border border-sky-200 p-3 rounded-xl">
+                    <div class="flex items-center justify-between bg-[#E0F2FE] border border-sky-200 p-3 rounded-xl">
                         <span class="text-xs font-bold text-raspberry uppercase tracking-wider">Total Items</span>
                         <span id="live-total-count" class="text-xl font-black text-raspberry">0</span>
                     </div>
 
-                    <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3 rounded-xl transition-all duration-300 text-xs tracking-wider uppercase shadow-[0_4px_15px_rgba(199,21,133,0.25)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                    <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3 rounded-xl transition-all duration-300 text-xs tracking-wider uppercase shadow-[0_4px_15px_rgba(194,24,91,0.25)] cursor-pointer focus:outline-none active:scale-[0.98]">
                         Save Log Entry
                     </button>
                 </form>
@@ -844,10 +844,10 @@
     <!-- HIDDEN PDF REPORT TEMPLATE -->
     <div class="hidden">
         <div id="pdf-template" style="padding: 24px; font-family: sans-serif; color: #1e293b;">
-            <div style="border-bottom: 2px solid #C71585; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div style="border-bottom: 2px solid #C2185B; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
-                    <h1 style="font-size: 24px; font-weight: 800; color: #C71585; margin: 0;">Laundry Activity Report</h1>
-                    <p style="font-size: 12px; color: #800040; margin-top: 4px;">Crisp Air Tracker • Verified Account</p>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #C2185B; margin: 0;">Laundry Activity Report</h1>
+                    <p style="font-size: 12px; color: #880e4f; margin-top: 4px;">Crisp Air Tracker • Verified Account</p>
                 </div>
                 <div style="text-align: right; font-size: 11px; color: #64748b;">
                     <p style="margin: 0;"><strong>User:</strong> <span id="pdf-user-name"></span></p>
@@ -857,7 +857,7 @@
 
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead>
-                    <tr style="background-color: #f0f9ff; color: #C71585; font-weight: bold; text-align: left;">
+                    <tr style="background-color: #E0F2FE; color: #C2185B; font-weight: bold; text-align: left;">
                         <th style="padding: 10px; border: 1px solid #bae6fd;">Date</th>
                         <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Pants</th>
                         <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Shirts</th>
