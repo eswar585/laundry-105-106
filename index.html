@@ -269,12 +269,12 @@
             panel.classList.toggle('hidden');
         };
 
-        // Generates an .ics Calendar / System Alarm File targeting the EXACT start time in UTC
-        function createAndDownloadSystemAlarm(title, targetDateObj) {
+        // Opens Google Calendar directly or falls back to .ics file download
+        function openDeviceCalendar(title, targetDateObj) {
             const pad = (n) => n < 10 ? '0' + n : n;
             
-            // Format dates strictly in UTC to prevent 30-minute timezone offset miscalculations
-            const formatUTCForICS = (date) => {
+            // Format UTC string for Google Calendar API (YYYYMMDDTHHMMSSZ)
+            const formatUTCForGoogle = (date) => {
                 return date.getUTCFullYear().toString() +
                        pad(date.getUTCMonth() + 1) +
                        pad(date.getUTCDate()) + 'T' +
@@ -283,10 +283,20 @@
                        pad(date.getUTCSeconds()) + 'Z';
             };
 
-            const startTime = formatUTCForICS(targetDateObj);
-            const endTime = formatUTCForICS(new Date(targetDateObj.getTime() + 15 * 60000));
+            const startTime = formatUTCForGoogle(targetDateObj);
+            const endTime = formatUTCForGoogle(new Date(targetDateObj.getTime() + 15 * 60000));
+            const eventDetails = encodeURIComponent("Time to load your clothes into the washing machine!");
+            const eventTitle = encodeURIComponent(`🧺 ${title}`);
 
-            const icsContent = 
+            // Direct Google Calendar Intent URL (Opens natively in Calendar App on Android/iOS)
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startTime}/${endTime}&details=${eventDetails}`;
+
+            // Launch directly in browser/app
+            const calendarWindow = window.open(googleCalendarUrl, '_blank');
+
+            // Fallback .ics file download if popup blocked
+            if (!calendarWindow) {
+                const icsContent = 
 `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Crisp Air Laundry Tracker//EN
@@ -307,16 +317,17 @@ END:VALARM
 END:VEVENT
 END:VCALENDAR`;
 
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'load_laundry_alarm.ics');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', 'load_laundry_alarm.ics');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
 
-        // Schedule Laundry Machine Loading Reminder
+        // Schedule Machine Loading Reminder
         window.scheduleLaundryTimer = function() {
             const dateVal = document.getElementById('timer-date-select').value;
             const timeVal = document.getElementById('timer-time-select').value;
@@ -353,10 +364,8 @@ END:VCALENDAR`;
                 document.getElementById('active-timer-box').classList.remove('hidden');
                 document.getElementById('timer-setup-panel').classList.add('hidden');
 
-                // Trigger direct file download to add exact-time alarm to system Calendar/Clock app
-                createAndDownloadSystemAlarm(`Load Clothes into Washing Machine (${currentUser})`, targetDate);
-
-                alert(`Reminder set for ${dateVal} at ${timeFormatted}!\n\nA system alarm entry (.ics) was downloaded. Tap "Open" or "Add to Calendar" to ring your phone's native alarm at the exact minute.`);
+                // Open calendar directly on device
+                openDeviceCalendar(`Load Clothes into Washing Machine (${currentUser})`, targetDate);
             });
         };
 
