@@ -8,11 +8,10 @@
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     
-    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core & Messaging) -->
+    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
     <style>
         body {
@@ -216,15 +215,12 @@
     <!-- APPLICATION CONTROLLER SCRIPT -->
     <script>
         let db;
-        let messaging;
         let currentUser = "";
         let globalLogs = [];
 
         let LOCATION_LAT = 16.2335;
         let LOCATION_LON = 80.5511;
         let LOCATION_NAME = "Vadlamudi";
-
-        const VAPID_PUBLIC_KEY = "BEfzG5pTLzEwern154mYFIYWkFGs_pveQWCJY7sl0m1mYYlNWLg6aTJ67fH_8CMKazmXmzPVbDo6v98F86zp_cQ";
 
         const userPasswords = {
             "ESWAR": "2000",
@@ -249,11 +245,6 @@
             }
             db = firebase.database();
 
-            if (firebase.messaging.isSupported()) {
-                messaging = firebase.messaging();
-                setupServiceWorker();
-            }
-
             const dateInput = document.getElementById('log-date');
             if(dateInput) dateInput.valueAsDate = new Date();
 
@@ -269,60 +260,62 @@
             });
 
             fetch24HourWeather();
-            startTimerChecker();
-
-            // Handle page visibility change (Mobile phone unlock or tab switch)
-            document.addEventListener("visibilitychange", function() {
-                if (!document.hidden) {
-                    checkPendingTimers();
-                }
-            });
+            startInTabTimerChecker();
         });
-
-        function setupServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('firebase-messaging-sw.js')
-                    .then(function(registration) {
-                        console.log('Service Worker registered:', registration.scope);
-                        messaging.useServiceWorker(registration);
-                    }).catch(function(err) {
-                        console.error('Service Worker Registration Error:', err);
-                    });
-            }
-        }
 
         // Toggle Timer Panel Visibility
         window.toggleTimerPanel = function() {
             const panel = document.getElementById('timer-setup-panel');
             panel.classList.toggle('hidden');
-
-            // Prompt permission on click if not granted
-            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                requestNotificationPermission();
-            }
         };
 
-        window.requestNotificationPermission = function() {
-            if (!messaging) return;
+        // Generates an .ics Calendar / System Alarm File for Native Phone/PC Alarms
+        function createAndDownloadSystemAlarm(title, targetDateObj) {
+            const pad = (n) => n < 10 ? '0' + n : n;
+            
+            // Format dates for ICS specification (YYYYMMDDTHHMMSS)
+            const formatDateForICS = (date) => {
+                return date.getFullYear().toString() +
+                       pad(date.getMonth() + 1) +
+                       pad(date.getDate()) + 'T' +
+                       pad(date.getHours()) +
+                       pad(date.getMinutes()) +
+                       pad(date.getSeconds());
+            };
 
-            Notification.requestPermission().then((permission) => {
-                if (permission === 'granted') {
-                    navigator.serviceWorker.ready.then((registration) => {
-                        messaging.getToken({ 
-                            serviceWorkerRegistration: registration,
-                            vapidKey: VAPID_PUBLIC_KEY
-                        })
-                        .then((token) => {
-                            if (token) {
-                                db.ref(`users/${currentUser}/fcmToken`).set(token);
-                            }
-                        });
-                    });
-                }
-            });
-        };
+            const startTime = formatDateForICS(targetDateObj);
+            const endTime = formatDateForICS(new Date(targetDateObj.getTime() + 15 * 60000));
 
-        // Step-by-Step Timer Scheduling (Date -> Time)
+            const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Crisp Air Laundry Tracker//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+SUMMARY:🧺 ${title}
+DESCRIPTION:Your laundry cycle is complete! Time to collect your clothes.
+DTSTART:${startTime}
+DTEND:${endTime}
+STATUS:CONFIRMED
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER:-PT0M
+DESCRIPTION:Laundry Alarm Alert
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'laundry_completion_alarm.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Schedule Laundry Timer and Export to System Calendar
         window.scheduleLaundryTimer = function() {
             const dateVal = document.getElementById('timer-date-select').value;
             const timeVal = document.getElementById('timer-time-select').value;
@@ -339,7 +332,7 @@
             const now = new Date();
 
             if (targetDate.getTime() <= now.getTime()) {
-                alert("Please select a future time!");
+                alert("Please select a future date and time!");
                 return;
             }
 
@@ -353,65 +346,43 @@
                 status: 'pending'
             };
 
-            // Save to Firebase Database
+            // Save entry into Firebase
             db.ref('scheduled_push_alerts').push(timerData).then(() => {
-                // Also save to LocalStorage for offline mobile fallback
-                let localTimers = JSON.parse(localStorage.getItem('laundry_timers') || '[]');
-                localTimers.push(timerData);
-                localStorage.setItem('laundry_timers', JSON.stringify(localTimers));
-
-                document.getElementById('active-timer-display').innerText = `⏱️ Active Timer set for: ${dateVal} @ ${timeFormatted}`;
+                document.getElementById('active-timer-display').innerText = `⏱️ Active Timer: ${dateVal} @ ${timeFormatted}`;
                 document.getElementById('active-timer-box').classList.remove('hidden');
                 document.getElementById('timer-setup-panel').classList.add('hidden');
 
-                alert(`Timer successfully set for ${dateVal} at ${timeFormatted}!`);
+                // Trigger direct file download to add to system Calendar/Clock app
+                createAndDownloadSystemAlarm(`Laundry Completed (${currentUser})`, targetDate);
+
+                alert(`Timer scheduled for ${dateVal} at ${timeFormatted}!\n\nA system alarm entry (.ics) was downloaded. Tap "Open" or "Add to Calendar" to ring your phone's native alarm when complete.`);
             });
         };
 
-        // Core Alarm & Vibration Trigger for Mobile Devices
-        function triggerMobileAlarm(message) {
-            // Vibrate phone
-            if ("vibrate" in navigator) {
-                navigator.vibrate([1000, 500, 1000, 500, 1000]);
-            }
+        // In-Tab Audio Alert Backup (if tab is open)
+        function startInTabTimerChecker() {
+            setInterval(() => {
+                if (!currentUser) return;
+                const now = Date.now();
 
-            // System Notification
-            if (Notification.permission === "granted") {
-                new Notification("🧺 Laundry Alert!", {
-                    body: message,
-                    icon: "https://cdn-icons-png.flaticon.com/512/3003/3003984.png"
-                });
-            }
+                db.ref('scheduled_push_alerts')
+                    .orderByChild('status').equalTo('pending')
+                    .once('value', (snapshot) => {
+                        const alerts = snapshot.val();
+                        if (!alerts) return;
 
-            // Standard Alert Box Backup
-            alert(`🧺 LAUNDRY ALERT!\n\n${message}`);
-        }
-
-        // Active Timer Checker (Runs every 3 seconds & on Mobile Screen Unlock)
-        function startTimerChecker() {
-            setInterval(checkPendingTimers, 3000);
-        }
-
-        function checkPendingTimers() {
-            if (!currentUser) return;
-            const now = Date.now();
-
-            // Check Firebase Timers
-            db.ref('scheduled_push_alerts')
-                .orderByChild('status').equalTo('pending')
-                .once('value', (snapshot) => {
-                    const alerts = snapshot.val();
-                    if (!alerts) return;
-
-                    Object.keys(alerts).forEach((key) => {
-                        const item = alerts[key];
-                        if (item.user === currentUser && item.sendAt <= now) {
-                            db.ref(`scheduled_push_alerts/${key}`).update({ status: 'sent' });
-                            document.getElementById('active-timer-box').classList.add('hidden');
-                            triggerMobileAlarm(`Hi ${item.user}, your laundry cycle is completed! Please collect your clothes.`);
-                        }
+                        Object.keys(alerts).forEach((key) => {
+                            const item = alerts[key];
+                            if (item.user === currentUser && item.sendAt <= now) {
+                                db.ref(`scheduled_push_alerts/${key}`).update({ status: 'sent' });
+                                document.getElementById('active-timer-box').classList.add('hidden');
+                                
+                                if ("vibrate" in navigator) navigator.vibrate([1000, 500, 1000]);
+                                alert(`🧺 LAUNDRY COMPLETED!\n\nHi ${item.user}, your clothes are ready to collect!`);
+                            }
+                        });
                     });
-                });
+            }, 4000);
         }
 
         async function fetch24HourWeather() {
@@ -893,11 +864,11 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 mb-6 gap-4">
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-slate-900">Hello, <span id="current-user" class="text-raspberry font-black">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-slate-600 font-medium">You can download all your previous laundry logs or set a laundry completion timer</p>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium">Download logs or export a laundry alarm directly to your phone's system clock/calendar</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <button onclick="toggleTimerPanel()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
-                    ⏱️ Set Timer
+                    ⏱️ Set System Alarm
                 </button>
                 <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
                     📥 Download PDF
@@ -908,17 +879,17 @@
             </div>
         </div>
 
-        <!-- ACTIVE TIMER BANNER (Shown when a timer is running) -->
+        <!-- ACTIVE TIMER BANNER -->
         <div id="active-timer-box" class="hidden mb-6 bg-raspberry text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
-            <span id="active-timer-display" class="text-xs sm:text-sm font-black uppercase tracking-wider">⏱️ Active Timer Running</span>
-            <span class="text-[10px] bg-white/20 px-2 py-1 rounded-full uppercase font-bold">In Progress</span>
+            <span id="active-timer-display" class="text-xs sm:text-sm font-black uppercase tracking-wider">⏱️ System Alarm Exported</span>
+            <span class="text-[10px] bg-white/20 px-2.5 py-1 rounded-full uppercase font-bold">Alarm Ready</span>
         </div>
 
-        <!-- ⏱️ STEP-BY-STEP LAUNDRY TIMER SETUP PANEL (Hidden by default until Timer button is clicked) -->
+        <!-- ⏱️ STEP-BY-STEP SYSTEM ALARM SCHEDULER PANEL -->
         <div id="timer-setup-panel" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-sky-100 mb-6">
             <div class="flex items-center justify-between mb-4 border-b border-sky-100 pb-3">
                 <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    ⏱️ Schedule Laundry Completion Timer
+                    ⏱️ Schedule System Alarm (Direct to Device Clock/Calendar)
                 </h3>
                 <button onclick="toggleTimerPanel()" class="text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">
                     ✕
@@ -934,14 +905,14 @@
 
                 <!-- Step 2: Select Completion Time -->
                 <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200">
-                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Select Target Time</label>
+                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Select Completion Time</label>
                     <input type="time" id="timer-time-select" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                 </div>
             </div>
 
             <div class="mt-4 flex justify-end">
                 <button onclick="scheduleLaundryTimer()" class="w-full md:w-auto bg-raspberry text-white font-black px-6 py-3 rounded-xl text-xs tracking-wider uppercase transition shadow-md active:scale-95 cursor-pointer">
-                    ⏰ Confirm & Start Laundry Timer
+                    ⏰ Export Alarm to Device
                 </button>
             </div>
         </div>
