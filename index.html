@@ -8,10 +8,11 @@
     <!-- Tailwind CSS Stylesheet -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     
-    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core) -->
+    <!-- Dependencies (html2pdf engine + Synchronous Firebase SDK Core & Messaging) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
     <style>
         body {
@@ -19,7 +20,6 @@
             color: #1e293b;
         }
 
-        /* CUSTOM EXACT COLOR UTILITIES */
         .bg-raspberry {
             background-color: #C2185B !important;
             color: #ffffff !important;
@@ -45,7 +45,6 @@
             overflow: hidden;
         }
         
-        /* Diagonal Split Panel Layout */
         .overlay-panel {
             position: absolute;
             top: 0;
@@ -89,7 +88,6 @@
             transform: scale(1.03);
         }
 
-        /* Weather forecast scrollbar styling */
         .weather-scroll::-webkit-scrollbar {
             height: 4px;
         }
@@ -98,7 +96,6 @@
             border-radius: 4px;
         }
 
-        /* RESPONSIVE ADJUSTMENTS */
         @media (max-width: 640px) {
             .login-card-container {
                 display: flex;
@@ -138,7 +135,6 @@
             filter: blur(4px);
         }
 
-        /* PIN Input Styling */
         .pin-box-input {
             width: 3.25rem;
             height: 3.5rem;
@@ -148,7 +144,6 @@
             border-radius: 0.75rem;
         }
 
-        /* LAUNDRY-THEMED SPINNING ANIMATION */
         .washing-machine-outer {
             width: 120px;
             height: 120px;
@@ -189,7 +184,6 @@
             100% { transform: scale(1.1) rotate(15deg); }
         }
 
-        /* SUCCESS TICK ANIMATION */
         @keyframes greenPop {
             0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
             60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
@@ -221,6 +215,7 @@
     <!-- APPLICATION CONTROLLER SCRIPT -->
     <script>
         let db;
+        let messaging;
         let currentUser = "";
         let globalLogs = [];
 
@@ -251,6 +246,12 @@
             }
             db = firebase.database();
 
+            // Initialize FCM Push Notifications
+            if (firebase.messaging.isSupported()) {
+                messaging = firebase.messaging();
+                setupServiceWorker();
+            }
+
             const dateInput = document.getElementById('log-date');
             if(dateInput) dateInput.valueAsDate = new Date();
 
@@ -264,6 +265,70 @@
 
             fetch24HourWeather();
         });
+
+        // Register Service Worker for Push Alerts when tab is closed
+        function setupServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then(function(registration) {
+                        messaging.useServiceWorker(registration);
+                    }).catch(function(err) {
+                        console.log('Service Worker Registration Failed:', err);
+                    });
+            }
+        }
+
+        // Request Push Permission from Browser
+        window.requestNotificationPermission = function() {
+            if (!messaging) {
+                alert("Push notifications are not supported in this browser.");
+                return;
+            }
+
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    messaging.getToken().then((token) => {
+                        if (token) {
+                            db.ref(`users/${currentUser}/fcmToken`).set(token);
+                            document.getElementById('notification-status-badge').innerText = "🔔 Notifications Enabled";
+                            document.getElementById('notification-status-badge').className = "px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300";
+                            alert("Push Notifications Enabled! You will receive alerts even when this tab is closed.");
+                        }
+                    });
+                } else {
+                    alert("Notification permission was denied.");
+                }
+            });
+        };
+
+        // Schedule Exact-Time Laundry Reminder
+        window.schedulePushReminder = function() {
+            const timeVal = document.getElementById('exact-reminder-time').value;
+            if (!timeVal) {
+                alert("Please select a valid completion time!");
+                return;
+            }
+
+            const now = new Date();
+            const [hours, minutes] = timeVal.split(':');
+            const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(hours), parseInt(minutes), 0);
+
+            if (targetDate.getTime() <= now.getTime()) {
+                targetDate.setDate(targetDate.getDate() + 1);
+            }
+
+            const sendAtTimestamp = targetDate.getTime();
+            const timeFormatted = targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            db.ref('scheduled_push_alerts').push({
+                user: currentUser,
+                sendAt: sendAtTimestamp,
+                scheduledTimeStr: timeFormatted,
+                status: 'pending'
+            }).then(() => {
+                alert(`Reminder set! You will receive a push alert at ${timeFormatted}.`);
+            });
+        };
 
         async function fetch24HourWeather() {
             try {
@@ -754,6 +819,38 @@
             </div>
         </div>
 
+        <!-- 🔔 PUSH NOTIFICATION REMINDER CARD -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-sky-100 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-black text-slate-900">🔔 Push Alert Reminder</h3>
+                <span id="notification-status-badge" class="px-3 py-1 text-xs font-bold bg-amber-100 text-amber-800 rounded-full border border-amber-300">
+                    ⚠️ Permission Required
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200 flex flex-col justify-between">
+                    <div>
+                        <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-1">Step 1: Device Permission</label>
+                        <p class="text-xs text-slate-600 mb-3">Enable alerts to receive a notification on your device even when this site is closed.</p>
+                    </div>
+                    <button onclick="requestNotificationPermission()" class="bg-raspberry text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase cursor-pointer">
+                        Enable Device Push Alerts
+                    </button>
+                </div>
+
+                <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200 flex flex-col justify-between">
+                    <div>
+                        <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Set Completion Time</label>
+                        <input type="time" id="exact-reminder-time" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                    </div>
+                    <button onclick="schedulePushReminder()" class="w-full bg-raspberry text-white font-black py-2.5 rounded-lg text-xs tracking-wider uppercase mt-3 transition cursor-pointer">
+                        ⏰ Schedule Push Alert
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-sky-100 h-fit">
                 <h3 class="text-base sm:text-lg font-black text-slate-900 mb-4">Enter New Laundry</h3>
@@ -793,7 +890,6 @@
                         </div>
                     </div>
 
-                    <!-- TOTAL ITEMS SUMMARY BOX WITH HIGH CONTRAST -->
                     <div class="flex items-center justify-between bg-[#E0F2FE] border border-sky-200 p-3 rounded-xl">
                         <span class="text-xs font-bold text-raspberry uppercase tracking-wider">Total Items</span>
                         <span id="live-total-count" class="text-xl font-black text-raspberry">0</span>
