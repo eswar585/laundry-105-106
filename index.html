@@ -269,22 +269,22 @@
             panel.classList.toggle('hidden');
         };
 
-        // Generates an .ics Calendar / System Alarm File for Native Phone/PC Alarms
+        // Generates an .ics Calendar / System Alarm File targeting the EXACT start time in UTC
         function createAndDownloadSystemAlarm(title, targetDateObj) {
             const pad = (n) => n < 10 ? '0' + n : n;
             
-            // Format dates for ICS specification (YYYYMMDDTHHMMSS)
-            const formatDateForICS = (date) => {
-                return date.getFullYear().toString() +
-                       pad(date.getMonth() + 1) +
-                       pad(date.getDate()) + 'T' +
-                       pad(date.getHours()) +
-                       pad(date.getMinutes()) +
-                       pad(date.getSeconds());
+            // Format dates strictly in UTC to prevent 30-minute timezone offset miscalculations
+            const formatUTCForICS = (date) => {
+                return date.getUTCFullYear().toString() +
+                       pad(date.getUTCMonth() + 1) +
+                       pad(date.getUTCDate()) + 'T' +
+                       pad(date.getUTCHours()) +
+                       pad(date.getUTCMinutes()) +
+                       pad(date.getUTCSeconds()) + 'Z';
             };
 
-            const startTime = formatDateForICS(targetDateObj);
-            const endTime = formatDateForICS(new Date(targetDateObj.getTime() + 15 * 60000));
+            const startTime = formatUTCForICS(targetDateObj);
+            const endTime = formatUTCForICS(new Date(targetDateObj.getTime() + 15 * 60000));
 
             const icsContent = 
 `BEGIN:VCALENDAR
@@ -293,15 +293,16 @@ PRODID:-//Crisp Air Laundry Tracker//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
+UID:${Date.now()}@laundrytracker
 SUMMARY:🧺 ${title}
-DESCRIPTION:Your laundry cycle is complete! Time to collect your clothes.
+DESCRIPTION:Time to load your clothes into the washing machine!
 DTSTART:${startTime}
 DTEND:${endTime}
 STATUS:CONFIRMED
 BEGIN:VALARM
-ACTION:AUDIO
-TRIGGER:-PT0M
-DESCRIPTION:Laundry Alarm Alert
+ACTION:DISPLAY
+DESCRIPTION:Time to load clothes into the washing machine!
+TRIGGER;RELATED=START:-PT0M
 END:VALARM
 END:VEVENT
 END:VCALENDAR`;
@@ -309,19 +310,19 @@ END:VCALENDAR`;
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'laundry_completion_alarm.ics');
+            link.setAttribute('download', 'load_laundry_alarm.ics');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Schedule Laundry Timer and Export to System Calendar
+        // Schedule Laundry Machine Loading Reminder
         window.scheduleLaundryTimer = function() {
             const dateVal = document.getElementById('timer-date-select').value;
             const timeVal = document.getElementById('timer-time-select').value;
 
             if (!dateVal || !timeVal) {
-                alert("Please select both Date and Time for your timer!");
+                alert("Please select both Date and Time for your reminder!");
                 return;
             }
 
@@ -348,14 +349,14 @@ END:VCALENDAR`;
 
             // Save entry into Firebase
             db.ref('scheduled_push_alerts').push(timerData).then(() => {
-                document.getElementById('active-timer-display').innerText = `⏱️ Active Timer: ${dateVal} @ ${timeFormatted}`;
+                document.getElementById('active-timer-display').innerText = `⏱️ Active Machine Loading Reminder: ${dateVal} @ ${timeFormatted}`;
                 document.getElementById('active-timer-box').classList.remove('hidden');
                 document.getElementById('timer-setup-panel').classList.add('hidden');
 
-                // Trigger direct file download to add to system Calendar/Clock app
-                createAndDownloadSystemAlarm(`Laundry Completed (${currentUser})`, targetDate);
+                // Trigger direct file download to add exact-time alarm to system Calendar/Clock app
+                createAndDownloadSystemAlarm(`Load Clothes into Washing Machine (${currentUser})`, targetDate);
 
-                alert(`Timer scheduled for ${dateVal} at ${timeFormatted}!\n\nA system alarm entry (.ics) was downloaded. Tap "Open" or "Add to Calendar" to ring your phone's native alarm when complete.`);
+                alert(`Reminder set for ${dateVal} at ${timeFormatted}!\n\nA system alarm entry (.ics) was downloaded. Tap "Open" or "Add to Calendar" to ring your phone's native alarm at the exact minute.`);
             });
         };
 
@@ -378,7 +379,7 @@ END:VCALENDAR`;
                                 document.getElementById('active-timer-box').classList.add('hidden');
                                 
                                 if ("vibrate" in navigator) navigator.vibrate([1000, 500, 1000]);
-                                alert(`🧺 LAUNDRY COMPLETED!\n\nHi ${item.user}, your clothes are ready to collect!`);
+                                alert(`🧺 TIME TO DO LAUNDRY!\n\nHi ${item.user}, it is time to load your clothes into the washing machine!`);
                             }
                         });
                     });
@@ -864,11 +865,11 @@ END:VCALENDAR`;
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 mb-6 gap-4">
             <div>
                 <h2 class="text-lg sm:text-xl font-bold text-slate-900">Hello, <span id="current-user" class="text-raspberry font-black">User</span>!</h2>
-                <p class="text-xs sm:text-sm text-slate-600 font-medium">Download logs or export a laundry alarm directly to your phone's system clock/calendar</p>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium">Download logs or set a reminder to give clothes to the washing machine at a scheduled time</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <button onclick="toggleTimerPanel()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
-                    ⏱️ Set System Alarm
+                    ⏱️ Set Machine Reminder
                 </button>
                 <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
                     📥 Download PDF
@@ -881,7 +882,7 @@ END:VCALENDAR`;
 
         <!-- ACTIVE TIMER BANNER -->
         <div id="active-timer-box" class="hidden mb-6 bg-raspberry text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
-            <span id="active-timer-display" class="text-xs sm:text-sm font-black uppercase tracking-wider">⏱️ System Alarm Exported</span>
+            <span id="active-timer-display" class="text-xs sm:text-sm font-black uppercase tracking-wider">⏱️ Machine Loading Reminder Scheduled</span>
             <span class="text-[10px] bg-white/20 px-2.5 py-1 rounded-full uppercase font-bold">Alarm Ready</span>
         </div>
 
@@ -889,7 +890,7 @@ END:VCALENDAR`;
         <div id="timer-setup-panel" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-sky-100 mb-6">
             <div class="flex items-center justify-between mb-4 border-b border-sky-100 pb-3">
                 <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    ⏱️ Schedule System Alarm (Direct to Device Clock/Calendar)
+                    ⏱️ Set Machine Loading Reminder (Alarm directly on Device)
                 </h3>
                 <button onclick="toggleTimerPanel()" class="text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">
                     ✕
@@ -897,15 +898,15 @@ END:VCALENDAR`;
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Step 1: Select Completion Date -->
+                <!-- Step 1: Select Date -->
                 <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200">
                     <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 1: Select Date</label>
                     <input type="date" id="timer-date-select" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                 </div>
 
-                <!-- Step 2: Select Completion Time -->
+                <!-- Step 2: Select Time to Give Clothes -->
                 <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200">
-                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Select Completion Time</label>
+                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Select Time to Load Clothes</label>
                     <input type="time" id="timer-time-select" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
                 </div>
             </div>
