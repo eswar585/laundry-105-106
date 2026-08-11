@@ -223,6 +223,8 @@
         let LOCATION_LON = 80.5511;
         let LOCATION_NAME = "Vadlamudi";
 
+        const VAPID_PUBLIC_KEY = "BEfzG5pTLzEwern154mYFIYWkFGs_pveQWCJY7sl0m1mYYlNWLg6aTJ67fH_8CMKazmXmzPVbDo6v98F86zp_cQ";
+
         const userPasswords = {
             "ESWAR": "2000",
             "KAVITHA": "1290",
@@ -264,9 +266,10 @@
             });
 
             fetch24HourWeather();
+            startInTabReminderChecker();
         });
 
-        // Register Service Worker from the main branch root
+        // Register Service Worker from main branch root
         function setupServiceWorker() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('firebase-messaging-sw.js')
@@ -279,7 +282,7 @@
             }
         }
 
-        // Request Push Permission from Browser
+        // Request Push Permission with VAPID Key
         window.requestNotificationPermission = function() {
             if (!messaging) {
                 alert("Push notifications are not supported in this browser.");
@@ -289,20 +292,24 @@
             Notification.requestPermission().then((permission) => {
                 if (permission === 'granted') {
                     navigator.serviceWorker.ready.then((registration) => {
-                        messaging.getToken({ serviceWorkerRegistration: registration })
-                            .then((token) => {
-                                if (token) {
-                                    db.ref(`users/${currentUser}/fcmToken`).set(token);
-                                    document.getElementById('notification-status-badge').innerText = "🔔 Notifications Enabled";
-                                    document.getElementById('notification-status-badge').className = "px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300";
-                                    alert("Push Notifications Enabled! You will receive alerts even when this tab is closed.");
-                                } else {
-                                    alert("Failed to generate notification token. Please refresh and try again.");
-                                }
-                            })
-                            .catch((err) => {
-                                console.error("Error retrieving FCM Token:", err);
-                            });
+                        messaging.getToken({ 
+                            serviceWorkerRegistration: registration,
+                            vapidKey: VAPID_PUBLIC_KEY
+                        })
+                        .then((token) => {
+                            if (token) {
+                                db.ref(`users/${currentUser}/fcmToken`).set(token);
+                                document.getElementById('notification-status-badge').innerText = "🔔 Notifications Enabled";
+                                document.getElementById('notification-status-badge').className = "px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300";
+                                alert("Push Notifications Enabled! Your FCM token has been registered.");
+                            } else {
+                                alert("Failed to generate notification token. Please refresh and try again.");
+                            }
+                        })
+                        .catch((err) => {
+                            console.error("Error retrieving FCM Token:", err);
+                            alert("Error getting notification token: " + err.message);
+                        });
                     });
                 } else {
                     alert("Notification permission was denied.");
@@ -335,9 +342,45 @@
                 scheduledTimeStr: timeFormatted,
                 status: 'pending'
             }).then(() => {
-                alert(`Reminder set! You will receive a push alert at ${timeFormatted}.`);
+                alert(`Reminder set! You will receive a notification at ${timeFormatted}.`);
             });
         };
+
+        // In-Tab Backup Alert Checker (Fires popup + sound + vibration if site is open)
+        function startInTabReminderChecker() {
+            setInterval(() => {
+                if (!currentUser) return;
+                const now = Date.now();
+                
+                db.ref('scheduled_push_alerts')
+                    .orderByChild('status').equalTo('pending')
+                    .once('value', (snapshot) => {
+                        const alerts = snapshot.val();
+                        if (!alerts) return;
+
+                        Object.keys(alerts).forEach((key) => {
+                            const item = alerts[key];
+                            if (item.user === currentUser && item.sendAt <= now) {
+                                
+                                // Trigger Browser Notification
+                                if (Notification.permission === "granted") {
+                                    new Notification("🧺 Laundry Completed!", {
+                                        body: `Hi ${item.user}, your laundry cycle is finished! Please collect your clothes.`,
+                                        icon: "https://cdn-icons-png.flaticon.com/512/3003/3003984.png"
+                                    });
+                                } else {
+                                    alert(`🧺 Laundry Completed! Hi ${item.user}, please collect your clothes.`);
+                                }
+
+                                if ("vibrate" in navigator) navigator.vibrate([500, 250, 500]);
+
+                                // Mark alert as sent in database
+                                db.ref(`scheduled_push_alerts/${key}`).update({ status: 'sent' });
+                            }
+                        });
+                    });
+            }, 5000);
+        }
 
         async function fetch24HourWeather() {
             try {
