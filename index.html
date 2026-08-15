@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Laundry Tracker — Aurora Crystal Luxe 3D</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <!-- Dependencies (html2pdf + Firebase + Three.js for 3D Engine) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- ============================================================
+         AURORA CRYSTAL LUXE DESIGN SYSTEM
+         ============================================================ -->
+    <style>
+        :root {
+            --bg-dark:       #070b15;
+            --c-indigo:      #6366f1;
+            --c-purple:      #a855f7;
+            --c-cyan:        #06b6d4;
+            --c-rose:        #f43f5e;
+            --glass-bg:      rgba(15, 23, 42, 0.65);
+            --glass-border:  rgba(255, 255, 255, 0.12);
+            --glass-border-h:rgba(168, 85, 247, 0.4);
+            --btn-gradient:  linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --btn-shadow:    0 12px 35px rgba(168, 85, 247, 0.38), 0 4px 0 rgba(99, 102, 241, 0.8);
+            --btn-shadow-h:  0 18px 45px rgba(168, 85, 247, 0.52), 0 4px 0 rgba(99, 102, 241, 0.8);
+            --btn-shadow-a:  0 4px 12px rgba(168, 85, 247, 0.2), 0 1px 0 rgba(99, 102, 241, 0.8);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: var(--bg-dark);
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 85% 110%, rgba(168, 85, 247, 0.15) 0%, transparent 60%),
+                radial-gradient(circle 500px at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── THREE.JS 3D CANVAS BACKGROUND ── */
+        #three-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ── BUTTON STYLING OVERRIDES ── */
+        .bg-raspberry {
+            background: var(--btn-gradient) !important;
+            color: #ffffff !important;
+            box-shadow: var(--btn-shadow);
+            border: none !important;
+            transition: transform 0.2s cubic-bezier(.25, 1, .5, 1), box-shadow 0.2s cubic-bezier(.25, 1, .5, 1), filter 0.2s ease !important;
+        }
+        .bg-raspberry:hover {
+            filter: brightness(1.15) !important;
+            transform: translateY(-3px) scale(1.01) !important;
+            box-shadow: var(--btn-shadow-h) !important;
+        }
+        .bg-raspberry:active {
+            transform: translateY(2px) scale(0.98) !important;
+            box-shadow: var(--btn-shadow-a) !important;
+            filter: brightness(0.95) !important;
+        }
+        .hover\:opacity-90:hover { opacity: 1 !important; }
+
+        .text-raspberry   { color: #c084fc !important; }
+        .border-raspberry { border-color: rgba(168, 85, 247, 0.38) !important; }
+
+        .bg-palesky       { background: rgba(99, 102, 241, 0.12) !important; }
+        .hover\:bg-sky-200:hover {
+            background: rgba(168, 85, 247, 0.25) !important;
+            color: #e879f9 !important;
+        }
+
+        /* ── BENTO GLASS CARDS & HOLOGRAPHIC LIGHT SHEEN ── */
+        .bg-white:not(input):not(select):not(textarea) {
+            background: rgba(15, 23, 42, 0.65) !important;
+            backdrop-filter: blur(28px) !important;
+            -webkit-backdrop-filter: blur(28px) !important;
+            border: 1px solid var(--glass-border) !important;
+            box-shadow: 
+                0 30px 60px -12px rgba(0, 0, 0, 0.7),
+                0 0 40px rgba(99, 102, 241, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+            border-radius: 1.5rem !important;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease;
+        }
+        .bg-white:not(input):not(select):not(textarea):hover {
+            border-color: var(--glass-border-h) !important;
+            box-shadow: 
+                0 35px 70px -12px rgba(0, 0, 0, 0.8),
+                0 0 50px rgba(168, 85, 247, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+        }
+
+        /* Dynamic Light Sheen Overlay */
+        .bg-white:not(input):not(select):not(textarea)::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(650px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(168, 85, 247, 0.15), transparent 45%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .bg-white:not(input):not(select):not(textarea):hover::before {
+            opacity: 1;
+        }
+
+        input.bg-white, select.bg-white, textarea.bg-white {
+            background: rgba(10, 16, 31, 0.85) !important;
+            backdrop-filter: none !important;
+        }
+        .bg-\[\#E0F2FE\] { background: rgba(99, 102, 241, 0.08) !important; border-radius: 1rem !important; }
+
+        /* ── TEXT COLORS ── */
+        .text-slate-900 { color: #f8fafc !important; }
+        .text-slate-800 { color: #e2e8f0 !important; }
+        .text-slate-700 { color: #cbd5e1 !important; }
+        .text-slate-600 { color: #94a3b8 !important; }
+
+        /* ── BORDERS & ACCENTS ── */
+        .border-sky-100, .border-sky-200 { border-color: rgba(255, 255, 255, 0.1) !important; }
+        .bg-sky-200 { background: rgba(255, 255, 255, 0.1) !important; }
+
+        /* ── WEATHER CARD ── */
+        #weather-card {
+            background: rgba(12, 19, 36, 0.75) !important;
+            backdrop-filter: blur(28px) !important;
+            -webkit-backdrop-filter: blur(28px) !important;
+            border: 1px solid rgba(168, 85, 247, 0.25) !important;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+        }
+        #weather-hourly-container > div {
+            background: rgba(99, 102, 241, 0.09) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            color: #f1f5f9 !important;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+        #weather-hourly-container > div:hover {
+            transform: translateY(-4px) scale(1.06);
+            background: rgba(168, 85, 247, 0.2) !important;
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+        }
+        #rain-warning-note {
+            background: rgba(99, 102, 241, 0.12) !important;
+            border-color: rgba(168, 85, 247, 0.25) !important;
+            color: #e2e8f0 !important;
+        }
+        #weather-hourly-container .text-pink-600 { color: #38bdf8 !important; }
+
+        /* ── LOGIN CONTAINER CARD ── */
+        .login-card-container {
+            position: relative;
+            background: rgba(12, 19, 36, 0.78);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow:
+                0 40px 110px rgba(0,0,0,0.85),
+                0 0 50px rgba(168, 85, 247, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            display: flex;
+            flex-direction: row;
+            border-radius: 2rem;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* ── OVERLAY PANEL ── */
+        .overlay-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(145deg, #6366f1 0%, #a855f7 50%, #0f172a 100%);
+            transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+            z-index: 20;
+            clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .overlay-panel::before {
+            content: '';
+            position: absolute;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+
+        .form-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 55%;
+            height: 100%;
+            transition: all 0.8s ease-in-out;
+            z-index: 10;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-card-container.active-mode .form-panel {
+            opacity: 0.3;
+            filter: blur(4px);
+        }
+
+        .form-panel h2 {
+            background: linear-gradient(135deg, #ffffff 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── INPUTS & PIN BOXES ── */
+        .theme-input {
+            background: rgba(8, 14, 28, 0.85) !important;
+            border: 1px solid rgba(168, 85, 247, 0.25) !important;
+            color: #f1f5f9 !important;
+            border-radius: 0.9rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .theme-input::placeholder { color: rgba(148,163,184,0.45) !important; }
+        .theme-input:focus {
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 0 3px rgba(168,85,247,0.25), 0 0 30px rgba(168,85,247,0.25) !important;
+            background: rgba(5, 9, 20, 0.98) !important;
+            transform: scale(1.02);
+        }
+
+        .pin-box-input {
+            width: 3.3rem;
+            height: 3.6rem;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            border-radius: 1rem;
+            background: rgba(8, 14, 28, 0.9) !important;
+            border: 1.5px solid rgba(168,85,247,0.3) !important;
+            color: #c084fc !important;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .pin-box-input:focus {
+            border-color: #ec4899 !important;
+            box-shadow: 0 0 0 3px rgba(236,72,153,0.3), inset 0 2px 10px rgba(0,0,0,0.5), 0 0 30px rgba(236,72,153,0.35) !important;
+            transform: scale(1.12);
+            background: rgba(4, 7, 16, 0.98) !important;
+            outline: none;
+        }
+
+        .weather-scroll::-webkit-scrollbar { height: 4px; }
+        .weather-scroll::-webkit-scrollbar-thumb {
+            background: rgba(168,85,247,0.4);
+            border-radius: 4px;
+        }
+
+        /* ── 3D WASHING MACHINE ANIMATION ── */
+        .washing-machine-outer {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 4px solid rgba(168,85,247,0.5);
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 0 55px rgba(168,85,247,0.6),
+                0 0 110px rgba(99,102,241,0.35),
+                inset 0 0 30px rgba(255,255,255,0.15);
+            overflow: visible;
+            animation: machineGlow 2.2s ease-in-out infinite alternate;
+        }
+        .washing-machine-outer::before {
+            content: '';
+            position: absolute;
+            inset: -22px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(236,72,153,0.3);
+            animation: ringExpand 2.2s ease-out infinite;
+            pointer-events: none;
+        }
+
+        .washing-machine-drum {
+            width: 98px;
+            height: 98px;
+            border-radius: 50%;
+            border: 4px dashed rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: drumSpin 1s linear infinite;
+        }
+
+        .laundry-items-inside {
+            font-size: 2rem;
+            animation: tumbleClothes 0.8s ease-in-out infinite alternate;
+        }
+
+        #otp-animation-overlay {
+            background: rgba(7, 11, 21, 0.97) !important;
+            backdrop-filter: blur(32px) !important;
+            -webkit-backdrop-filter: blur(32px) !important;
+        }
+        #otp-animation-overlay p { color: #c084fc !important; }
+
+        .tick-circle {
+            background: linear-gradient(135deg, #a855f7, #ec4899) !important;
+            box-shadow: 0 0 45px rgba(168,85,247,0.6), 0 14px 35px rgba(236,72,153,0.4) !important;
+        }
+        .green-tick-animated {
+            animation: greenPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .checkmark-path {
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: strokeCheck 0.4s ease-in-out 0.2s forwards;
+        }
+
+        #active-timer-box {
+            background: var(--btn-gradient) !important;
+            border: 1px solid rgba(168,85,247,0.4) !important;
+            box-shadow: 0 12px 35px rgba(168,85,247,0.35), 0 0 75px rgba(99,102,241,0.15) !important;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="number"] {
+            background: rgba(8, 14, 28, 0.85) !important;
+            border-color: rgba(255,255,255,0.12) !important;
+            color: #f1f5f9 !important;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="number"]:focus {
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 0 3px rgba(168,85,247,0.25) !important;
+            outline: none !important;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) opacity(0.75);
+            cursor: pointer;
+        }
+
+        #current-user {
+            background: linear-gradient(135deg, #c084fc 0%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+        }
+
+        #table-body tr {
+            color: #f1f5f9 !important;
+            border-color: rgba(255,255,255,0.08) !important;
+            transition: background 0.2s ease;
+        }
+        #table-body tr:hover {
+            background: rgba(168,85,247,0.1) !important;
+        }
+        thead tr { border-color: rgba(255,255,255,0.15) !important; }
+
+        #mobile-cards-container > div {
+            background: rgba(11, 18, 38, 0.85) !important;
+            border-color: rgba(168,85,247,0.2) !important;
+            color: #f1f5f9 !important;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s cubic-bezier(.4,0,.2,1) !important;
+        }
+        #mobile-cards-container > div:hover {
+            transform: translateY(-5px) scale(1.01) !important;
+            box-shadow: 0 18px 55px rgba(0,0,0,0.6), 0 0 35px rgba(168,85,247,0.25) !important;
+        }
+
+        .text-red-500  { color: #fb7185 !important; }
+        .hover\:text-red-700:hover { color: #f43f5e !important; }
+        .bg-palesky.text-raspberry {
+            background: rgba(168,85,247,0.12) !important;
+            color: #e879f9 !important;
+            border-color: rgba(168,85,247,0.28) !important;
+        }
+        span.bg-raspberry.text-white {
+            background: var(--btn-gradient) !important;
+        }
+
+        /* ── SCROLL REVEAL ── */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), transform 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+        [data-reveal].revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            .login-card-container { display: flex; flex-direction: column; }
+            .form-panel { position: relative; width: 100%; height: auto; }
+            .overlay-panel {
+                position: relative;
+                width: 100%;
+                height: 160px;
+                clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%);
+            }
+            .login-card-container.active-mode .overlay-panel {
+                transform: none !important;
+                width: 100% !important;
+                clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 100%) !important;
+            }
+        }
+        @media (min-width: 641px) {
+            .login-card-container { min-height: 520px; }
+            .login-card-container.active-mode .overlay-panel {
+                transform: translateX(-122%);
+                width: 100%;
+                clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
+            }
+        }
+
+        @keyframes drumSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes tumbleClothes { 0% { transform: scale(0.9) rotate(-15deg); } 100% { transform: scale(1.1) rotate(15deg); } }
+        @keyframes greenPop {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+            80% { transform: scale(0.95) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes strokeCheck { 0% { stroke-dashoffset: 50; } 100% { stroke-dashoffset: 0; } }
+        @keyframes machineGlow {
+            from { box-shadow: 0 0 55px rgba(168,85,247,0.6), inset 0 0 30px rgba(255,255,255,0.15); }
+            to   { box-shadow: 0 0 85px rgba(236,72,153,0.85), inset 0 0 40px rgba(255,255,255,0.25); }
+        }
+        @keyframes ringExpand { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.4); opacity: 0; } }
+        @keyframes glow-pulse {
+            0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.45; }
+            50%       { transform: translate(-50%,-50%) scale(1.55); opacity: 0.85; }
+        }
+
+        #login-screen  { position: relative; z-index: 2; }
+        #dashboard     { position: relative; z-index: 2; }
+        #otp-animation-overlay { z-index: 50 !important; }
+    </style>
+
+    <!-- ============================================================
+         APPLICATION CONTROLLER SCRIPT — PRESERVED EXACTLY AS-IS
+         ============================================================ -->
+    <script>
+        let db;
+        let currentUser = "";
+        let globalLogs = [];
+
+        let LOCATION_LAT = 16.2335;
+        let LOCATION_LON = 80.5511;
+        let LOCATION_NAME = "Vadlamudi";
+
+        const userPasswords = {
+            "ESWAR": "2000",
+            "KAVITHA": "1290",
+            "SNEHITH": "2001"
+        };
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBpSOTKv33YniPOVosU3FHSVoG6__SNTlg",
+                authDomain: "laundry-management-32c18.firebaseapp.com",
+                databaseURL: "https://laundry-management-32c18-default-rtdb.firebaseio.com",
+                projectId: "laundry-management-32c18",
+                storageBucket: "laundry-management-32c18.firebasestorage.app",
+                messagingSenderId: "195267320338",
+                appId: "1:195267320338:web:a89d3deba4d318ff8616cb",
+                measurementId: "G-XZYPE7WQBN"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+
+            const dateInput = document.getElementById('log-date');
+            if(dateInput) dateInput.valueAsDate = new Date();
+
+            const timerDateInput = document.getElementById('timer-date-select');
+            if(timerDateInput) timerDateInput.valueAsDate = new Date();
+
+            document.getElementById('laundry-form').addEventListener('submit', saveLog);
+            document.getElementById('password-form').addEventListener('submit', submitPassword);
+
+            const itemInputs = ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'];
+            itemInputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateTotal);
+            });
+
+            fetch24HourWeather();
+            startInTabTimerChecker();
+        });
+
+        // Toggle Timer Panel Visibility
+        window.toggleTimerPanel = function() {
+            const panel = document.getElementById('timer-setup-panel');
+            panel.classList.toggle('hidden');
+        };
+
+        // Opens Google Calendar directly or falls back to .ics file download
+        function openDeviceCalendar(title, targetDateObj) {
+            const pad = (n) => n < 10 ? '0' + n : n;
+            
+            // Format UTC string for Google Calendar API (YYYYMMDDTHHMMSSZ)
+            const formatUTCForGoogle = (date) => {
+                return date.getUTCFullYear().toString() +
+                       pad(date.getUTCMonth() + 1) +
+                       pad(date.getUTCDate()) + 'T' +
+                       pad(date.getUTCHours()) +
+                       pad(date.getUTCMinutes()) +
+                       pad(date.getUTCSeconds()) + 'Z';
+            };
+
+            const startTime = formatUTCForGoogle(targetDateObj);
+            const endTime = formatUTCForGoogle(new Date(targetDateObj.getTime() + 15 * 60000));
+            const eventDetails = encodeURIComponent("Time to load your clothes into the washing machine!");
+            const eventTitle = encodeURIComponent(`🧺 ${title}`);
+
+            // Direct Google Calendar Intent URL (Opens natively in Calendar App on Android/iOS)
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startTime}/${endTime}&details=${eventDetails}`;
+
+            // Launch directly in browser/app
+            const calendarWindow = window.open(googleCalendarUrl, '_blank');
+
+            // Fallback .ics file download if popup blocked
+            if (!calendarWindow) {
+                const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Crisp Air Laundry Tracker//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${Date.now()}@laundrytracker
+SUMMARY:🧺 ${title}
+DESCRIPTION:Time to load your clothes into the washing machine!
+DTSTART:${startTime}
+DTEND:${endTime}
+STATUS:CONFIRMED
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Time to load clothes into the washing machine!
+TRIGGER;RELATED=START:-PT0M
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', 'load_laundry_alarm.ics');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Schedule Machine Loading Reminder
+        window.scheduleLaundryTimer = function() {
+            const dateVal = document.getElementById('timer-date-select').value;
+            const timeVal = document.getElementById('timer-time-select').value;
+
+            if (!dateVal || !timeVal) {
+                alert("Please select both Date and Time for your reminder!");
+                return;
+            }
+
+            const [year, month, day] = dateVal.split('-').map(Number);
+            const [hours, minutes] = timeVal.split(':').map(Number);
+
+            const targetDate = new Date(year, month - 1, day, hours, minutes, 0);
+            const now = new Date();
+
+            if (targetDate.getTime() <= now.getTime()) {
+                alert("Please select a future date and time!");
+                return;
+            }
+
+            const sendAtTimestamp = targetDate.getTime();
+            const timeFormatted = targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const timerData = {
+                user: currentUser,
+                sendAt: sendAtTimestamp,
+                scheduledTimeStr: `${dateVal} at ${timeFormatted}`,
+                status: 'pending'
+            };
+
+            // Save entry into Firebase
+            db.ref('scheduled_push_alerts').push(timerData).then(() => {
+                document.getElementById('active-timer-display').innerText = `⏱️ Active Machine Loading Reminder: ${dateVal} @ ${timeFormatted}`;
+                document.getElementById('active-timer-box').classList.remove('hidden');
+                document.getElementById('timer-setup-panel').classList.add('hidden');
+
+                // Open calendar directly on device
+                openDeviceCalendar(`Load Clothes into Washing Machine (${currentUser})`, targetDate);
+            });
+        };
+
+        // In-Tab Audio Alert Backup (if tab is open)
+        function startInTabTimerChecker() {
+            setInterval(() => {
+                if (!currentUser) return;
+                const now = Date.now();
+
+                db.ref('scheduled_push_alerts')
+                    .orderByChild('status').equalTo('pending')
+                    .once('value', (snapshot) => {
+                        const alerts = snapshot.val();
+                        if (!alerts) return;
+
+                        Object.keys(alerts).forEach((key) => {
+                            const item = alerts[key];
+                            if (item.user === currentUser && item.sendAt <= now) {
+                                db.ref(`scheduled_push_alerts/${key}`).update({ status: 'sent' });
+                                document.getElementById('active-timer-box').classList.add('hidden');
+                                
+                                if ("vibrate" in navigator) navigator.vibrate([1000, 500, 1000]);
+                                alert(`🧺 TIME TO DO LAUNDRY!\n\nHi ${item.user}, it is time to load your clothes into the washing machine!`);
+                            }
+                        });
+                    });
+            }, 4000);
+        }
+
+        async function fetch24HourWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LOCATION_LAT}&longitude=${LOCATION_LON}&hourly=temperature_2m,precipitation_probability,weather_code&current_weather=true&forecast_days=2&timezone=auto`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data || !data.hourly) return;
+
+                const hourly = data.hourly;
+                const now = new Date();
+                const currentHourISO = now.toISOString().slice(0, 13);
+
+                let startIndex = hourly.time.findIndex(t => t.startsWith(currentHourISO));
+                if (startIndex === -1) startIndex = 0;
+
+                const next24Times = hourly.time.slice(startIndex, startIndex + 24);
+                const next24Temps = hourly.temperature_2m.slice(startIndex, startIndex + 24);
+                const next24Rain = hourly.precipitation_probability.slice(startIndex, startIndex + 24);
+                const next24Codes = hourly.weather_code.slice(startIndex, startIndex + 24);
+
+                let hourlyHTML = "";
+                let maxRainChance = 0;
+                let maxRainTime = "";
+
+                for (let i = 0; i < next24Times.length; i++) {
+                    const timeObj = new Date(next24Times[i]);
+                    const hourLabel = timeObj.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+                    const temp = Math.round(next24Temps[i]);
+                    const rain = next24Rain[i] || 0;
+                    const code = next24Codes[i];
+                    const icon = getWeatherIcon(code);
+
+                    if (rain > maxRainChance) {
+                        maxRainChance = rain;
+                        maxRainTime = hourLabel;
+                    }
+
+                    hourlyHTML += `
+                        <div class="flex-shrink-0 flex flex-col items-center bg-[#E0F2FE] border border-sky-200 rounded-xl p-2 min-w-[65px] text-center">
+                            <span class="text-[10px] font-bold text-raspberry uppercase">${i === 0 ? 'Now' : hourLabel}</span>
+                            <span class="text-lg my-1">${icon}</span>
+                            <span class="text-xs font-black text-slate-800">${temp}°C</span>
+                            <span class="text-[9px] font-bold text-pink-600 mt-0.5">${rain > 0 ? rain + '%' : ''}</span>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('weather-location-label').innerText = LOCATION_NAME;
+                document.getElementById('weather-hourly-container').innerHTML = hourlyHTML;
+
+                const rainNoteEl = document.getElementById('rain-warning-note');
+                const rainTextEl = document.getElementById('rain-warning-text');
+
+                if (maxRainChance >= 30) {
+                    rainTextEl.innerText = `⚠️ Chance of rain (${maxRainChance}%) expected around ${maxRainTime}. Consider drying clothes indoors!`;
+                    rainNoteEl.classList.remove('hidden');
+                } else {
+                    rainTextEl.innerText = `☀️ Clear skies expected for the next 24 hours. Great weather to dry clothes outside!`;
+                    rainNoteEl.classList.remove('hidden');
+                }
+
+            } catch (err) {
+                console.error("Weather fetch failed:", err);
+            }
+        }
+
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️'; 
+            if (code >= 1 && code <= 3) return '⛅'; 
+            if (code >= 45 && code <= 48) return '🌫️'; 
+            if (code >= 51 && code <= 67) return '🌧️'; 
+            if (code >= 80 && code <= 82) return '🌦️'; 
+            if (code >= 95) return '⛈️'; 
+            return '☁️';
+        }
+
+        function getItemTotal(log) {
+            return (parseInt(log.pant) || 0) + 
+                   (parseInt(log.shirt) || 0) + 
+                   (parseInt(log.inners) || 0) + 
+                   (parseInt(log.boxers) || 0) + 
+                   (parseInt(log.towel) || 0) + 
+                   (parseInt(log.bedsheet) || 0);
+        }
+
+        window.handlePinInput = function(element, index) {
+            element.value = element.value.replace(/[^0-9]/g, '');
+
+            if (element.value.length === 1 && index < 3) {
+                const nextBox = document.getElementById(`pin-box-${index + 1}`);
+                if (nextBox) nextBox.focus();
+            }
+        };
+
+        window.handlePinKeyDown = function(event, index) {
+            if (event.key === 'Backspace' && !event.target.value && index > 0) {
+                const prevBox = document.getElementById(`pin-box-${index - 1}`);
+                if (prevBox) prevBox.focus();
+            }
+        };
+
+        window.calculateTotal = function() {
+            const inputs = ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'];
+            let total = 0;
+            inputs.forEach(id => {
+                total += parseInt(document.getElementById(id).value) || 0;
+            });
+            document.getElementById('live-total-count').innerText = total;
+        };
+
+        window.submitPassword = function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('modal-username-input').value.trim().toUpperCase();
+            
+            const p0 = document.getElementById('pin-box-0').value;
+            const p1 = document.getElementById('pin-box-1').value;
+            const p2 = document.getElementById('pin-box-2').value;
+            const p3 = document.getElementById('pin-box-3').value;
+            const passwordInput = `${p0}${p1}${p2}${p3}`;
+
+            const errorMsg = document.getElementById('login-error-msg');
+            const cardContainer = document.getElementById('animated-card-box');
+
+            if (userPasswords[usernameInput] && userPasswords[usernameInput] === passwordInput) {
+                currentUser = usernameInput;
+                errorMsg.classList.add('hidden');
+
+                const overlay = document.getElementById('otp-animation-overlay');
+                const spinningStage = document.getElementById('otp-spinning-stage');
+                const successStage = document.getElementById('otp-success-stage');
+
+                overlay.classList.remove('hidden');
+                spinningStage.classList.remove('hidden');
+                successStage.classList.add('hidden');
+
+                setTimeout(() => {
+                    spinningStage.classList.add('hidden');
+                    successStage.classList.remove('hidden');
+                }, 1500);
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    cardContainer.classList.add('active-mode');
+                    
+                    setTimeout(() => {
+                        executeDashboardLogin();
+                        cardContainer.classList.remove('active-mode'); 
+                    }, 400);
+                }, 2900);
+
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        };
+
+        function executeDashboardLogin() {
+            document.getElementById('current-user').innerText = currentUser;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            listenToDatabase();
+        }
+
+        window.logout = function() {
+            currentUser = "";
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('modal-username-input').value = "";
+            for(let i=0; i<4; i++) {
+                const box = document.getElementById(`pin-box-${i}`);
+                if (box) box.value = "";
+            }
+        };
+
+        function listenToDatabase() {
+            db.ref().on('value', function(snapshot) {
+                const rawData = snapshot.val();
+                globalLogs = [];
+                
+                if (rawData) {
+                    const checkAndPush = (item, pathString) => {
+                        if (item && typeof item === 'object' && item.date) {
+                            if (!item.user || item.user.toUpperCase() === currentUser.toUpperCase()) {
+                                globalLogs.push({
+                                    key: pathString,
+                                    ...item
+                                });
+                            }
+                        }
+                    };
+
+                    Object.keys(rawData).forEach(key => {
+                        if (key === 'laundry_records' && typeof rawData[key] === 'object') {
+                            const subFolder = rawData[key];
+                            Object.keys(subFolder).forEach(subKey => {
+                                checkAndPush(subFolder[subKey], `laundry_records/${subKey}`);
+                            });
+                        } else {
+                            checkAndPush(rawData[key], key);
+                        }
+                    });
+
+                    globalLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                }
+                renderTable(globalLogs);
+                renderMobileCards(globalLogs);
+            });
+        }
+
+        function saveLog(e) {
+            e.preventDefault();
+            const recordsRef = db.ref('laundry_records');
+            recordsRef.push({
+                user: currentUser,
+                date: document.getElementById('log-date').value,
+                pant: parseInt(document.getElementById('count-pant').value) || 0,
+                shirt: parseInt(document.getElementById('count-shirt').value) || 0,
+                inners: parseInt(document.getElementById('count-inners').value) || 0,
+                boxers: parseInt(document.getElementById('count-boxers').value) || 0,
+                towel: parseInt(document.getElementById('count-towels').value) || 0,
+                bedsheet: parseInt(document.getElementById('count-bedsheet').value) || 0
+            });
+
+            ['count-pant', 'count-shirt', 'count-inners', 'count-boxers', 'count-towels', 'count-bedsheet'].forEach(id => {
+                document.getElementById(id).value = 0;
+            });
+            
+            calculateTotal();
+        }
+
+        window.deleteLog = function(fullPathKey) {
+            if(confirm("Are you sure you want to delete this entry?")) {
+                db.ref(fullPathKey).remove();
+            }
+        };
+
+        function renderTable(logs) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-raspberry py-8 font-semibold">No records found for your account.</td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const total = getItemTotal(log);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-[#E0F2FE]/50 transition border-b border-sky-100 text-slate-800";
+                tr.innerHTML = `
+                    <td class="py-3 font-medium">${log.date}</td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-xs font-bold bg-palesky text-raspberry border border-sky-200">${log.user || 'Legacy'}</span></td>
+                    <td class="py-3 text-center font-medium">${log.pant}</td>
+                    <td class="py-3 text-center font-medium">${log.shirt}</td>
+                    <td class="py-3 text-center font-medium">${log.inners}</td>
+                    <td class="py-3 text-center font-medium">${log.boxers}</td>
+                    <td class="py-3 text-center font-medium">${log.towel}</td>
+                    <td class="py-3 text-center font-medium">${log.bedsheet}</td>
+                    <td class="py-3 text-center font-black"><span class="bg-raspberry text-white px-2.5 py-0.5 rounded-lg font-black">${total}</span></td>
+                    <td class="py-3 text-right">
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs cursor-pointer focus:outline-none">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderMobileCards(logs) {
+            const cardContainer = document.getElementById('mobile-cards-container');
+            cardContainer.innerHTML = "";
+
+            if (logs.length === 0) {
+                cardContainer.innerHTML = `<p class="text-center text-raspberry py-4 text-sm font-semibold">No records found for your account.</p>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const total = getItemTotal(log);
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-sky-200 shadow-sm flex flex-col gap-3 text-slate-800";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-sky-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-slate-900">${log.date}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-palesky text-raspberry border border-sky-200">${log.user || 'Legacy'}</span>
+                        </div>
+                        <button onclick="window.deleteLog('${log.key}')" class="text-red-500 hover:text-red-700 font-bold text-xs focus:outline-none px-2 py-1">
+                            Delete
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Pants</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.pant}</div>
+                        </div>
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Shirts</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.shirt}</div>
+                        </div>
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Inners</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.inners}</div>
+                        </div>
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Boxers</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.boxers}</div>
+                        </div>
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Towels</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.towel}</div>
+                        </div>
+                        <div class="bg-[#E0F2FE] rounded-lg p-1.5 border border-sky-200">
+                            <div class="text-[10px] uppercase tracking-wider text-raspberry font-bold">Sheets</div>
+                            <div class="text-sm font-bold text-slate-900 mt-0.5">${log.bedsheet}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-raspberry text-white rounded-lg px-3 py-2 mt-1">
+                        <span class="text-xs font-bold uppercase tracking-wider">Total Items</span>
+                        <span class="text-base font-black">${total}</span>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
+            });
+        }
+
+        window.downloadPDF = function() {
+            if(globalLogs.length === 0) {
+                alert("There are no personal logs to generate a PDF for!");
+                return;
+            }
+
+            document.getElementById('pdf-user-name').innerText = currentUser;
+            document.getElementById('pdf-gen-date').innerText = new Date().toLocaleDateString();
+            const pdfTbody = document.getElementById('pdf-table-body');
+            pdfTbody.innerHTML = "";
+
+            globalLogs.forEach(log => {
+                const total = getItemTotal(log);
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #bae6fd";
+                tr.innerHTML = `
+                    <td style="padding: 10px; border: 1px solid #bae6fd;">${log.date}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.pant}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.shirt}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.inners}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.boxers}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.towel}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">${log.bedsheet}</td>
+                    <td style="padding: 10px; border: 1px solid #bae6fd; text-align: center; font-weight: bold; color: #C2185B;">${total}</td>
+                `;
+                pdfTbody.appendChild(tr);
+            });
+
+            const element = document.getElementById('pdf-template');
+            const opt = {
+                margin:       0.4,
+                filename:     `laundry-report-${currentUser}-${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().catch(err => {
+                console.error("PDF generation failure: ", err);
+            });
+        };
+    </script>
+</head>
+<body class="min-h-screen font-sans antialiased flex flex-col justify-center py-6">
+
+    <!-- ── THREE.JS 3D CANVAS BACKGROUND ── -->
+    <canvas id="three-canvas" aria-hidden="true"></canvas>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LOGIN SCREEN LAYER  (structure preserved exactly)
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="login-screen" class="w-full max-w-4xl mx-auto p-4 relative">
+
+        <!-- 🌤️ 24-HOUR WEATHER FORECAST COMPONENT -->
+        <div id="weather-card" class="mb-4 bg-white/90 backdrop-blur border border-sky-200 rounded-2xl p-3 shadow-sm" data-reveal>
+            <div class="flex items-center justify-between mb-2 px-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-base">📍</span>
+                    <span id="weather-location-label" class="text-xs font-black text-raspberry uppercase tracking-wide">Loading Weather...</span>
+                </div>
+                <span class="text-[10px] font-bold text-raspberry bg-palesky px-2.5 py-0.5 rounded-full border border-sky-200 uppercase tracking-wider">24-Hour Forecast</span>
+            </div>
+
+            <div id="weather-hourly-container" class="flex gap-2 overflow-x-auto pb-1 weather-scroll">
+                <!-- Hourly forecast items populate here -->
+            </div>
+
+            <div id="rain-warning-note" class="hidden mt-2 p-2.5 rounded-xl bg-palesky border border-sky-200 text-slate-800 text-xs font-semibold flex items-center gap-2">
+                <span id="rain-warning-text">Checking rain probability...</span>
+            </div>
+        </div>
+
+        <div id="animated-card-box" class="login-card-container rounded-2xl" data-reveal>
+            
+            <!-- Form Inputs -->
+            <div class="form-panel flex flex-col justify-center p-6 sm:p-12">
+                <div class="mb-4">
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Login</h2>
+                    <p class="text-xs font-bold text-raspberry mt-1 uppercase tracking-wider">Access your profile</p>
+                </div>
+                
+                <form id="password-form" class="space-y-4" autocomplete="off">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Username</label>
+                        <input type="text" id="modal-username-input" placeholder="Enter username" required autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm focus:outline-none theme-input font-bold uppercase">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">PIN / OTP</label>
+                        
+                        <div class="flex items-center justify-between gap-2 max-w-xs">
+                            <input type="password" id="pin-box-0" maxlength="1" required class="theme-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 0)" onkeydown="handlePinKeyDown(event, 0)">
+                            <input type="password" id="pin-box-1" maxlength="1" required class="theme-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 1)" onkeydown="handlePinKeyDown(event, 1)">
+                            <input type="password" id="pin-box-2" maxlength="1" required class="theme-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 2)" onkeydown="handlePinKeyDown(event, 2)">
+                            <input type="password" id="pin-box-3" maxlength="1" required class="theme-input pin-box-input focus:outline-none" oninput="handlePinInput(this, 3)" onkeydown="handlePinKeyDown(event, 3)">
+                        </div>
+
+                        <p id="login-error-msg" class="text-red-500 text-xs mt-2 hidden font-bold">❌ Invalid Username or PIN.</p>
+                    </div>
+                    
+                    <div class="pt-2 relative z-30">
+                        <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3.5 rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_15px_rgba(194,24,91,0.3)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                            <span>Verify &amp; Login</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Side Overlay Section -->
+            <div class="overlay-panel flex flex-col justify-center items-center text-center p-6 sm:p-8 text-white">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center text-xl sm:text-2xl mb-3 sm:mb-4 border border-white border-opacity-30 shadow-lg">
+                    🧺
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black tracking-tight mb-1 sm:mb-2 uppercase drop-shadow-md">Welcome Back!</h2>
+                <div class="text-3xl mt-1 tracking-widest drop-shadow-md">
+                    👕👖🧦👗
+                </div>
+            </div>
+
+        </div>
+
+        <!-- LAUNDRY SPINNING OVERLAY -->
+        <div id="otp-animation-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-md z-50 rounded-2xl flex flex-col items-center justify-center hidden transition-all duration-300">
+            
+            <div id="otp-spinning-stage" class="flex flex-col items-center gap-4">
+                <div class="washing-machine-outer">
+                    <div class="washing-machine-drum">
+                        <span class="laundry-items-inside">👕</span>
+                    </div>
+                </div>
+                <p class="text-raspberry font-black text-lg tracking-wide uppercase mt-2">Washing &amp; Verifying...</p>
+            </div>
+
+            <div id="otp-success-stage" class="hidden flex flex-col items-center gap-3">
+                <div class="w-20 h-20 tick-circle rounded-full flex items-center justify-center green-tick-animated">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
+                        <path class="checkmark-path" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <p class="text-raspberry font-black text-xl tracking-wide uppercase mt-2">Verified Successfully</p>
+                <span class="px-3 py-1 bg-palesky text-raspberry text-xs font-bold rounded-full border border-sky-200 uppercase tracking-wider">
+                    Verified &amp; Secured
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MAIN DASHBOARD LAYER  (structure preserved exactly)
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="dashboard" class="hidden max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-sky-100 mb-6 gap-4" data-reveal>
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900">Hello, <span id="current-user" class="text-raspberry font-black">User</span>!</h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium">Download logs or set a reminder to give clothes to the washing machine at a scheduled time</p>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button onclick="toggleTimerPanel()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
+                    ⏱️ Set Machine Reminder
+                </button>
+                <button onclick="window.downloadPDF()" class="flex-1 sm:flex-initial justify-center bg-raspberry hover:opacity-90 text-white font-black px-4 py-3 rounded-xl transition-all duration-300 text-xs sm:text-sm flex items-center gap-2 cursor-pointer focus:outline-none shadow-[0_4px_15px_rgba(194,24,91,0.25)] active:scale-95 uppercase tracking-wider">
+                    📥 Download PDF
+                </button>
+                <button onclick="window.logout()" class="bg-palesky hover:bg-sky-200 text-raspberry font-bold px-4 py-3 rounded-xl transition text-xs sm:text-sm cursor-pointer focus:outline-none active:scale-95 border border-sky-200">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <div id="active-timer-box" class="hidden mb-6 bg-raspberry text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
+            <span id="active-timer-display" class="text-xs sm:text-sm font-black uppercase tracking-wider">⏱️ Machine Loading Reminder Scheduled</span>
+            <span class="text-[10px] bg-white/20 px-2.5 py-1 rounded-full uppercase font-bold">Alarm Ready</span>
+        </div>
+
+        <div id="timer-setup-panel" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-sky-100 mb-6" data-reveal>
+            <div class="flex items-center justify-between mb-4 border-b border-sky-100 pb-3">
+                <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                    ⏱️ Set Machine Loading Reminder (Alarm directly on Device)
+                </h3>
+                <button onclick="toggleTimerPanel()" class="text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">
+                    ✕
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200">
+                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 1: Select Date</label>
+                    <input type="date" id="timer-date-select" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                </div>
+
+                <div class="bg-[#E0F2FE] p-4 rounded-xl border border-sky-200">
+                    <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-2">Step 2: Select Time to Load Clothes</label>
+                    <input type="time" id="timer-time-select" required class="w-full bg-white border border-sky-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <button onclick="scheduleLaundryTimer()" class="w-full md:w-auto bg-raspberry text-white font-black px-6 py-3 rounded-xl text-xs tracking-wider uppercase transition shadow-md active:scale-95 cursor-pointer">
+                    ⏰ Export Alarm to Device
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-sky-100 h-fit" data-reveal>
+                <h3 class="text-base sm:text-lg font-black text-slate-900 mb-4">Enter New Laundry</h3>
+                <form id="laundry-form" class="space-y-4" autocomplete="off">
+                    <div>
+                        <label class="block text-xs font-bold text-raspberry uppercase tracking-wider mb-1">Date</label>
+                        <input type="date" id="log-date" required class="w-full border border-sky-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-raspberry bg-[#E0F2FE] text-slate-900 font-medium transition-colors">
+                    </div>
+                    
+                    <div class="border-t border-sky-100 my-2 pt-3">
+                        <p class="text-xs font-bold text-raspberry uppercase tracking-wider mb-3">Item Counts</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pants</label>
+                                <input type="number" id="count-pant" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Shirts</label>
+                                <input type="number" id="count-shirt" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Inners</label>
+                                <input type="number" id="count-inners" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Boxers</label>
+                                <input type="number" id="count-boxers" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Towels</label>
+                                <input type="number" id="count-towels" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                            <div class="bg-[#E0F2FE] p-2 rounded-xl border border-sky-200">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Bed Sheets</label>
+                                <input type="number" id="count-bedsheet" min="0" value="0" class="w-full bg-white border border-sky-200 rounded-lg px-2.5 py-1 text-sm font-bold text-slate-900 focus:outline-none focus:border-raspberry">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-[#E0F2FE] border border-sky-200 p-3 rounded-xl">
+                        <span class="text-xs font-bold text-raspberry uppercase tracking-wider">Total Items</span>
+                        <span id="live-total-count" class="text-xl font-black text-raspberry">0</span>
+                    </div>
+
+                    <button type="submit" class="w-full bg-raspberry hover:opacity-90 text-white font-black py-3 rounded-xl transition-all duration-300 text-xs tracking-wider uppercase shadow-[0_4px_15px_rgba(194,24,91,0.25)] cursor-pointer focus:outline-none active:scale-[0.98]">
+                        Save Log Entry
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6" data-reveal>
+                <div class="hidden md:block bg-white p-6 rounded-2xl shadow-sm border border-sky-100 overflow-x-auto">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">Laundry Logs</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-sky-100 text-raspberry uppercase tracking-wider font-bold">
+                                <th class="pb-3">Date</th>
+                                <th class="pb-3">User</th>
+                                <th class="pb-3 text-center">Pants</th>
+                                <th class="pb-3 text-center">Shirts</th>
+                                <th class="pb-3 text-center">Inners</th>
+                                <th class="pb-3 text-center">Boxers</th>
+                                <th class="pb-3 text-center">Towels</th>
+                                <th class="pb-3 text-center">Sheets</th>
+                                <th class="pb-3 text-center">Total</th>
+                                <th class="pb-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="md:hidden space-y-3">
+                    <h3 class="text-base font-black text-slate-900 px-1">Laundry Logs</h3>
+                    <div id="mobile-cards-container" class="space-y-3">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN PDF REPORT TEMPLATE -->
+    <div class="hidden">
+        <div id="pdf-template" style="padding: 24px; font-family: sans-serif; color: #1e293b;">
+            <div style="border-bottom: 2px solid #C2185B; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #C2185B; margin: 0;">Laundry Activity Report</h1>
+                    <p style="font-size: 12px; color: #880e4f; margin-top: 4px;">Crisp Air Tracker • Verified Account</p>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #64748b;">
+                    <p style="margin: 0;"><strong>User:</strong> <span id="pdf-user-name"></span></p>
+                    <p style="margin: 2px 0 0 0;"><strong>Generated:</strong> <span id="pdf-gen-date"></span></p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                    <tr style="background-color: #E0F2FE; color: #C2185B; font-weight: bold; text-align: left;">
+                        <th style="padding: 10px; border: 1px solid #bae6fd;">Date</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Pants</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Shirts</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Inners</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Boxers</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Towels</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Sheets</th>
+                        <th style="padding: 10px; border: 1px solid #bae6fd; text-align: center;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-table-body">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         THREE.JS AURORA CRYSTAL 3D ENGINE
+         ============================================================ -->
+    <script>
+    (function() {
+        'use strict';
+
+        var canvas = document.getElementById('three-canvas');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        var scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x070b15, 0.03);
+
+        var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 10);
+
+        var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.35;
+
+        /* ── AURORA AMBIENT & DYNAMIC LIGHTS ── */
+        var ambientLight = new THREE.AmbientLight(0x312e81, 2.5);
+        scene.add(ambientLight);
+
+        var purpleLight = new THREE.PointLight(0xa855f7, 4.5, 30);
+        purpleLight.position.set(-6, 6, 6);
+        scene.add(purpleLight);
+
+        var indigoLight = new THREE.PointLight(0x6366f1, 4, 30);
+        indigoLight.position.set(7, -5, 6);
+        scene.add(indigoLight);
+
+        var roseLight = new THREE.PointLight(0xec4899, 3, 20);
+        roseLight.position.set(0, 4, 3);
+        scene.add(roseLight);
+
+        /* ── 3D CRYSTAL LAUNDRY ENGINE MODEL ── */
+        var engineGroup = new THREE.Group();
+
+        // 3D Glass Crystal Outer Orb
+        var orbGeo = new THREE.IcosahedronGeometry(2.4, 3);
+        var orbMat = new THREE.MeshPhysicalMaterial({
+            color: 0xa855f7,
+            transparent: true,
+            opacity: 0.35,
+            roughness: 0.05,
+            metalness: 0.2,
+            transmission: 0.88,
+            ior: 1.45,
+            wireframe: false
+        });
+        var outerOrb = new THREE.Mesh(orbGeo, orbMat);
+        engineGroup.add(outerOrb);
+
+        // Outer Glowing Energy Ring
+        var ringGeo = new THREE.TorusGeometry(3.0, 0.08, 16, 100);
+        var ringMat = new THREE.MeshStandardMaterial({ color: 0xec4899, metalness: 0.9, roughness: 0.1, emissive: 0xa855f7, emissiveIntensity: 0.6 });
+        var energyRing = new THREE.Mesh(ringGeo, ringMat);
+        energyRing.rotation.x = Math.PI / 3;
+        engineGroup.add(energyRing);
+
+        // Inner Spinning Chrome Core Drum
+        var coreGeo = new THREE.SphereGeometry(1.4, 32, 32);
+        var coreMat = new THREE.MeshStandardMaterial({ color: 0x6366f1, metalness: 0.95, roughness: 0.1, wireframe: true });
+        var coreDrum = new THREE.Mesh(coreGeo, coreMat);
+        engineGroup.add(coreDrum);
+
+        // Tumbling Crystal Particles inside Core
+        var crystalGroup = new THREE.Group();
+        var colors = [0xa855f7, 0x6366f1, 0xec4899, 0x38bdf8, 0xf43f5e];
+        for (var i = 0; i < 16; i++) {
+            var cGeo = new THREE.OctahedronGeometry(0.2 + Math.random() * 0.15);
+            var cMat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length], metalness: 0.5, roughness: 0.2 });
+            var crystal = new THREE.Mesh(cGeo, cMat);
+            crystal.position.set((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2);
+            crystalGroup.add(crystal);
+        }
+        engineGroup.add(crystalGroup);
+
+        var isMobile = window.innerWidth < 640;
+        engineGroup.position.set(isMobile ? 0 : 4.5, isMobile ? 3.8 : 0.6, -2);
+        engineGroup.scale.setScalar(isMobile ? 0.75 : 1.15);
+        scene.add(engineGroup);
+
+        /* ── 3D IRIDESCENT SPECULAR BUBBLES ── */
+        var bubbleGroup = new THREE.Group();
+        var BUBBLE_COUNT = isMobile ? 18 : 40;
+        var bubbleMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.4,
+            roughness: 0.01,
+            metalness: 0.15,
+            transmission: 0.95,
+            ior: 1.35
+        });
+
+        var bubbleData = [];
+        for (var b = 0; b < BUBBLE_COUNT; b++) {
+            var r = 0.18 + Math.random() * 0.5;
+            var bGeo = new THREE.SphereGeometry(r, 20, 20);
+            var bubble = new THREE.Mesh(bGeo, bubbleMat);
+            
+            var posX = (Math.random() - 0.5) * 24;
+            var posY = (Math.random() - 0.5) * 22;
+            var posZ = -6 + Math.random() * 14;
+
+            bubble.position.set(posX, posY, posZ);
+            bubbleGroup.add(bubble);
+
+            bubbleData.push({
+                mesh: bubble,
+                speedY: 0.008 + Math.random() * 0.016,
+                pulse: Math.random() * Math.PI * 2
+            });
+        }
+        scene.add(bubbleGroup);
+
+        /* ── AURORA AMBIENT SPARKLE FIELD ── */
+        var pCount = isMobile ? 150 : 400;
+        var pGeo = new THREE.BufferGeometry();
+        var pPositions = new Float32Array(pCount * 3);
+        for (var p = 0; p < pCount * 3; p += 3) {
+            pPositions[p]     = (Math.random() - 0.5) * 32;
+            pPositions[p + 1] = (Math.random() - 0.5) * 32;
+            pPositions[p + 2] = (Math.random() - 0.5) * 22;
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+        var pMat = new THREE.PointsMaterial({ color: 0xc084fc, size: 0.09, transparent: true, opacity: 0.7 });
+        var particleSystem = new THREE.Points(pGeo, pMat);
+        scene.add(particleSystem);
+
+        /* ── MOUSE INTERACTION & 3D PARALLAX ── */
+        var targetMouseX = 0, targetMouseY = 0;
+        var mouseX = 0, mouseY = 0;
+
+        window.addEventListener('mousemove', function(e) {
+            targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            targetMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+
+            roseLight.position.x = targetMouseX * 9;
+            roseLight.position.y = targetMouseY * 7;
+
+            document.querySelectorAll('.bg-white').forEach(function(card) {
+                var rect = card.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', x + 'px');
+                card.style.setProperty('--mouse-y', y + 'px');
+            });
+        }, { passive: true });
+
+        // 3D Tilt for Glass Cards
+        document.querySelectorAll('.bg-white, .login-card-container').forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                if (card.classList.contains('active-mode')) return;
+                var rect = card.getBoundingClientRect();
+                var cx = rect.left + rect.width / 2;
+                var cy = rect.top + rect.height / 2;
+                var dx = (e.clientX - cx) / (rect.width / 2);
+                var dy = (e.clientY - cy) / (rect.height / 2);
+                card.style.transform = 'perspective(1200px) rotateX(' + (-dy * 4.5) + 'deg) rotateY(' + (dx * 5.5) + 'deg) translateZ(12px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+            });
+        });
+
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            var mob = window.innerWidth < 640;
+            engineGroup.position.set(mob ? 0 : 4.5, mob ? 3.8 : 0.6, -2);
+            engineGroup.scale.setScalar(mob ? 0.75 : 1.15);
+        }, { passive: true });
+
+        /* ── ANIMATION LOOP ── */
+        var clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            var delta = clock.getDelta();
+            var elapsedTime = clock.getElapsedTime();
+
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+
+            engineGroup.rotation.y = mouseX * 0.4 + Math.sin(elapsedTime * 0.6) * 0.1;
+            engineGroup.rotation.x = mouseY * 0.3;
+            energyRing.rotation.z += delta * 1.2;
+            coreDrum.rotation.y += delta * 2.8;
+            crystalGroup.rotation.z += delta * 2.0;
+
+            for (var b = 0; b < bubbleData.length; b++) {
+                var bd = bubbleData[b];
+                bd.mesh.position.y += bd.speedY;
+                bd.mesh.position.x += Math.sin(elapsedTime * 1.5 + bd.pulse) * 0.006;
+                if (bd.mesh.position.y > 11) bd.mesh.position.y = -11;
+            }
+
+            particleSystem.rotation.y = elapsedTime * 0.04;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        /* ── SCROLL REVEAL ── */
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.10, rootMargin: '0px 0px -35px 0px' });
+
+            function observeRevealTargets() {
+                document.querySelectorAll('[data-reveal]').forEach(function(el) {
+                    observer.observe(el);
+                });
+            }
+            observeRevealTargets();
+
+            var dashboardEl = document.getElementById('dashboard');
+            if (dashboardEl) {
+                var dashObs = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(m) {
+                        if (m.attributeName === 'class' && !dashboardEl.classList.contains('hidden')) {
+                            setTimeout(observeRevealTargets, 80);
+                        }
+                    });
+                });
+                dashObs.observe(dashboardEl, { attributes: true });
+            }
+        }
+    }());
+    </script>
+</body>
+</html>
